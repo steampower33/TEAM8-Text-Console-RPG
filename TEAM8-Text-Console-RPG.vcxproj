@@ -167,6 +167,9 @@
     <ClInclude Include="Monster\Types\Slime.h" />
     <ClInclude Include="Monster\Types\Troll.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="UI\README.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
