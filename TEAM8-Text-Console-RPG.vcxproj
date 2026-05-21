@@ -156,8 +156,20 @@
   <ItemGroup>
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Monster\Types\Goblin.cpp" />
+    <ClCompile Include="Monster\Types\Orc.cpp" />
+    <ClCompile Include="Monster\Types\Slime.cpp" />
+    <ClCompile Include="Monster\Types\Troll.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Monster\Monster.h" />
+    <ClInclude Include="Monster\Types\Goblin.h" />
+    <ClInclude Include="Monster\Types\Orc.h" />
+    <ClInclude Include="Monster\Types\Slime.h" />
+    <ClInclude Include="Monster\Types\Troll.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Item\README.md" />
     <Content Include="UI\README.md" />
   </ItemGroup>
   <ItemGroup>
