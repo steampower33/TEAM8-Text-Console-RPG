@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster\Types\Goblin.cpp" />
     <ClCompile Include="Monster\Types\Orc.cpp" />
@@ -170,6 +171,9 @@
   <ItemGroup>
     <Content Include="Item\README.md" />
     <Content Include="UI\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
