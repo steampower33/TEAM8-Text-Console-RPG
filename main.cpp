@@ -15,10 +15,15 @@ void InitConsoleWindow() {
 }
 
 int main() {
+
+    std::cout << "Text RPG System Initialized." << std::endl;
+    std::cin.get();
+    std::cout << "Yaburae" << std::endl;
     InitConsoleWindow();
 
     std::cout << "UI System Initialized." << std::endl;
 
-    std::cin.get();
+ 
     return 0;
 }
+
