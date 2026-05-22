@@ -5,15 +5,12 @@
 
 class Character
 {
-private:
-    static Character* Instance;
-    
-    
-    
-    Character(std::string name);
-    
 public:
     ~Character();
+    
+    static Character* Instance;
+    
+    Character(std::string name);
     
     static Character* GetInstance(std::string name = "");
     void DisplayStatus();
