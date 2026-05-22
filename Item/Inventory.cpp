@@ -2,13 +2,12 @@
 #include  "IItem.h"
 
 
-using namespace std;
-
-
 Inventory::Inventory()
 {
 }
 
+/*
+// uniq 라 뺌
 // 순회 하면서 지우기
 Inventory::~Inventory()
 {
@@ -19,10 +18,17 @@ Inventory::~Inventory()
     items.clear();
 }
 
-//void Inventory::AddItem(unique_ptr<IItem> item)
+
 void Inventory::AddItem(IItem* item)
 {
     items.push_back(item);
+}
+*/
+
+
+void Inventory::AddItem(std::unique_ptr<IItem> item)
+{
+    items.push_back(move(item));
 }
 
 
@@ -31,9 +37,20 @@ void Inventory::UseItem(int index, Character* character)
     if (index >= 0 && index < items.size())
     {
         items[index]->Use(character);
-
-        //
-        items.erase(items.begin() + index); // 사용후 제거 (메모리 해제는 시스템 종료시)
+        items.erase(items.begin() + index); 
     }
+}
+
+std::vector<IItem*> Inventory::GetItems() const
+{
+    std::vector<IItem*> Items;
+    Items.reserve(items.size());
+
+    for (const auto& item : items)
+    {
+        Items.push_back(item.get()); 
+    }
+
+    return Items;
 }
 

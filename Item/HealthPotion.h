@@ -15,7 +15,7 @@ public:
         healthRestore = 50;
     }
     
-    string GetName() const override;
+    std::string GetName() const override;
     void Use(Character* character) override;
     
    

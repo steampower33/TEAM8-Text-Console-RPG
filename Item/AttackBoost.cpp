@@ -1,7 +1,7 @@
 ﻿#include "AttackBoost.h"
 #include "../Character/Character.h"
 
-string AttackBoost::GetName() const
+std::string AttackBoost::GetName() const
 {
     return name;
 }
