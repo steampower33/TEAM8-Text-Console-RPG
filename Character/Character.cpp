@@ -66,5 +66,5 @@ void Character::LevelUp() // 레벨 업
 
 void Character::UseItem(int index) // 아이템 사용
 {
-    Inventory.UseItem(index, this);
+    CharacterInventory.UseItem(index, this);    // Inventory -> CharacterInventory
 }
