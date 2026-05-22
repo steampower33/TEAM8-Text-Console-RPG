@@ -22,19 +22,14 @@ Inventory::~Inventory()
 //void Inventory::AddItem(unique_ptr<IItem> item)
 void Inventory::AddItem(IItem* item)
 {
-    cout << "Item Added: " << item->GetName() << endl;
     items.push_back(item);
 }
 
 
 void Inventory::UseItem(int index, Character* character)
 {
-    cout << "index: " << index << endl;
-
     if (index >= 0 && index < items.size())
     {
-        // 우선 출력만
-        cout << "Using Item: " << items[index]->GetName() << endl;
         items[index]->Use(character);
 
         //
@@ -42,12 +37,3 @@ void Inventory::UseItem(int index, Character* character)
     }
 }
 
-
-void Inventory::DisplayInventory()
-{
-    cout << "--- Inventory ---" << endl;
-    for (int i = 0; i < items.size(); ++i)
-    {
-        cout << i << ": " << items[i]->GetName() << endl;
-    }
-}
