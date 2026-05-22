@@ -156,6 +156,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Item\AttackBoost.cpp" />
+    <ClCompile Include="Item\HealthPotion.cpp" />
+    <ClCompile Include="Item\Inventory.cpp" />
     <ClCompile Include="main.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -239,6 +242,10 @@
     <ClCompile Include="Monster\Types\Troll.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Item\AttackBoost.h" />
+    <ClInclude Include="Item\HealthPotion.h" />
+    <ClInclude Include="Item\IItem.h" />
+    <ClInclude Include="Item\Inventory.h" />
     <ClInclude Include="Monster\Monster.h" />
     <ClInclude Include="Monster\Types\Goblin.h" />
     <ClInclude Include="Monster\Types\Orc.h" />
