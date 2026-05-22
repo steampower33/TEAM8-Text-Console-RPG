@@ -1,79 +1,41 @@
-﻿#pragma once
+#pragma once
 
+#include <algorithm>
 #include <string>
-#include <unordered_map>
 
-struct MonsterStats
-{
-    std::string Name;
-    int BaseHP;
-    int BaseATK;
-    int BaseDEF;
-    int BaseAVD;
-};
-
-struct MonsterDrop
-{
-    std::string DropItem;;
-};
-
-struct MonsterReward
-{
-    int Exp;
-    MonsterDrop DropItems;
-};
-
-
-enum class MonsterType
-{
-    Goblin,
-    Orc,
-    Troll,
-    Slime,
-    Length,
-};
-
-inline const std::unordered_map<MonsterType, MonsterStats>& GetMonsterTable()
-{
-    static const std::unordered_map<MonsterType, MonsterStats> table = {
-        {MonsterType::Goblin, {"Goblin", 50, 10, 2, 2,}},
-        {MonsterType::Orc, {"Orc", 80, 15, 10, 0}},
-        {MonsterType::Troll, {"Troll", 120, 20, 5, 5}},
-        {MonsterType::Slime, {"Slime", 30, 5, 0, 0}},
-    };
-    return table;
-}
-
-
-inline const MonsterStats& GetMonsterStats(MonsterType type)
-{
-    return GetMonsterTable().at(type);
-}
-
+#include "data/MonsterStructs.h"
 
 class Monster
 {
-public:
-    virtual ~Monster() = default;
-    virtual std::string GetName() const = 0;
-    virtual int GetStatus() const = 0;
-    virtual void TakeDamage(int damage) = 0;
-    virtual MonsterReward GetReward() = 0;
-};
+protected:
+    MonsterInfo Info;
 
-// std::unique_ptr<Monster> CreateMonster(MonsterType type)
-// {
-//     switch (type)
-//     {
-//     case MonsterType::Goblin:
-//         return std::make_unique<MonsterType::Goblin>();
-//     case MonsterType::Orc:
-//         return std::make_unique<MonsterType::Orc>();
-//     case MonsterType::Troll:
-//         return std::make_unique<MonsterType::Troll>();
-//     case MonsterType::Slime:
-//         return std::make_unique<Slime>();
-//     default:
-//         return nullptr;
-//     }
-// }
+public:
+    explicit Monster(const MonsterInfo& info)
+        : Info(info)
+    {
+    }
+
+    virtual ~Monster() = default;
+
+    // std::string GetName() const
+    // {
+    //     return Info.Stats.Name;
+    // } Get Status 으로 통합.
+
+    MonsterStats GetStatus() const
+    {
+        return Info.Stats;
+    }
+
+    void TakeDamage(int damage)
+    {
+        int finalDamage = std::max(1, damage - Info.Stats.DEF);
+        Info.Stats.HP = std::max(0, Info.Stats.HP - finalDamage);
+    }
+
+    MonsterReward GetReward() const
+    {
+        return Info.Reward;
+    }
+};
