@@ -10,7 +10,7 @@ MonsterInfo MakeGoblinInfo(int level)
 
     if (level <= 0)
     {
-        info.Stats.Name += " 0";
+        // info.Stats.Name += " 0";
         return info;
     }
 
