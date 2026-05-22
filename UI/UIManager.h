@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <vector>
 
 class Character;
 
@@ -14,13 +15,16 @@ public:
     // 게임 플레이 화면
     void ShowMainFrame();
     
-    // 로그 추가 및 화면 갱신
-    void PrintLog(const std::string& message);
+    int ShowMenuBox(const std::vector<std::string>& menuList);
 
     // 캐릭터 포인터를 받아서 스탯 패널 텍스트 갱신
     void UpdateStat(Character* character);
     
+    // 로그 추가 및 화면 갱신
+    void PrintLog(const std::string& message);
+    
     // 인벤토리 목록 갱신
+    std::vector<std::string> LogMessages;
     void UpdateInventory();
     
 private:
