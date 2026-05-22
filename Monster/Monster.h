@@ -1,60 +1,41 @@
-﻿#pragma once
+#pragma once
+
+#include <algorithm>
 #include <string>
-#include <unordered_map>
-#include <array>
-struct MonsterStats {
-    std::string name;
-    int baseHealth;
-    int healthPerLevel;
-    int baseAttack;
-    int attackPerLevel;
-};
 
-enum class MonsterType {
-    Goblin,
-    Orc,
-    Troll,
-    Slime, 
-    Length,
-    
-};
-const std::array<MonsterStats, static_cast<size_t>(MonsterType::Length)> MonsterTable = {{
-    { "Goblin", 50, 10, 5, 2 },
-    { "Orc",    80, 15, 8, 3 },
-    { "Troll", 120, 20, 12, 4 },
-    { "Slime",  30,  5, 3, 1 }
-}};
-//
-// const std::unordered_map<MonsterType, MonsterStats> MonsterTable = {
-//     {
-//         MonsterType::Goblin,
-//         { "Goblin", 50, 10, 5, 2 }
-//     },
-//     {
-//         MonsterType::Orc,
-//         { "Orc", 80, 15, 8, 3 }
-//     },
-//     {
-//         MonsterType::Troll,
-//         { "Troll", 120, 20, 12, 4 }
-//     },
-//     {
-//         MonsterType::Slime,
-//         { "Slime", 30, 5, 3, 1 }
-//     }
-// };
+#include "data/MonsterStructs.h"
 
+class Monster
+{
+protected:
+    MonsterInfo Info;
 
-
-class Monster {
 public:
-    virtual ~Monster() = default;
-    virtual std::string getName() const = 0;
-    virtual int getHealth() const = 0;
-    virtual int getAttack() const = 0;
-    virtual void takeDamage(int damage) = 0;
-    void take_damage();
-    void Get_damage();
-    
-};
+    explicit Monster(const MonsterInfo& info)
+        : Info(info)
+    {
+    }
 
+    virtual ~Monster() = default;
+
+    // std::string GetName() const
+    // {
+    //     return Info.Stats.Name;
+    // } Get Status 으로 통합.
+
+    MonsterStats GetStatus() const
+    {
+        return Info.Stats;
+    }
+
+    void TakeDamage(int damage)
+    {
+        int finalDamage = std::max(1, damage - Info.Stats.DEF);
+        Info.Stats.HP = std::max(0, Info.Stats.HP - finalDamage);
+    }
+
+    MonsterReward GetReward() const
+    {
+        return Info.Reward;
+    }
+};
