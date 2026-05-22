@@ -38,6 +38,29 @@ auto goblin = CreateMonster(MonsterType::Goblin, 3);
 auto orc = CreateMonster(MonsterType::Orc, 3);
 auto troll = CreateMonster(MonsterType::Troll, 3);
 auto slime = CreateMonster(MonsterType::Slime, 3);
+
+
+    auto goblin = CreateMonster(MonsterType::Goblin, 10);
+    std::cout << goblin->GetStatus().HP << std::endl;
+    goblin->TakeDamage(100);
+    std::cout <<  goblin->GetStatus().HP<< std::endl;
+
+    auto goblin2 = CreateMonster(MonsterType::Goblin, 100);
+    std::cout << goblin2->GetStatus().HP << std::endl;
+    goblin2->TakeDamage(100);
+    std::cout <<  goblin2->GetStatus().HP<< std::endl;
+
+    /**********랜덤 ******** */
+    auto randomMonster = CreateRandomMonster(10); // 랜덤
+    std::cout << randomMonster->GetStatus().Name << std::endl;
+
+    auto randomMonster2 = CreateRandomMonster(10);
+    std::cout << randomMonster2->GetStatus().Name << std::endl;
+
+    auto randomMonster3 = CreateRandomMonster(10);
+    std::cout << randomMonster3->GetStatus().Name << std::endl;
+
+
 ```
 
 `GetStatus()`는 현재 상태의 복사본을 반환합니다. 데미지 적용 후 체력을 확인하려면 `TakeDamage()` 호출 뒤 다시 `GetStatus()`를 호출해야 합니다.
@@ -57,13 +80,3 @@ auto slime = CreateMonster(MonsterType::Slime, 3);
 - `CreateMonster()`는 미지원 타입에서 예외를 던집니다. 호출하는 쪽에서 `try-catch`를 할지, `nullptr`를 반환할지 팀 규칙을 정해야 합니다.
 - `MonsterStats`의 `HP`는 현재 체력으로 사용됩니다. 나중에 최대 체력이 필요하면 `MaxHP`, `CurrentHP`처럼 분리하는 것이 좋습니다.
 - `DevItem`은 임시 아이템 구조체입니다. 아이템 시스템이 확정되면 실제 `Item` 타입과 연결해야 합니다.
-
-### 협업 시 규칙 제안
-
-새 몬스터를 추가할 때는 아래 순서로 작업합니다.
-
-1. `Monster/data/MonsterStructs.h`의 `MonsterType`에 타입 추가
-2. `Monster/data/MonsterTable.h`의 `GetMonsterTable()`에 기본 스탯과 보상 추가
-3. `Monster/classes`에 `MonsterName.h`, `MonsterName.cpp` 클래스 추가
-4. `Monster/utils/Create.cpp`의 `CreateMonster()`에 생성 case 추가
-5. `README.md`의 생성 가능한 타입 예시에 추가
