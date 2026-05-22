@@ -21,5 +21,7 @@ public:
     //void AddItem(unique_ptr<IItem> item);
     void AddItem(IItem* item);
     void UseItem(int index, Character* character);
-    void DisplayInventory();
+    
+    vector<IItem*> GetItems() { return items; }
+
 };
