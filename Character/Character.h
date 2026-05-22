@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "Item.h"
+#include "../Item/Inventory.h"
 
 class Character
 {
@@ -16,15 +16,24 @@ private:
     int Attack;
     int Experience;
     int Gold;
-    std::vector<Item*> Inventory;
+    Inventory Inventory;
     
-    Character(std::sring name);
+    Character(std::string name);
     
 public:
     ~Character();
     
     static Character* GetInstance(std::string name = "");
     void DisplayStatus();
-    void LevelUp
-    void UseItem(int index)
+    void LevelUp();
+    void UseItem(int index);
+    
+    // Getter
+    int GetHealth() const { return Health; }
+    int GetMaxHealth() const { return MaxHealth; }
+    int GetAttack() const { return Attack; }
+
+    // Setter
+    void SetHealth(int health) { Health = health; }
+    void SetAttack(int attack) { Attack = attack; }
 };

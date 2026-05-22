@@ -27,11 +27,7 @@ Character::Character(std::string name) // 기본 정보
 
 Character::~Character() // 소멸자
 {
-    for (Item* item : Inventory)
-    {
-        delete item;
-    }
-    Inventory.clear();
+    
 }
 
 void Character::DisplayStatus() // 스탯 보기
@@ -50,10 +46,25 @@ void Character::DisplayStatus() // 스탯 보기
 
 void Character::LevelUp() // 레벨 업
 {
-    
+    if (Level >= 10)
+    {
+        std::cout << "최대 레벨에 도달했습니다!" << std::endl;
+        return;
+    }
+
+    if (Experience >= 100)
+    {
+        Experience -= 100;
+        Level++;
+        MaxHealth += Level * 20;
+        Attack += Level * 5;
+        Health = MaxHealth;
+
+        std::cout << "레벨 업! 현재 레벨: " << Level << std::endl;
+    }
 }
 
 void Character::UseItem(int index) // 아이템 사용
 {
-    
+    Inventory.UseItem(index, this);
 }
