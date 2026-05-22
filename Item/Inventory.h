@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory> 
 
-using namespace std;
 
 class IItem;
 
@@ -12,7 +11,7 @@ class IItem;
 class Inventory
 {
 private:
-    vector<unique_ptr<IItem>> items;       
+    std::vector<std::unique_ptr<IItem>> items;       
 
 public:
     Inventory();
@@ -20,11 +19,11 @@ public:
     
     //void AddItem(IItem* item);
     
-    void AddItem(unique_ptr<IItem> item);
+    void AddItem(std::unique_ptr<IItem> item);
     void UseItem(int index, Character* character);
     
     //vector<IItem*> GetItems() { return items; }
     
-    vector<IItem*> GetItems() const;
+    std::vector<IItem*> GetItems() const;
 
 };

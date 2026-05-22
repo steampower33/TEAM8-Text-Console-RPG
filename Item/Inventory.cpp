@@ -2,9 +2,6 @@
 #include  "IItem.h"
 
 
-using namespace std;
-
-
 Inventory::Inventory()
 {
 }
@@ -29,7 +26,7 @@ void Inventory::AddItem(IItem* item)
 */
 
 
-void Inventory::AddItem(unique_ptr<IItem> item)
+void Inventory::AddItem(std::unique_ptr<IItem> item)
 {
     items.push_back(move(item));
 }
@@ -44,9 +41,9 @@ void Inventory::UseItem(int index, Character* character)
     }
 }
 
-vector<IItem*> Inventory::GetItems() const
+std::vector<IItem*> Inventory::GetItems() const
 {
-    vector<IItem*> Items;
+    std::vector<IItem*> Items;
     Items.reserve(items.size());
 
     for (const auto& item : items)

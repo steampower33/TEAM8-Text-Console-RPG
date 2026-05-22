@@ -1,7 +1,7 @@
 ﻿#include "HealthPotion.h"
 #include "../Character/Character.h"
 
-string HealthPotion::GetName() const
+std::string HealthPotion::GetName() const
 {
     return name;
 }
