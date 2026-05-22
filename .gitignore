@@ -1,10 +1,64 @@
-# Created by https://www.toptal.com/developers/gitignore/api/rider,visualstudio
-# Edit at https://www.toptal.com/developers/gitignore?templates=rider,visualstudio
+# Created by https://www.toptal.com/developers/gitignore/api/c++,cmake,visualstudio,rider
+# Edit at https://www.toptal.com/developers/gitignore?templates=c++,cmake,visualstudio,rider
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+### CMake Patch ###
+CMakeUserPresets.json
+
+# External projects
+*-prefix/
 
 ### Rider ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
+.idea/
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
@@ -157,9 +211,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
 *.iobj
-*.pch
 *.pdb
 *.ipdb
 *.pgc
@@ -481,4 +533,4 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
-# End of https://www.toptal.com/developers/gitignore/api/rider,visualstudio
+# End of https://www.toptal.com/developers/gitignore/api/c++,cmake,visualstudio,rider
