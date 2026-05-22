@@ -83,7 +83,6 @@ void UIManager::DrawLogPanel()
     
     Gotoxy(StartSceneX + 5, EndSceneY + 1);
     std::cout << "Log";
-    
 }
 
 void UIManager::DrawChoosePanel()
@@ -92,7 +91,7 @@ void UIManager::DrawChoosePanel()
     
     Gotoxy(EndSceneX + 1 + 5, EndSceneY + 1);
     std::cout << "Choose";
-    
+        
     const int MAX_MENU = 2;
     std::string menu[MAX_MENU] = { "전투", "아이템 사용" };
     int selectedIndex = 0;
