@@ -1,60 +1,79 @@
 ﻿#pragma once
+
 #include <string>
 #include <unordered_map>
-#include <array>
-struct MonsterStats {
-    std::string name;
-    int baseHealth;
-    int healthPerLevel;
-    int baseAttack;
-    int attackPerLevel;
+
+struct MonsterStats
+{
+    std::string Name;
+    int BaseHP;
+    int BaseATK;
+    int BaseDEF;
+    int BaseAVD;
 };
 
-enum class MonsterType {
+struct MonsterDrop
+{
+    std::string DropItem;;
+};
+
+struct MonsterReward
+{
+    int Exp;
+    MonsterDrop DropItems;
+};
+
+
+enum class MonsterType
+{
     Goblin,
     Orc,
     Troll,
-    Slime, 
+    Slime,
     Length,
-    
 };
-const std::array<MonsterStats, static_cast<size_t>(MonsterType::Length)> MonsterTable = {{
-    { "Goblin", 50, 10, 5, 2 },
-    { "Orc",    80, 15, 8, 3 },
-    { "Troll", 120, 20, 12, 4 },
-    { "Slime",  30,  5, 3, 1 }
-}};
-//
-// const std::unordered_map<MonsterType, MonsterStats> MonsterTable = {
-//     {
-//         MonsterType::Goblin,
-//         { "Goblin", 50, 10, 5, 2 }
-//     },
-//     {
-//         MonsterType::Orc,
-//         { "Orc", 80, 15, 8, 3 }
-//     },
-//     {
-//         MonsterType::Troll,
-//         { "Troll", 120, 20, 12, 4 }
-//     },
-//     {
-//         MonsterType::Slime,
-//         { "Slime", 30, 5, 3, 1 }
-//     }
-// };
+
+inline const std::unordered_map<MonsterType, MonsterStats>& GetMonsterTable()
+{
+    static const std::unordered_map<MonsterType, MonsterStats> table = {
+        {MonsterType::Goblin, {"Goblin", 50, 10, 2, 2,}},
+        {MonsterType::Orc, {"Orc", 80, 15, 10, 0}},
+        {MonsterType::Troll, {"Troll", 120, 20, 5, 5}},
+        {MonsterType::Slime, {"Slime", 30, 5, 0, 0}},
+    };
+    return table;
+}
 
 
+inline const MonsterStats& GetMonsterStats(MonsterType type)
+{
+    return GetMonsterTable().at(type);
+}
 
-class Monster {
+
+class Monster
+{
 public:
     virtual ~Monster() = default;
-    virtual std::string getName() const = 0;
-    virtual int getHealth() const = 0;
-    virtual int getAttack() const = 0;
-    virtual void takeDamage(int damage) = 0;
-    void take_damage();
-    void Get_damage();
-    
+    virtual std::string GetName() const = 0;
+    virtual int GetStatus() const = 0;
+    virtual void TakeDamage(int damage) = 0;
+    virtual MonsterReward GetReward() = 0;
 };
 
+// std::unique_ptr<Monster> CreateMonster(MonsterType type)
+// {
+//     switch (type)
+//     {
+//     case MonsterType::Goblin:
+//         return std::make_unique<MonsterType::Goblin>();
+//     case MonsterType::Orc:
+//         return std::make_unique<MonsterType::Orc>();
+//     case MonsterType::Troll:
+//         return std::make_unique<MonsterType::Troll>();
+//     case MonsterType::Slime:
+//         return std::make_unique<Slime>();
+//     default:
+//         return nullptr;
+//     }
+// }

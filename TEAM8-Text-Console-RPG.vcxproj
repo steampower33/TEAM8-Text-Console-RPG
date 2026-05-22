@@ -155,17 +155,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Monster\Types\Goblin.cpp" />
-    <ClCompile Include="Monster\Types\Orc.cpp" />
-    <ClCompile Include="Monster\Types\Slime.cpp" />
-    <ClCompile Include="Monster\Types\Troll.cpp" />
+    <ClCompile Include="Monster\test_BaseMonster.cpp" />
+    <ClCompile Include="Monster\Goblin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Monster\test_BaseMonster.h" />
+    <ClInclude Include="Monster\Goblin.h" />
     <ClInclude Include="Monster\Monster.h" />
-    <ClInclude Include="Monster\Types\Goblin.h" />
-    <ClInclude Include="Monster\Types\Orc.h" />
-    <ClInclude Include="Monster\Types\Slime.h" />
-    <ClInclude Include="Monster\Types\Troll.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
