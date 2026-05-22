@@ -1,6 +1,8 @@
 #include <iostream>
 #include <windows.h>
 
+#include "Game/GameManager.h"
+
 void InitConsoleWindow() {
     // 창 크기와 버퍼를 DOS 명령어로 강제 고정 (가로 120, 세로 30)
     system("mode con cols=150 lines=50");
@@ -16,14 +18,8 @@ void InitConsoleWindow() {
 
 int main() {
 
-    std::cout << "Text RPG System Initialized." << std::endl;
-    std::cin.get();
-    std::cout << "Yaburae" << std::endl;
-    InitConsoleWindow();
-
-    std::cout << "UI System Initialized." << std::endl;
-
- 
+    // GameManager::GetInstance().StartGame();
+    
     return 0;
 }
 
