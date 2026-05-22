@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip> // DisplayStatus 쪽에서 setw 안쓰면 지워도 됨
 #include "Character.h"
 
 
@@ -35,7 +36,16 @@ Character::~Character() // 소멸자
 
 void Character::DisplayStatus() // 스탯 보기
 {
-    
+    std::cout << "╔═════════════════════════╗" << std::endl;
+    std::cout << "║      [ 캐릭터 정보 ]      ║" << std::endl;
+    std::cout << "╠═════════════════════════╣" << std::endl;
+    std::cout << "║  이름   │ " << std::left << std::setw(14) << Name        << "║" << std::endl;
+    std::cout << "║  레벨   │ " << std::left << std::setw(14) << Level       << "║" << std::endl;
+    std::cout << "║  체력   │ " << std::left << std::setw(14) << std::to_string(Health) + " / " + std::to_string(MaxHealth) << "║" << std::endl;
+    std::cout << "║  공격력 │ " << std::left << std::setw(14) << Attack      << "║" << std::endl;
+    std::cout << "║  경험치 │ " << std::left << std::setw(14) << Experience  << "║" << std::endl;
+    std::cout << "║  골드   │ " << std::left << std::setw(14) << Gold        << "║" << std::endl;
+    std::cout << "╚═════════════════════════╝" << std::endl;
 }
 
 void Character::LevelUp() // 레벨 업
