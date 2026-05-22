@@ -1,7 +1,8 @@
 ﻿#include <iostream>
 
 #include "BattleManager.h"
-#include "MonsterFactory.h"
+#include "../Monster/utils/Create.h"
+#include "../Monster/data/MonsterStructs.h"
 
 using namespace std;
 
@@ -13,34 +14,34 @@ using namespace std;
 void BattleManager::Battle(Character& player)
 {
     
-    monster = MonsterFactory::CreateRandomMonster();
+    unique_ptr<Monster> monster = CreateRandomMonster(player.Level);
 
-    while (!IsBattleEnd(player, monster))
+    // while (!IsBattleEnd(player, monster))
+    // {
+    //     BattleLoof(player, monster);
+    // }
+    bool BattleResult = false;
+    
+    while (BattleResult == false)
     {
-        BattleLoof(player, monster);
-    }
-}
-
-void BattleManager::BattleLoof(Character& player, Monster& monster)
-{
-    int playerDamage = player.GetAttack();
-    monster.TakeDamage(playerDamage);
-
-    if (monster.IsDead()) return;
-
-    // Monster 공격
-    int monsterDamage = monster;
-    player.TakeDamage(monsterDamage);
-}
-
-
-bool BattleManager::IsBattleEnd(Character& player, Monster& monster)
-{
-
-    if (player.IsDead() || monster.IsDead())
-    {
-        return true;
+        BattleResult = BattleLoop(player, monster);
     }
     
-    return false;
 }
+
+bool BattleManager::BattleLoop(Character& player, unique_ptr<Monster>& monster)
+{
+    bool IsMonsterDead = monster->TakeDamageWithIsDead(player.Attack); //플레이어 공격
+    player.TakeDamage(monster->GetStatus().ATK); //몬스터 공격
+    
+    if (player.IsDead == true || IsMonsterDead == true) 
+        return true;
+    
+    return false;
+        
+}
+
+
+// bool BattleManager::IsBattleEnd(Character& player, Monster& monster)
+// {
+// }
