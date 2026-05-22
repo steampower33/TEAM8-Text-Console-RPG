@@ -1,5 +1,5 @@
 ﻿#include "HealthPotion.h"
-#include "../Character.h" // 위치 중요
+//#include "../Character.h" // 위치 중요
 
 string HealthPotion::GetName() const
 {
@@ -8,7 +8,7 @@ string HealthPotion::GetName() const
 
 void HealthPotion::Use(Character* character)
 {
-    character->SetHealthPoint(character->GetHealthPoint() + healthRestore);
+    //character->SetHealthPoint(character->GetHealthPoint() + healthRestore);
     
     // 확인용
     cout << GetName() << " is used.\n";
