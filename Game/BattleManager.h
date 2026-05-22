@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class GameManager
+class BattleManager
 {
 public:
     
