@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include "../Item/Inventory.h"
 
 class Character
@@ -9,14 +8,7 @@ class Character
 private:
     static Character* Instance;
     
-    std::string Name;
-    int Level;
-    int Health;
-    int MaxHealth;
-    int Attack;
-    int Experience;
-    int Gold;
-    Inventory Inventory;
+    
     
     Character(std::string name);
     
@@ -28,12 +20,22 @@ public:
     void LevelUp();
     void UseItem(int index);
     
-    // Getter
-    int GetHealth() const { return Health; }
-    int GetMaxHealth() const { return MaxHealth; }
-    int GetAttack() const { return Attack; }
+    // 스탯 관련 변수들 public으로 옮김
+    std::string Name;
+    int Level;
+    int Health;             // Health는 SetHealth로만 건드리기
+    int MaxHealth;
+    int Attack;
+    int Experience;
+    int Gold;
+    Inventory CharacterInventory;           // 안 헷갈리게 타입명이랑 다르게 설정 바꿈
 
     // Setter
-    void SetHealth(int health) { Health = health; }
-    void SetAttack(int attack) { Attack = attack; }
+    void SetHealth(int health)          // MaxHealth보다 Health가 커지지 않게 설정, 0보다 아래로 내려가지 않게 설정 -> 포션이랑 죽는거에도 적용 가능하겠지..
+	{
+        if (health > MaxHealth) Health = MaxHealth;
+        else if (health < 0) Health = 0;
+        else Health = health;
+	}
+
 };
