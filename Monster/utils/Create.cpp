@@ -7,6 +7,24 @@
 #include "../classes/Slime.h"
 #include "../classes/Troll.h"
 
+
+#include <random>
+#include <stdexcept>
+std::unique_ptr<Monster> CreateRandomMonster(int level)
+{
+    static std::random_device rd; // AI 쪼아용 
+    static std::mt19937 gen(rd());
+
+    std::uniform_int_distribution<int> dist(
+        0,
+        static_cast<int>(MonsterType::Count) - 1
+    );
+
+    MonsterType randomType = static_cast<MonsterType>(dist(gen));
+
+    return CreateMonster(randomType, level);
+}
+
 std::unique_ptr<Monster> CreateMonster(MonsterType type, int level)
 {
     switch (type)
@@ -22,6 +40,5 @@ std::unique_ptr<Monster> CreateMonster(MonsterType type, int level)
     case MonsterType::Count:
         throw std::invalid_argument("Invalid MonsterType");
     }
-
     throw std::invalid_argument("Invalid MonsterType");
 }

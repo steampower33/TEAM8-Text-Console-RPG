@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-
 #include "MonsterStructs.h"
 
 inline const std::unordered_map<MonsterType, MonsterInfo>& GetMonsterTable()
