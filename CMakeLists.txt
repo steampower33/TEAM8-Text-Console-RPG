@@ -1,0 +1,25 @@
+  cmake_minimum_required(VERSION 3.20)
+
+  project(TEAM8_Text_Console_RPG)
+
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  file(GLOB_RECURSE PROJECT_SOURCES
+          CONFIGURE_DEPENDS
+          "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+          "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+  )
+
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/cmake-build-.*/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/CMakeFiles/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/\\.git/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/\\.idea/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/\\.vs/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/x64/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/Debug/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/Release/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/out/.*")
+  list(FILTER PROJECT_SOURCES EXCLUDE REGEX ".*/build/.*")
+
+  add_executable(TEAM8_Text_Console_RPG ${PROJECT_SOURCES})
