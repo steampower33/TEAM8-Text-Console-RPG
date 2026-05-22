@@ -1,5 +1,5 @@
 ﻿#include "AttackBoost.h"
-//#include "../Character.h" // 위치 중요
+#include "../Character/Character.h"
 
 string AttackBoost::GetName() const
 {
@@ -11,6 +11,4 @@ void AttackBoost::Use(Character* character)
 {
     //character->SetAttackPower(character->GetAttackPower() + attackTempIncrease);
 
-    // 확인용
-    cout << GetName() << " is used.\n";
 }
