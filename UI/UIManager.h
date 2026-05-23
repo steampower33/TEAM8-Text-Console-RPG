@@ -3,39 +3,53 @@
 #include <vector>
 
 class Character;
+class Inventory;
+class IItem;
+
+struct Vec2 {
+    int x;
+    int y;
+};
+
+struct Box
+{
+    int startX;
+    int startY;
+    int endX;
+    int endY;
+};
 
 class UIManager {
 public:
-    // 시스템 초기화 (창 크기 고정, 커서 숨기기)
-    void Initialize();
-
-    // 타이틀 화면 렌더링 및 메뉴 선택 (반환값: 0=게임시작, 1=종료)
-    int ShowTitleMenu();
+    void Initialize(); // 시스템 초기화 (창 크기 고정, 커서 숨기기)
+    int GetTitleResult(); // 타이틀 화면 렌더링 및 메뉴 선택 (반환값: 0=게임시작, 1=종료)
+    int GetMainResult();
     
-    // 게임 플레이 화면
-    void ShowMainFrame();
-    
-    int ShowMenuBox(const std::vector<std::string>& menuList);
-
-    // 캐릭터 포인터를 받아서 스탯 패널 텍스트 갱신
-    void UpdateStat(Character* character);
+    void ShowMainFrame(); // 게임 플레이 화면
+    int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
+    void UpdateStat(Character* character); // 캐릭터 포인터를 받아서 스탯 패널 텍스트 갱신
     
     // 로그 추가 및 화면 갱신
-    void PrintLog(const std::string& message);
+    std::vector<std::string> LogMessages;
+    void PrintLog(const std::string& message = "");
     
     // 인벤토리 목록 갱신
-    std::vector<std::string> LogMessages;
-    void UpdateInventory();
+    void UpdateInventory(Inventory* inven);
+    
+    void ChooseItem(Inventory* inven, Character* character);
     
 private:
+    void PrintLineAt(int x, int y, std::string& line);
+    std::string RepeatString(const std::string& str, int count);
     void DrawBox(int startX, int startY, int endX, int endY);
     void Gotoxy(int x, int y);
     void DrawTitleMenu();
     
     void DrawScenePanel();
-    void DrawStatInventoryPanel();
+    void DrawStatPanel();
+    void DrawInventoryPanel();
     void DrawLogPanel();
-    void DrawChoosePanel();
+    void DrawMenuPanel();
 
 private:
     int ConsoleWidth = 150;
@@ -46,10 +60,15 @@ private:
     int EndSceneX = 110;
     int EndSceneY = 25;
     
-    int StartStatInventoryX = EndSceneX + 1;
-    int StartStatInventoryY = StartSceneY;
-    int EndStatInventoryX = ConsoleWidth - 1;
-    int EndStatInventoryY = EndSceneY;
+    int StartStatX = EndSceneX + 1;
+    int StartStatY = StartSceneY;
+    int EndStatX = ConsoleWidth - 1;
+    int EndStatY = 9;
+    
+    int StartInventoryX = StartStatX;
+    int StartInventoryY = EndStatY + 1;
+    int EndInventoryX = ConsoleWidth - 1;
+    int EndInventoryY = EndSceneY;
     
     int StartLogX = StartSceneX;
     int StartLogY = EndSceneY + 1;
