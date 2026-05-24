@@ -6,6 +6,12 @@ class Character;
 class Inventory;
 class IItem;
 
+enum class TextAlign {
+    Left,
+    Center,
+    Right
+};
+
 struct Vec2 {
     int x;
     int y;
@@ -25,8 +31,9 @@ public:
     int GetTitleResult(); // 타이틀 화면 렌더링 및 메뉴 선택 (반환값: 0=게임시작, 1=종료)
     int GetMainResult();
     
-    void ShowMainFrame(); // 게임 플레이 화면
+    void ShowMainFrame(); // 메인 게임 플레이 프레임 그리기
     int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
+    int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
     void UpdateStat(Character* character); // 캐릭터 포인터를 받아서 스탯 패널 텍스트 갱신
     
     // 로그 추가 및 화면 갱신
@@ -39,7 +46,10 @@ public:
     void ChooseItem(Inventory* inven, Character* character);
     
 private:
-    void PrintLineAt(int x, int y, std::string& line);
+    int HandleMenuInput(int& selectedIndex, int maxMenu);
+    void PrintTextAt(int x, int y, const std::string& text);
+    int GetDisplayWidth(const std::string& text);
+    void PrintTextAlign(int startX, int endX, int y, const std::string& text, TextAlign align);
     std::string RepeatString(const std::string& str, int count);
     void DrawBox(int startX, int startY, int endX, int endY);
     void Gotoxy(int x, int y);

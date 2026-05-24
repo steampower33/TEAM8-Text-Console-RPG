@@ -53,10 +53,51 @@ std::string UIManager::RepeatString(const std::string& str, int count) {
     return result;
 }
 
-void UIManager::PrintLineAt(int x, int y, std::string& line)
+void UIManager::PrintTextAt(int x, int y, const std::string& text)
 {
     Gotoxy(x, y);
-    std::cout << line;
+    std::cout << text;
+}
+
+int UIManager::GetDisplayWidth(const std::string& text) {
+    int displayWidth = 0;
+    for (size_t i = 0; i < text.length(); ) {
+        // UTF-8의 첫 바이트를 확인하여 글자 바이트 수를 판별
+        unsigned char c = text[i];
+        if ((c & 0x80) == 0) {
+            // 1바이트 문자 (영어, 숫자, 기호): 화면에서 1칸 차지
+            displayWidth += 1;
+            i += 1;
+        } else {
+            // 다중 바이트 문자 (한글 등): 화면에서 2칸 차지한다고 가정 (UTF-8 한글은 보통 3바이트)
+            displayWidth += 2;
+            i += 3; // 3바이트를 건너뜀
+        }
+    }
+    return displayWidth;
+}
+
+void UIManager::PrintTextAlign(int startX, int endX, int y, const std::string& text, TextAlign align) {
+    int displayWidth = GetDisplayWidth(text);
+    int totalWidth = endX - startX;
+    int targetX = startX;
+
+    switch (align) {
+    case TextAlign::Left:
+        targetX = startX;
+        break;
+    case TextAlign::Center:
+        // 남은 여백의 절반만큼 시작 위치를 뒤로 밉니다.
+        targetX = startX + (totalWidth - displayWidth) / 2;
+        break;
+    case TextAlign::Right:
+        // 전체 넓이에서 글자 크기만큼 뺀 곳에서 시작합니다.
+        targetX = endX - displayWidth;
+        break;
+    }
+
+    Gotoxy(targetX, y);
+    std::cout << text;
 }
 
 void UIManager::DrawBox(int startX, int startY, int endX, int endY) {
@@ -64,26 +105,26 @@ void UIManager::DrawBox(int startX, int startY, int endX, int endY) {
 
     // 윗변 그리기
     std::string topBorder = "╔" + RepeatString("═", width) + "╗";
-    PrintLineAt(startX, startY, topBorder);
+    PrintTextAt(startX, startY, topBorder);
 
     // 양옆 벽 그리기
     for (int i = startY + 1; i <= endY - 1; i++) {
         std::string line = "║";
-        PrintLineAt(startX, i, line);
-        PrintLineAt(endX, i, line);
+        PrintTextAt(startX, i, line);
+        PrintTextAt(endX, i, line);
     }
 
     // 아랫변 그리기
     std::string bottomBorder = "╚" + RepeatString("═", width) + "╝";
-    PrintLineAt(startX, endY, bottomBorder);
+    PrintTextAt(startX, endY, bottomBorder);
 }
 
-int UIManager::GetTitleResult() {
-
+int UIManager::GetTitleResult()
+{
     DrawBox(0,0, ConsoleWidth - 1, ConsoleHeight - 1);
     DrawTitleMenu();
 
-    return ShowMenuAt(Vec2{60, 30}, { "게임 시작", "게임 종료" });
+    return ShowMenuAlign(1, ConsoleWidth - 1, 31, { "게임 시작", "게임 종료" }, 2, TextAlign::Center);
 }
 
 int UIManager::GetMainResult()
@@ -91,72 +132,84 @@ int UIManager::GetMainResult()
     return ShowMenuAt(Vec2{StartChooseX + 2, StartChooseY + 2},{ "전투", "아이템 사용" });
 }
 
-int UIManager::ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step, bool isVertical) {
+int UIManager::HandleMenuInput(int& selectedIndex, int maxMenu) {
+    int key = _getch();
+    if (key == KEY_ESC) return -1;
+    if (key == 224) {
+        key = _getch();
+        switch (key) {
+        case KEY_UP: case KEY_LEFT:
+            selectedIndex--;
+            if (selectedIndex < 0) selectedIndex = maxMenu - 1;
+            break;
+        case KEY_DOWN: case KEY_RIGHT:
+            selectedIndex++;
+            if (selectedIndex >= maxMenu) selectedIndex = 0;
+            break;
+        }
+        return 0; // 아직 엔터 안 침
+    }
+    else if (key == KEY_ENTER) {
+        return 1; // 엔터 침! (선택 완료)
+    }
+    return 0;
+}
+
+int UIManager::ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step, bool isVertical)
+{
     int maxMenu = menuList.size();
     int selectedIndex = 0;
     
-    // std::string sysLog = "\033[33m[📢 시스템] 플레이어의 턴입니다.\033[0m";
-    // std::string attackLog = "\033[31m[⚔️ 전투] 고블린에게 15의 치명타 피해!\t\033[0m";
-    // std::string itemLog = "\033[32m[🎁 획득] 낡은 롱소드를 얻었습니다.\t\033[0m";
-    
     while (true) {
-        // PrintLog(sysLog);
-        // PrintLog(attackLog);
-        // PrintLog(itemLog);
-        // 메뉴 렌더링 (그리는 역할만 수행)
         for (int i = 0; i < maxMenu; i++) {
-            std::string line;
+            std::string text;
             if (i == selectedIndex) {
-                line += std::string("[  ") + menuList[i] + std::string("  ]");
+                text += std::string("[  ") + menuList[i] + std::string("  ]");
             } else {
-                line += std::string("   ") + menuList[i] + std::string("   ");
+                text += std::string("   ") + menuList[i] + std::string("   ");
             }
             
             if (isVertical)
-                PrintLineAt(at.x, at.y + (i * step), line);
+                PrintTextAt(at.x, at.y + (i * step), text);
             else
             {
                 if (i != 0)
                 {
-                    PrintLineAt(at.x + menuList[i - 1].length() + 6, at.y, line);
+                    PrintTextAt(at.x + menuList[i - 1].length() + 6, at.y, text);
                 }
                 else
                 {
-                    PrintLineAt(at.x, at.y, line);
+                    PrintTextAt(at.x, at.y, text);
                 }
             }
         }
 
-        int key = _getch();
-        if (key == KEY_ESC) { // ESC 키를 눌렀을 때
-            return -1;
-        }
-        if (key == 224) {
-            key = _getch();
-            switch (key) {
-            case KEY_UP:
-                selectedIndex--;
-                if (selectedIndex < 0) selectedIndex = maxMenu - 1;
-                break;
-            case KEY_DOWN:
-                selectedIndex++;
-                if (selectedIndex >= maxMenu) selectedIndex = 0;
-                break;
-            case KEY_LEFT:
-                selectedIndex--;
-                if (selectedIndex < 0) selectedIndex = maxMenu - 1;
-                break;
-            case KEY_RIGHT:
-                selectedIndex++;
-                if (selectedIndex >= maxMenu) selectedIndex = 0;
-                break;
+        int inputResult = HandleMenuInput(selectedIndex, maxMenu);
+        if (inputResult == -1) return -1; // ESC
+        if (inputResult == 1) return selectedIndex; // ENTER
+    }
+}
+
+int UIManager::ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step, TextAlign textAlign)
+{
+    int maxMenu = menuList.size();
+    int selectedIndex = 0;
+    
+    while (true) {
+        for (int i = 0; i < maxMenu; i++) {
+            std::string text;
+            if (i == selectedIndex) {
+                text += std::string("[  ") + menuList[i] + std::string("  ]");
+            } else {
+                text += std::string("   ") + menuList[i] + std::string("   ");
             }
+            
+            PrintTextAlign(startX, endX, y + (i * step), text, textAlign);
         }
-        else if (key == KEY_ENTER) {
-            // 🚨 주의: 여기서 system("cls")를 해버리면 애써 그린 3분할 테두리가 다 날아갑니다!
-            // 화면을 지우지 않고 그냥 번호만 토스합니다.
-            return selectedIndex; 
-        }
+
+        int inputResult = HandleMenuInput(selectedIndex, maxMenu);
+        if (inputResult == -1) return -1; // ESC
+        if (inputResult == 1) return selectedIndex; // ENTER
     }
 }
 
@@ -185,10 +238,16 @@ void UIManager::UpdateStat(Character* character)
         std::string line = oss.str();
     
         // 이제 하나로 묶인 line을 원하는 위치에 출력합니다.
-        PrintLineAt(StartStatX + 4, StartStatY + 2 + i, line);
+        PrintTextAt(StartStatX + 4, StartStatY + 2 + i, line);
     }
 }
 
+// std::string sysLog = "\033[33m[📢 시스템] 플레이어의 턴입니다.\033[0m";
+// std::string attackLog = "\033[31m[⚔️ 전투] 고블린에게 15의 치명타 피해!\t\033[0m";
+// std::string itemLog = "\033[32m[🎁 획득] 낡은 롱소드를 얻었습니다.\t\033[0m";
+// PrintLog(sysLog);
+// PrintLog(attackLog);
+// PrintLog(itemLog);
 void UIManager::PrintLog(const std::string& message)
 {
     if (message.size() != 0)
@@ -205,14 +264,14 @@ void UIManager::PrintLog(const std::string& message)
     std::string blankLine(innerWidth, ' ');
     for (int i = StartLogY + 1; i < EndLogY; i++)
     {
-        PrintLineAt(StartLogX + 1, i, blankLine);
+        PrintTextAt(StartLogX + 1, i, blankLine);
     }
     
     size_t logSize = LogMessages.size();
     for (int i = 0; i < logSize; i++)
     {
         std::string line = std::string("> ") + LogMessages[i];
-        PrintLineAt(StartLogX + 2, EndLogY - 1 - (logSize - i), line);
+        PrintTextAt(StartLogX + 2, EndLogY - 1 - (logSize - i), line);
     }
 }
 
@@ -222,7 +281,7 @@ void UIManager::UpdateInventory(Inventory* inven)
     for (int i = 0; i < inven->GetItems().size(); i++)
     {
         std::string name = items[i]->GetName();
-        PrintLineAt(StartInventoryX + 5, StartInventoryY + 2 + (i * 1), name);
+        PrintTextAt(StartInventoryX + 5, StartInventoryY + 2 + (i * 1), name);
     }
 }
 
@@ -275,7 +334,7 @@ void UIManager::DrawScenePanel()
     DrawBox(StartSceneX,StartSceneY, EndSceneX, EndSceneY);
     
     std::string line = "Scene";
-    PrintLineAt(StartSceneX + 5, StartSceneY, line);
+    PrintTextAt(StartSceneX + 5, StartSceneY, line);
 }
 
 void UIManager::DrawStatPanel()
@@ -283,7 +342,7 @@ void UIManager::DrawStatPanel()
     DrawBox(StartStatX,StartStatY, EndStatX, EndStatY);
     
     std::string line = "Stat";
-    PrintLineAt(EndSceneX + 1 + 5, StartSceneY, line);
+    PrintTextAt(EndSceneX + 1 + 5, StartSceneY, line);
 }
 
 void UIManager::DrawInventoryPanel()
@@ -291,7 +350,7 @@ void UIManager::DrawInventoryPanel()
     DrawBox(StartInventoryX,StartInventoryY, EndInventoryX, EndInventoryY);
     
     std::string line = "Inventory";
-    PrintLineAt(StartInventoryX + 1 + 5, StartInventoryY, line);
+    PrintTextAt(StartInventoryX + 1 + 5, StartInventoryY, line);
 }
 
 void UIManager::DrawLogPanel()
@@ -299,7 +358,7 @@ void UIManager::DrawLogPanel()
     DrawBox(StartLogX, StartLogY, EndLogX, EndLogY);
     
     std::string line = "Log";
-    PrintLineAt(StartSceneX + 5, EndSceneY + 1, line);
+    PrintTextAt(StartSceneX + 5, EndSceneY + 1, line);
 }
 
 void UIManager::DrawMenuPanel()
@@ -307,7 +366,7 @@ void UIManager::DrawMenuPanel()
     DrawBox(StartChooseX, StartChooseY, EndChooseX, EndChooseY);
     
     std::string line = "Choose";
-    PrintLineAt(EndSceneX + 1 + 5, EndSceneY + 1, line);
+    PrintTextAt(EndSceneX + 1 + 5, EndSceneY + 1, line);
 }
 
 void UIManager::DrawTitleMenu() {
@@ -336,6 +395,6 @@ void UIManager::DrawTitleMenu() {
 
     // 15줄을 한 줄씩 좌표를 밑으로 내리며(startY + i) 렌더링
     for (int i = 0; i < 15; i++) {
-        PrintLineAt(startX, startY + i, art[i]);
+        PrintTextAt(startX, startY + i, art[i]);
     }
 }
