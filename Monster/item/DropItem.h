@@ -5,7 +5,7 @@
 class MonsterItem : public IItem
 {
 public:
-    MonsterItem(DevItem& item)
+     MonsterItem(const DevItem& item)
     {
         name = item.name;
         gold = item.gold;

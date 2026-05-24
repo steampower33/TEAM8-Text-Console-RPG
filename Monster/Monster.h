@@ -4,6 +4,7 @@
 #include <string>
 
 #include "data/MonsterStructs.h"
+#include "item/DropItem.h"
 
 class Monster
 {
@@ -47,5 +48,10 @@ public:
     MonsterReward GetReward() const
     {
         return Info.Reward;
+    }
+    
+    std::unique_ptr<IItem> MonsterDropItems() const
+    {
+        return std::make_unique<MonsterItem>(Info.Reward.Item);
     }
 };
