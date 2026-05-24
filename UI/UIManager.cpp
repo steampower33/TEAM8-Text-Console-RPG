@@ -3,13 +3,6 @@
 #include "../Item/IItem.h"
 #include "UIManager.h"
 
-#define KEY_UP    72
-#define KEY_DOWN  80
-#define KEY_LEFT  75
-#define KEY_RIGHT 77
-#define KEY_ENTER 13
-#define KEY_ESC   27
-
 void UIManager::Initialize() {
     std::string systemLine("");
     systemLine.append("mode con cols=");
@@ -169,11 +162,6 @@ int UIManager::GetTitleResult()
     return ShowMenuAlign(1, ConsoleWidth - 1, 25, { "게임 시작", "게임 종료" }, 2, TextAlign::Center);
 }
 
-int UIManager::GetMainResult()
-{
-    return ShowMenuAt(Vec2{StartChooseX + 2, StartChooseY + 2},{ "전투", "아이템 사용" });
-}
-
 int UIManager::HandleMenuInput(int& selectedIndex, int maxMenu) {
     int key = _getch();
     if (key == KEY_ESC) return -1;
@@ -195,41 +183,6 @@ int UIManager::HandleMenuInput(int& selectedIndex, int maxMenu) {
         return 1; // 엔터 침! (선택 완료)
     }
     return 0;
-}
-
-int UIManager::ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step, bool isVertical)
-{
-    int maxMenu = menuList.size();
-    int selectedIndex = 0;
-    
-    while (true) {
-        for (int i = 0; i < maxMenu; i++) {
-            std::string text;
-            if (i == selectedIndex) {
-                text += std::string("[  ") + menuList[i] + std::string("  ]");
-            } else {
-                text += std::string("   ") + menuList[i] + std::string("   ");
-            }
-            
-            if (isVertical)
-                PrintTextAt(at.x, at.y + (i * step), text);
-            else
-            {
-                if (i != 0)
-                {
-                    PrintTextAt(at.x + menuList[i - 1].length() + 6, at.y, text);
-                }
-                else
-                {
-                    PrintTextAt(at.x, at.y, text);
-                }
-            }
-        }
-
-        int inputResult = HandleMenuInput(selectedIndex, maxMenu);
-        if (inputResult == -1) return -1; // ESC
-        if (inputResult == 1) return selectedIndex; // ENTER
-    }
 }
 
 int UIManager::ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step, TextAlign textAlign)
@@ -284,6 +237,60 @@ void UIManager::UpdateStat(Character* character)
     }
 }
 
+void UIManager::UpdateScene(bool isCombat, std::string monsterName)
+{
+    if (!isCombat)
+    {
+        // 1. 비전투(Idle) 상태: 대검 출력
+        for (int i = 0; i < warrior.size(); i++) {
+            PrintTextAlign(StartSceneX + 1, EndSceneX - 1, StartSceneY + 1 + i, warrior[i], TextAlign::Left);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < warrior.size(); i++) {
+            PrintTextAlign(StartSceneX + 1, EndSceneX - 1, StartSceneY + 1 + i, warrior[i], TextAlign::Left);
+        }
+        
+        // 2. 전투(Combat) 상태: 몬스터 이름에 따라 아트 스왑
+        int monsterX = StartSceneX + 55; // 우측 배치 기준 X좌표
+        int startY = StartSceneY + 1;
+
+        // C++ string의 find를 쓰는 이유: 팀원분 코드를 보면 레벨이 0일 때 "Slime 0" 처럼 
+        // 뒤에 숫자가 붙는 예외 처리가 있어서, 이름 포함 여부로 검사하는 것이 안전합니다.
+        
+        int SceneHeight = EndSceneY - StartSceneY - 1;
+        
+        if (monsterName.find("Goblin") != std::string::npos)
+        {
+            // 뾰족한 고블린 배열 출력
+            for (int i = 0; i < std::min(int(goblin.size()), SceneHeight) ; i++) {
+                PrintTextAt(monsterX, startY + i, goblin[i]);
+            }
+        }
+        else if (monsterName.find("Orc") != std::string::npos)
+        {
+            for (int i = 0; i < std::min(int(orc.size()), SceneHeight); i++) {
+                PrintTextAt(monsterX, startY + i, orc[i]);
+            }
+        }
+        else if (monsterName.find("Troll") != std::string::npos)
+        {
+            for (int i = 0; i < std::min(int(troll.size()), SceneHeight); i++)
+            {
+                PrintTextAt(monsterX, startY + i, troll[i]);
+            }
+        }
+        else if (monsterName.find("Slime") != std::string::npos)
+        {
+            for (int i = 0; i < std::min(int(slime.size()), SceneHeight); i++)
+            {
+                PrintTextAt(monsterX, startY + i, slime[i]);
+            }
+        }
+    }
+}
+
 // std::string sysLog = "\033[33m[📢 시스템] 플레이어의 턴입니다.\033[0m";
 // std::string attackLog = "\033[31m[⚔️ 전투] 고블린에게 15의 치명타 피해!\t\033[0m";
 // std::string itemLog = "\033[32m[🎁 획득] 낡은 롱소드를 얻었습니다.\t\033[0m";
@@ -327,38 +334,6 @@ void UIManager::UpdateInventory(Inventory* inven)
     }
 }
 
-void UIManager::ChooseItem(Inventory* inven, Character* character)
-{
-    std::vector<IItem*> items = inven->GetItems();
-    
-    if (items.empty()) {
-        PrintLog("\033[33m[시스템] 인벤토리가 비어있습니다.\033[0m");
-        return;
-    }
-    
-    std::vector<std::string> menuList;
-    
-    for (size_t i = 0; i < items.size(); i++)
-    {
-        std::string line = items[i]->GetName();
-        menuList.push_back(line);
-    }
-    
-    int itemIndex = ShowMenuAt({StartInventoryX + 2, StartInventoryY + 2}, menuList, 1);
-    
-    // 0 = 사용, 1 = 취소
-    int wannaUse = ShowMenuAt({StartInventoryX + 8, EndInventoryY - 3}, 
-        {"사용", "취소"}, 2, false);
-    
-    if (wannaUse == 0)
-    {
-        std::string line = character->Name + "이(가) " + items[itemIndex]->GetName() + "을(를) 사용했습니다!";
-        inven->UseItem(itemIndex, character);
-        
-        PrintLog(line);
-    }
-}
-
 // ====================================================== 
 // = 아래로는 Panel 그리기 위주 함수
 // ======================================================
@@ -368,7 +343,6 @@ void UIManager::ShowMainFrame()
     DrawStatPanel();
     DrawInventoryPanel();
     DrawLogPanel();
-    DrawMenuPanel();
 }
 
 void UIManager::DrawScenePanel()
@@ -401,14 +375,6 @@ void UIManager::DrawLogPanel()
     
     std::string line = "Log";
     PrintTextAt(StartSceneX + 5, EndSceneY + 1, line);
-}
-
-void UIManager::DrawMenuPanel()
-{
-    DrawBox(StartChooseX, StartChooseY, EndChooseX, EndChooseY);
-    
-    std::string line = "Choose";
-    PrintTextAt(EndSceneX + 1 + 5, EndSceneY + 1, line);
 }
 
 void UIManager::DrawTitleMenu() {

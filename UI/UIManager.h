@@ -2,56 +2,50 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <conio.h>
+
+#define NOMINMAX // ★ windows.h가 min, max 매크로를 생성하지 못하게 차단
 #include <windows.h>
+#include <conio.h>
 #include <sstream>
 #include <iomanip>
+
+#define KEY_UP    72
+#define KEY_DOWN  80
+#define KEY_LEFT  75
+#define KEY_RIGHT 77
+#define KEY_ENTER 13
+#define KEY_ESC   27
 
 class Character;
 class Inventory;
 class IItem;
 
-enum class TextAlign {
-    Left,
-    Center,
-    Right
-};
-
-struct Vec2 {
-    int x;
-    int y;
-};
-
-struct Box
-{
-    int startX;
-    int startY;
-    int endX;
-    int endY;
-};
+enum class TextAlign { Left, Center, Right };
+struct Vec2 { int x; int y; };
+struct Box { int startX; int startY; int endX; int endY; };
 
 class UIManager {
 public:
-    void Initialize(); // 시스템 초기화 (창 크기 고정, 커서 숨기기)
+    void Initialize();
     std::string ShowCharacterGeneration();
-    int GetTitleResult(); // 타이틀 화면 렌더링 및 메뉴 선택 (반환값: 0=게임시작, 1=종료)
-    int GetMainResult();
-    void ShowMainFrame(); // 메인 게임 플레이 프레임 그리기
-    int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
-    int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
-    void UpdateStat(Character* character); // 캐릭터 포인터를 받아서 스탯 패널 텍스트 갱신
+    int GetTitleResult();
     
-    // 로그 추가 및 화면 갱신
+    // 💡 변경: GetMainResult, GetBattleResult, ShowMenu~ 함수 싹 다 삭제
+    
+    void ShowMainFrame();
+    void UpdateStat(Character* character);
+    
+    void UpdateScene(bool isCombat = false, std::string monsterName = "");
+    
     std::vector<std::string> LogMessages;
     void PrintLog(const std::string& message = "");
-    
-    // 인벤토리 목록 갱신
     void UpdateInventory(Inventory* inven);
     
-    void ChooseItem(Inventory* inven, Character* character);
-    
+    // 💡 변경: ChooseItem 삭제 (명세서 규칙: 아이템 사용은 "자동/랜덤" 이므로 UI가 관여 안 함)
+
 private:
     int HandleMenuInput(int& selectedIndex, int maxMenu);
+    int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
     void PrintTextAt(int x, int y, const std::string& text);
     int GetDisplayWidth(const std::string& text);
     void PrintTextAlign(int startX, int endX, int y, const std::string& text, TextAlign align);
@@ -64,7 +58,7 @@ private:
     void DrawStatPanel();
     void DrawInventoryPanel();
     void DrawLogPanel();
-    void DrawMenuPanel();
+    // 💡 변경: DrawMenuPanel 삭제
 
 private:
     int ConsoleWidth = 150;
@@ -87,12 +81,143 @@ private:
     
     int StartLogX = StartSceneX;
     int StartLogY = EndSceneY + 1;
-    int EndLogX = EndSceneX;
+    int EndLogX = ConsoleWidth - 1; // 💡 변경: Choose 패널이 사라졌으니 Log 패널을 화면 끝까지(150칸) 넓게 씁니다!
     int EndLogY = ConsoleHeight - 1;
     
-    int StartChooseX = EndSceneX + 1;
-    int StartChooseY = EndSceneY + 1;
-    int EndChooseX = ConsoleWidth - 1;
-    int EndChooseY = ConsoleHeight - 1;
+    std::vector<std::string> warrior = {
+        R"_EOL(        $                                           )_EOL",
+        R"_EOL(       $$ $$                                        )_EOL",
+        R"_EOL(        $$   $$                                     )_EOL",
+        R"_EOL(          $$$  $$                                   )_EOL",
+        R"_EOL(             $$  $$                                 )_EOL",
+        R"_EOL(               $$  @$   $$*$$$                      )_EOL",
+        R"_EOL(                 $$  Q$  $    $$                    )_EOL",
+        R"_EOL(                   $$   $  ^    $$                  )_EOL",
+        R"_EOL(                     $$*  :.      $                 )_EOL",
+        R"_EOL(                       $ I`    .                    )_EOL",
+        R"_EOL(                     $$$  ' ^I!!  $$                )_EOL",
+        R"_EOL(                   $$    ^.^   ,:$                  )_EOL",
+        R"_EOL(                 $$  ;|i:. ^ $$   n$$$$$$           )_EOL",
+        R"_EOL(                    -..    ^   $$$    i             )_EOL",
+        R"_EOL(                 $ ]"       ^?   $   >  $$          )_EOL",
+        R"_EOL(                 $ ,+         I $$Q$ "   $$$$       )_EOL",
+        R"_EOL(                 $$ f.        ,       $$     $      )_EOL",
+        R"_EOL(                  $ ]>         :>>([+`        $     )_EOL",
+        R"_EOL(                  $. -`        ^!|cQ}     $$$$$$    )_EOL",
+        R"_EOL(                   $ .:       ^      L$$$           )_EOL",
+        R"_EOL(                   $  ,       " $$$$$               )_EOL",
+        R"_EOL(                     !"       " $                   )_EOL",
+        R"_EOL(                 $$ !:.       .  $                  )_EOL",
+        R"_EOL(                 $  <.         .  $$                )_EOL",
+    };
     
+    std::vector<std::string> goblin = {
+        R"_EOL(                   $$$$$$$$    $$] $              )_EOL",
+        R"_EOL(                $ $        $$$$  $$               )_EOL",
+        R"_EOL(              $$    +^...^     $$                 )_EOL",
+        R"_EOL(              $  }].      `   $                   )_EOL",
+        R"_EOL(             $  $  +.`-rr-" $  $$                 )_EOL",
+        R"_EOL(   $$$$      $$$ $ k-.    }      $$$$$            )_EOL",
+        R"_EOL( $$    $$            $"$$ `^.` .      $           )_EOL",
+        R"_EOL( $  $J. $        $$$$     )`    .   `  $$$        )_EOL",
+        R"_EOL(  $   '+ $$             $ |tc}:     >     $$      )_EOL",
+        R"_EOL(    $$     $           $ :    !:    ~ $$    $     )_EOL",
+        R"_EOL(      $$    $          $ : $$  :    _ C $   $     )_EOL",
+        R"_EOL(        $$   $       $$   $ $ _:    ^ $  $  $     )_EOL",
+        R"_EOL(          $$  $$$$$$    $$$$  >     `  $ $  $     )_EOL",
+        R"_EOL(            $      $$$$$  $  >      '~ $  $  $    )_EOL",
+        R"_EOL(            $$$$  $     $$  ?`      ^?  $$    $   )_EOL",
+        R"_EOL(                $  $   $  n0]'`I;, `I{ $$ $ L ~   )_EOL",
+        R"_EOL(                 $$  $       nx< ~I,    $$$  L$   )_EOL",
+        R"_EOL(                       $ $ $      )  $$  $ $$     )_EOL",
+        R"_EOL(                     $  : $ $$ $$ I?< $           )_EOL",
+        R"_EOL(                      $   %  $$ $$$    J$         )_EOL",
+        R"_EOL(                       $  $        $$$$  $$$$     )_EOL",
+        R"_EOL(                      $  > $           $ ~  $     )_EOL",
+        R"_EOL(                 $  $   $  %$         $    $      )_EOL",
+        R"_EOL(                 $|$$$$$ $$         $$ $$$$       )_EOL",
+    };
+    
+    std::vector<std::string> slime = {
+        R"_EOL(                      $$$$$                       )_EOL",
+        R"_EOL(                 $  $c     $$$$                   )_EOL",
+        R"_EOL(               $ $$$ $ r-]:    $$                 )_EOL",
+        R"_EOL(              $  $  o     . 'l   $                )_EOL",
+        R"_EOL(             $    $   ^..     `>  $               )_EOL",
+        R"_EOL(                $   .          ';                 )_EOL",
+        R"_EOL(             $    ;'           !1 o$              )_EOL",
+        R"_EOL(            $  i!i'         `-t                   )_EOL",
+        R"_EOL(           $  }|]^.        `}   $$ $$             )_EOL",
+        R"_EOL(          $       ..       `  $      $$           )_EOL",
+        R"_EOL(       $$$    $$ + ;:"     `]  $ :rC   $$         )_EOL",
+        R"_EOL(    $$$    a$    I    ^   'I<("  ,``+d,  $$$$$$   )_EOL",
+        R"_EOL(  $            x+  }$ '  `    -1`             $   )_EOL",
+        R"_EOL(   $$$$$$${  $       fm0+   $    $| '$$$$$$$$     )_EOL",
+        R"_EOL(        $$$$$ $$$$$$     $$$$$&|$ $$     $        )_EOL",
+        R"_EOL(                    $$$$$           $$$$$         )_EOL",
+    };
+    
+    std::vector<std::string> orc = {
+        R"_EOL(                            $$$$                  )_EOL",
+        R"_EOL(                          $$    $                 )_EOL",
+        R"_EOL(                        $$  .?u  BW               )_EOL",
+        R"_EOL(                         )        $               )_EOL",
+        R"_EOL(                       $$ $$ $ $o  $$$            )_EOL",
+        R"_EOL(                    $$$          >"   $$$$        )_EOL",
+        R"_EOL(        $$$$$     $$    `:lll;-_~^.,[;   o$       )_EOL",
+        R"_EOL(     $$$          $  "'.              '~,  $      )_EOL",
+        R"_EOL(     $   [Z $$$   $ .....           `ll;l_  $     )_EOL",
+        R"_EOL(    $   +      $$$  .   ..         "+    :{ $$    )_EOL",
+        R"_EOL(_$z$  ' f $$  C    ';:];  .       `!  $m  <  $$   )_EOL",
+        R"_EOL( $$   )<C $$  $   0Q   r[ .       ,  $  $ .+   $  )_EOL",
+        R"_EOL(   $$        $$ $    $$   .       ,  $ $  ,,<     )_EOL",
+        R"_EOL(     $$B$$$$$ $$ $$$$  a `        `!   $" !? *p   )_EOL",
+        R"_EOL(                      $  .         `'.$   \   $   )_EOL",
+        R"_EOL(                     $   .          .   i}   $    )_EOL",
+        R"_EOL(                    $  `.            `:_   $$     )_EOL",
+        R"_EOL(                   $  ..  ..   :ll`  ".  $$  $ $$ )_EOL",
+        R"_EOL(                   *  ",}nLc{}/    ` !  $    $ $$ )_EOL",
+        R"_EOL(                   $  :'        $$ ]>i  $         )_EOL",
+        R"_EOL(                  $   ! c$$$$ $$     ]  u         )_EOL",
+        R"_EOL(                  $  .!  $   $$   $$ -,  $$       )_EOL",
+        R"_EOL(                  $   ,)  $       $  c:;          )_EOL",
+        R"_EOL(                  $   ^x  $           Ii"  $      )_EOL",
+        R"_EOL(                   %  ,| $         $$i i $$       )_EOL",
+        R"_EOL(                  $l;ut  $           q t{  $      )_EOL",
+        R"_EOL(                $-     ~$$           $      $     )_EOL",
+        R"_EOL(                $q$$$$$              $$$$$$$$     )_EOL",
+    };
+    
+    std::vector<std::string> troll = {
+        R"_EOL(                                   $$             )_EOL",
+        R"_EOL(                              $$$$$  $$$          )_EOL",
+        R"_EOL(                            $$     f>   $         )_EOL",
+        R"_EOL(                      $$$$$$  Ifv,:  $ $          )_EOL",
+        R"_EOL(                    $a       i    $ $             )_EOL",
+        R"_EOL(                 $q$    ''' : ($ $                )_EOL",
+        R"_EOL(          $$ $$$     `      :!     $              )_EOL",
+        R"_EOL(      $$$$  $   Y$ |         :}\u|  $$$$          )_EOL",
+        R"_EOL(     $     `  $ [  i             ._.    [$        )_EOL",
+        R"_EOL( $}k    I ~  $ $ ;_'                 ':" $        )_EOL",
+        R"_EOL( $b@$ $   _ $ w  ^                     ~   $$     )_EOL",
+        R"_EOL(       $  ~   " `l[[l                   >i        )_EOL",
+        R"_EOL(       $ ^ ~]]^l(    l              .,;,' _ $     )_EOL",
+        R"_EOL(       $  ; i1?   $$ !             .    ^'`  $$   )_EOL",
+        R"_EOL(        $      l$$   !             .  $  : `  W   )_EOL",
+        R"_EOL(         $$${$$   $                ' @ $ l  . $   )_EOL",
+        R"_EOL(                  v ^ !            .< $   . , $   )_EOL",
+        R"_EOL(                  $                 u $ $ . ] $   )_EOL",
+        R"_EOL(                   $                \ $ $  ./ $   )_EOL",
+        R"_EOL(                  $  !              l  $ | .f $   )_EOL",
+        R"_EOL(                  $ ^        ..     [      :+ $   )_EOL",
+        R"_EOL(                 $  ^ ~fCCf)(}! .  I  $  $ +"  $  )_EOL",
+        R"_EOL(                 r ! ~         I'  l $ |$}   +$   )_EOL",
+        R"_EOL(                $  ~ ~ $$$$ $$   .~:  ($ $$$$     )_EOL",
+        R"_EOL(                 $ l'~' $  $   $$  ; I  $         )_EOL",
+        R"_EOL(                  } + Q $        $ $  -  $ $      )_EOL",
+        R"_EOL(                  $ -IX $           $ ;`,  $      )_EOL",
+        R"_EOL(                $$       $                $       )_EOL",
+        R"_EOL(              $$$$$$8$$$ $         $$$$$$$        )_EOL",
+    };
 };
+
