@@ -1,21 +1,7 @@
 ﻿#include "../Character/Character.h"
 #include "../Item/Inventory.h"
 #include "../Item/IItem.h"
-
-#include <iostream>
-#include <conio.h>
-#include <windows.h>
-#include <sstream>
-#include <iomanip>
-
 #include "UIManager.h"
-
-#define KEY_UP    72
-#define KEY_DOWN  80
-#define KEY_LEFT  75
-#define KEY_RIGHT 77
-#define KEY_ENTER 13
-#define KEY_ESC   27
 
 void UIManager::Initialize() {
     std::string systemLine("");
@@ -36,6 +22,55 @@ void UIManager::Initialize() {
     SetConsoleOutputCP(CP_UTF8); // 콘솔을 UTF-8 모드로 강제 전환
 }
 
+std::string UIManager::ShowCharacterGeneration()
+{
+    // 기존 화면을 깔끔하게 지웁니다. 
+    // (캐릭터 생성은 게임 루프 시작 전의 독립된 '씬'이므로 cls를 써도 무방합니다.)
+    system("cls");
+
+    // 화면 정중앙에 그릴 박스의 크기와 좌표를 계산합니다.
+    int boxWidth = 50;
+    int boxHeight = 6;
+    int startX = (ConsoleWidth - boxWidth) / 2;
+    int startY = (ConsoleHeight - boxHeight) / 2;
+    int endX = startX + boxWidth;
+    int endY = startY + boxHeight;
+
+    // 중앙 박스 및 안내 문구 렌더링
+    DrawBox(startX, startY, endX, endY);
+    
+    PrintTextAlign(startX, endX, startY + 2, "새로운 모험가의 이름을 입력하세요", TextAlign::Center);
+    
+    // 입력 칸 프롬프트 렌더링
+    std::string prompt = "이름 : ";
+    PrintTextAt(startX + 4, startY + 4, prompt);
+
+    // 숨겨놨던 커서를 유저가 볼 수 있도록 임시로 켭니다.
+    CONSOLE_CURSOR_INFO cursorInfo = { 0, };
+    cursorInfo.dwSize = 1;
+    cursorInfo.bVisible = TRUE; // 커서 On!
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
+    // 이름 입력 받기
+    std::string name;
+    
+    // std::cin >> name; 대신 getline을 쓰는 이유:
+    // cin은 띄어쓰기를 입력하면 그 뒷부분을 잘라버립니다. ("빛의 기사" -> "빛의"만 저장됨)
+    // getline은 엔터를 칠 때까지의 모든 띄어쓰기를 포함해 온전히 가져옵니다.
+    std::getline(std::cin, name);
+
+    // 입력이 끝났으니 커서를 다시 숨겨서 게임 UI 모드로 복구합니다.
+    cursorInfo.bVisible = FALSE; // 커서 Off!
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
+    // 유저가 아무것도 안 치고 엔터만 쳤을 경우의 예외 처리 (방어 코드)
+    if (name.empty()) {
+        name = "무명"; // 디폴트 네임
+    }
+
+    return name;
+}
+
 void UIManager::Gotoxy(int x, int y) {
     COORD pos = { (short)x, (short)y };
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
@@ -53,10 +88,51 @@ std::string UIManager::RepeatString(const std::string& str, int count) {
     return result;
 }
 
-void UIManager::PrintLineAt(int x, int y, std::string& line)
+void UIManager::PrintTextAt(int x, int y, const std::string& text)
 {
     Gotoxy(x, y);
-    std::cout << line;
+    std::cout << text;
+}
+
+int UIManager::GetDisplayWidth(const std::string& text) {
+    int displayWidth = 0;
+    for (size_t i = 0; i < text.length(); ) {
+        // UTF-8의 첫 바이트를 확인하여 글자 바이트 수를 판별
+        unsigned char c = text[i];
+        if ((c & 0x80) == 0) {
+            // 1바이트 문자 (영어, 숫자, 기호): 화면에서 1칸 차지
+            displayWidth += 1;
+            i += 1;
+        } else {
+            // 다중 바이트 문자 (한글 등): 화면에서 2칸 차지한다고 가정 (UTF-8 한글은 보통 3바이트)
+            displayWidth += 2;
+            i += 3; // 3바이트를 건너뜀
+        }
+    }
+    return displayWidth;
+}
+
+void UIManager::PrintTextAlign(int startX, int endX, int y, const std::string& text, TextAlign align) {
+    int displayWidth = GetDisplayWidth(text);
+    int totalWidth = endX - startX;
+    int targetX = startX;
+
+    switch (align) {
+    case TextAlign::Left:
+        targetX = startX;
+        break;
+    case TextAlign::Center:
+        // 남은 여백의 절반만큼 시작 위치를 뒤로 밉니다.
+        targetX = startX + (totalWidth - displayWidth) / 2;
+        break;
+    case TextAlign::Right:
+        // 전체 넓이에서 글자 크기만큼 뺀 곳에서 시작합니다.
+        targetX = endX - displayWidth;
+        break;
+    }
+
+    Gotoxy(targetX, y);
+    std::cout << text;
 }
 
 void UIManager::DrawBox(int startX, int startY, int endX, int endY) {
@@ -64,99 +140,71 @@ void UIManager::DrawBox(int startX, int startY, int endX, int endY) {
 
     // 윗변 그리기
     std::string topBorder = "╔" + RepeatString("═", width) + "╗";
-    PrintLineAt(startX, startY, topBorder);
+    PrintTextAt(startX, startY, topBorder);
 
     // 양옆 벽 그리기
     for (int i = startY + 1; i <= endY - 1; i++) {
         std::string line = "║";
-        PrintLineAt(startX, i, line);
-        PrintLineAt(endX, i, line);
+        PrintTextAt(startX, i, line);
+        PrintTextAt(endX, i, line);
     }
 
     // 아랫변 그리기
     std::string bottomBorder = "╚" + RepeatString("═", width) + "╝";
-    PrintLineAt(startX, endY, bottomBorder);
+    PrintTextAt(startX, endY, bottomBorder);
 }
 
-int UIManager::GetTitleResult() {
-
+int UIManager::GetTitleResult()
+{
     DrawBox(0,0, ConsoleWidth - 1, ConsoleHeight - 1);
     DrawTitleMenu();
 
-    return ShowMenuAt(Vec2{60, 30}, { "게임 시작", "게임 종료" });
+    return ShowMenuAlign(1, ConsoleWidth - 1, 25, { "게임 시작", "게임 종료" }, 2, TextAlign::Center);
 }
 
-int UIManager::GetMainResult()
+int UIManager::HandleMenuInput(int& selectedIndex, int maxMenu) {
+    int key = _getch();
+    if (key == KEY_ESC) return -1;
+    if (key == 224) {
+        key = _getch();
+        switch (key) {
+        case KEY_UP: case KEY_LEFT:
+            selectedIndex--;
+            if (selectedIndex < 0) selectedIndex = maxMenu - 1;
+            break;
+        case KEY_DOWN: case KEY_RIGHT:
+            selectedIndex++;
+            if (selectedIndex >= maxMenu) selectedIndex = 0;
+            break;
+        }
+        return 0; // 아직 엔터 안 침
+    }
+    else if (key == KEY_ENTER) {
+        return 1; // 엔터 침! (선택 완료)
+    }
+    return 0;
+}
+
+int UIManager::ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step, TextAlign textAlign)
 {
-    return ShowMenuAt(Vec2{StartChooseX + 2, StartChooseY + 2},{ "전투", "아이템 사용" });
-}
-
-int UIManager::ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step, bool isVertical) {
     int maxMenu = menuList.size();
     int selectedIndex = 0;
     
-    // std::string sysLog = "\033[33m[📢 시스템] 플레이어의 턴입니다.\033[0m";
-    // std::string attackLog = "\033[31m[⚔️ 전투] 고블린에게 15의 치명타 피해!\t\033[0m";
-    // std::string itemLog = "\033[32m[🎁 획득] 낡은 롱소드를 얻었습니다.\t\033[0m";
-    
     while (true) {
-        // PrintLog(sysLog);
-        // PrintLog(attackLog);
-        // PrintLog(itemLog);
-        // 메뉴 렌더링 (그리는 역할만 수행)
         for (int i = 0; i < maxMenu; i++) {
-            std::string line;
+            std::string text;
             if (i == selectedIndex) {
-                line += std::string("[  ") + menuList[i] + std::string("  ]");
+                text += std::string("[  ") + menuList[i] + std::string("  ]");
             } else {
-                line += std::string("   ") + menuList[i] + std::string("   ");
+                text += std::string("   ") + menuList[i] + std::string("   ");
             }
             
-            if (isVertical)
-                PrintLineAt(at.x, at.y + (i * step), line);
-            else
-            {
-                if (i != 0)
-                {
-                    PrintLineAt(at.x + menuList[i - 1].length() + 6, at.y, line);
-                }
-                else
-                {
-                    PrintLineAt(at.x, at.y, line);
-                }
-            }
+            PrintTextAlign(startX, endX, y + (i * step), text, textAlign);
         }
 
-        int key = _getch();
-        if (key == KEY_ESC) { // ESC 키를 눌렀을 때
-            return -1;
-        }
-        if (key == 224) {
-            key = _getch();
-            switch (key) {
-            case KEY_UP:
-                selectedIndex--;
-                if (selectedIndex < 0) selectedIndex = maxMenu - 1;
-                break;
-            case KEY_DOWN:
-                selectedIndex++;
-                if (selectedIndex >= maxMenu) selectedIndex = 0;
-                break;
-            case KEY_LEFT:
-                selectedIndex--;
-                if (selectedIndex < 0) selectedIndex = maxMenu - 1;
-                break;
-            case KEY_RIGHT:
-                selectedIndex++;
-                if (selectedIndex >= maxMenu) selectedIndex = 0;
-                break;
-            }
-        }
-        else if (key == KEY_ENTER) {
-            // 🚨 주의: 여기서 system("cls")를 해버리면 애써 그린 3분할 테두리가 다 날아갑니다!
-            // 화면을 지우지 않고 그냥 번호만 토스합니다.
-            return selectedIndex; 
-        }
+        int inputResult = HandleMenuInput(selectedIndex, maxMenu);
+        if (inputResult == -1) return -1; // ESC
+        if (inputResult == 1) return selectedIndex; // ENTER
     }
 }
 
@@ -185,10 +233,70 @@ void UIManager::UpdateStat(Character* character)
         std::string line = oss.str();
     
         // 이제 하나로 묶인 line을 원하는 위치에 출력합니다.
-        PrintLineAt(StartStatX + 4, StartStatY + 2 + i, line);
+        PrintTextAt(StartStatX + 4, StartStatY + 2 + i, line);
     }
 }
 
+void UIManager::UpdateScene(bool isCombat, std::string monsterName)
+{
+    if (!isCombat)
+    {
+        // 1. 비전투(Idle) 상태: 대검 출력
+        for (int i = 0; i < warrior.size(); i++) {
+            PrintTextAlign(StartSceneX + 1, EndSceneX - 1, StartSceneY + 1 + i, warrior[i], TextAlign::Left);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < warrior.size(); i++) {
+            PrintTextAlign(StartSceneX + 1, EndSceneX - 1, StartSceneY + 1 + i, warrior[i], TextAlign::Left);
+        }
+        
+        // 2. 전투(Combat) 상태: 몬스터 이름에 따라 아트 스왑
+        int monsterX = StartSceneX + 55; // 우측 배치 기준 X좌표
+        int startY = StartSceneY + 1;
+
+        // C++ string의 find를 쓰는 이유: 팀원분 코드를 보면 레벨이 0일 때 "Slime 0" 처럼 
+        // 뒤에 숫자가 붙는 예외 처리가 있어서, 이름 포함 여부로 검사하는 것이 안전합니다.
+        
+        int SceneHeight = EndSceneY - StartSceneY - 1;
+        
+        if (monsterName.find("Goblin") != std::string::npos)
+        {
+            // 뾰족한 고블린 배열 출력
+            for (int i = 0; i < std::min(int(goblin.size()), SceneHeight) ; i++) {
+                PrintTextAt(monsterX, startY + i, goblin[i]);
+            }
+        }
+        else if (monsterName.find("Orc") != std::string::npos)
+        {
+            for (int i = 0; i < std::min(int(orc.size()), SceneHeight); i++) {
+                PrintTextAt(monsterX, startY + i, orc[i]);
+            }
+        }
+        else if (monsterName.find("Troll") != std::string::npos)
+        {
+            for (int i = 0; i < std::min(int(troll.size()), SceneHeight); i++)
+            {
+                PrintTextAt(monsterX, startY + i, troll[i]);
+            }
+        }
+        else if (monsterName.find("Slime") != std::string::npos)
+        {
+            for (int i = 0; i < std::min(int(slime.size()), SceneHeight); i++)
+            {
+                PrintTextAt(monsterX, startY + i, slime[i]);
+            }
+        }
+    }
+}
+
+// std::string sysLog = "\033[33m[📢 시스템] 플레이어의 턴입니다.\033[0m";
+// std::string attackLog = "\033[31m[⚔️ 전투] 고블린에게 15의 치명타 피해!\t\033[0m";
+// std::string itemLog = "\033[32m[🎁 획득] 낡은 롱소드를 얻었습니다.\t\033[0m";
+// PrintLog(sysLog);
+// PrintLog(attackLog);
+// PrintLog(itemLog);
 void UIManager::PrintLog(const std::string& message)
 {
     if (message.size() != 0)
@@ -205,14 +313,14 @@ void UIManager::PrintLog(const std::string& message)
     std::string blankLine(innerWidth, ' ');
     for (int i = StartLogY + 1; i < EndLogY; i++)
     {
-        PrintLineAt(StartLogX + 1, i, blankLine);
+        PrintTextAt(StartLogX + 1, i, blankLine);
     }
     
     size_t logSize = LogMessages.size();
     for (int i = 0; i < logSize; i++)
     {
         std::string line = std::string("> ") + LogMessages[i];
-        PrintLineAt(StartLogX + 2, EndLogY - 1 - (logSize - i), line);
+        PrintTextAt(StartLogX + 2, EndLogY - 1 - (logSize - i), line);
     }
 }
 
@@ -222,39 +330,7 @@ void UIManager::UpdateInventory(Inventory* inven)
     for (int i = 0; i < inven->GetItems().size(); i++)
     {
         std::string name = items[i]->GetName();
-        PrintLineAt(StartInventoryX + 5, StartInventoryY + 2 + (i * 1), name);
-    }
-}
-
-void UIManager::ChooseItem(Inventory* inven, Character* character)
-{
-    std::vector<IItem*> items = inven->GetItems();
-    
-    if (items.empty()) {
-        PrintLog("\033[33m[시스템] 인벤토리가 비어있습니다.\033[0m");
-        return;
-    }
-    
-    std::vector<std::string> menuList;
-    
-    for (size_t i = 0; i < items.size(); i++)
-    {
-        std::string line = items[i]->GetName();
-        menuList.push_back(line);
-    }
-    
-    int itemIndex = ShowMenuAt({StartInventoryX + 2, StartInventoryY + 2}, menuList, 1);
-    
-    // 0 = 사용, 1 = 취소
-    int wannaUse = ShowMenuAt({StartInventoryX + 8, EndInventoryY - 3}, 
-        {"사용", "취소"}, 2, false);
-    
-    if (wannaUse == 0)
-    {
-        std::string line = character->Name + "이(가) " + items[itemIndex]->GetName() + "을(를) 사용했습니다!";
-        inven->UseItem(itemIndex, character);
-        
-        PrintLog(line);
+        PrintTextAt(StartInventoryX + 5, StartInventoryY + 2 + (i * 1), name);
     }
 }
 
@@ -267,7 +343,6 @@ void UIManager::ShowMainFrame()
     DrawStatPanel();
     DrawInventoryPanel();
     DrawLogPanel();
-    DrawMenuPanel();
 }
 
 void UIManager::DrawScenePanel()
@@ -275,7 +350,7 @@ void UIManager::DrawScenePanel()
     DrawBox(StartSceneX,StartSceneY, EndSceneX, EndSceneY);
     
     std::string line = "Scene";
-    PrintLineAt(StartSceneX + 5, StartSceneY, line);
+    PrintTextAt(StartSceneX + 5, StartSceneY, line);
 }
 
 void UIManager::DrawStatPanel()
@@ -283,7 +358,7 @@ void UIManager::DrawStatPanel()
     DrawBox(StartStatX,StartStatY, EndStatX, EndStatY);
     
     std::string line = "Stat";
-    PrintLineAt(EndSceneX + 1 + 5, StartSceneY, line);
+    PrintTextAt(EndSceneX + 1 + 5, StartSceneY, line);
 }
 
 void UIManager::DrawInventoryPanel()
@@ -291,7 +366,7 @@ void UIManager::DrawInventoryPanel()
     DrawBox(StartInventoryX,StartInventoryY, EndInventoryX, EndInventoryY);
     
     std::string line = "Inventory";
-    PrintLineAt(StartInventoryX + 1 + 5, StartInventoryY, line);
+    PrintTextAt(StartInventoryX + 1 + 5, StartInventoryY, line);
 }
 
 void UIManager::DrawLogPanel()
@@ -299,43 +374,33 @@ void UIManager::DrawLogPanel()
     DrawBox(StartLogX, StartLogY, EndLogX, EndLogY);
     
     std::string line = "Log";
-    PrintLineAt(StartSceneX + 5, EndSceneY + 1, line);
-}
-
-void UIManager::DrawMenuPanel()
-{
-    DrawBox(StartChooseX, StartChooseY, EndChooseX, EndChooseY);
-    
-    std::string line = "Choose";
-    PrintLineAt(EndSceneX + 1 + 5, EndSceneY + 1, line);
+    PrintTextAt(StartSceneX + 5, EndSceneY + 1, line);
 }
 
 void UIManager::DrawTitleMenu() {
-    // 15줄짜리 거대 아스키 아트를 배열에 저장
+    // 11줄짜리 아스키 아트를 배열에 저장
     // R"EOF( )EOF" 를 사용하여 내부의 모든 특수기호를 안전하게 보호함
-    std::string art[15] = {
-        R"EOF(                                                                 ,──,)EOF",
-        R"EOF(               ,────..             ,──.                ,────..   ,───.'│                               ,─.────.)EOF",
-        R"EOF(  ,────..     ╱   ╱   ╲         ,──.'│  .──.──.      ╱   ╱   ╲  │   │ :        ,───,.        ,─.────.  ╲    ╱  ╲    ,────..)EOF",
-        R"EOF( ╱   ╱   ╲   ╱   .     :    ,──,:  : │ ╱  ╱   '.    ╱   .     : :   : │      ,'  .' │        ╲    ╱  ╲  │   :    ╲  ╱   ╱   ╲)EOF",
-        R"EOF(│   :     : .   ╱   ;.  ╲,`──.'`│  ' :│  :  ╱`. ╱  .   ╱   ;.  ╲│   ' :    ,───.'   │        ;   :    ╲ │   │  .╲ :│   :     :)EOF",
-        R"EOF(.   │  ;. ╱.   ;   ╱  ` ;│   :  :  │ │;  │  │──`  .   ;   ╱  ` ;;   ; '    │   │   .'        │   │ .╲ : .   :  │: │.   │  ;. ╱)EOF",
-        R"EOF(.   ; ╱──` ;   │  ; ╲ ; │:   │   ╲ │ :│  :  ;_    ;   │  ; ╲ ; │'   │ │__ :   :  │─,        .   : │: │ │   │   ╲ :.   ; ╱──`)EOF",
-        R"EOF(;   │ ;    │   :  │ ; │ '│   : '  '; │ ╲  ╲    `. │   :  │ ; │ '│   │ :.'│:   │  ;╱│        │   │  ╲ : │   : .   ╱;   │ ;  __)EOF",
-        R"EOF(│   : │    .   │  ' ' ' :'   ' ;.    ;  `────.   ╲.   │  ' ' ' :'   :    ;│   :   .'        │   : .  ╱ ;   │ │`─' │   : │.' .')EOF",
-        R"EOF(.   │ '___ '   ;  ╲; ╱  ││   │ │ ╲   │  __ ╲  ╲  │'   ;  ╲; ╱  ││   │  .╱ │   │  │─,        ;   │ │  ╲ │   │ ;    .   │ '_.' :)EOF",
-        R"EOF('   ; : .'│ ╲   ╲  ',  ╱ '   : │  ; .' ╱  ╱`──'  ╱ ╲   ╲  ',  ╱ ;   : ;   '   :  ;╱│        │   │ ;╲  ╲:   ' │    '   ; : ╲  │)EOF",
-        R"EOF('   │ '╱  :  ;   :    ╱  │   │ '`──'  '──'.     ╱  ;   :    ╱  │   ,╱    │   │    ╲        :   ' │ ╲.':   : :    '   │ '╱  .')EOF",
-        R"EOF(│   :    ╱    ╲   ╲ .'   '   : │        `──'───'     ╲   ╲ .'  '───'     │   :   .'        :   : :─'  │   │ :    │   :    ╱)EOF",
-        R"EOF( ╲   ╲ .'      `───`     ;   │.'                     `───`               │   │ ,'          │   │.'    `───'.│     ╲   ╲ .')EOF",
-        R"EOF(  `───`                  '───'                                           `────'            `───'        `───`      `───`)EOF"
+    std::string art[11] = {
+        R"EOF(  ╱$$$$$$   ╱$$$$$$  ╱$$   ╱$$  ╱$$$$$$   ╱$$$$$$  ╱$$       ╱$$$$$$$$       ╱$$$$$$$  ╱$$$$$$$   ╱$$$$$$ )EOF",
+        R"EOF( ╱$$__  $$ ╱$$__  $$│ $$$ │ $$ ╱$$__  $$ ╱$$__  $$│ $$      │ $$_____╱      │ $$__  $$│ $$__  $$ ╱$$__  $$)EOF",
+        R"EOF(│ $$  ╲__╱│ $$  ╲ $$│ $$$$│ $$│ $$  ╲__╱│ $$  ╲ $$│ $$      │ $$            │ $$  ╲ $$│ $$  ╲ $$│ $$  ╲__╱)EOF",
+        R"EOF(│ $$      │ $$  │ $$│ $$ $$ $$│  $$$$$$ │ $$  │ $$│ $$      │ $$$$$         │ $$$$$$$╱│ $$$$$$$╱│ $$ ╱$$$$)EOF",
+        R"EOF(│ $$      │ $$  │ $$│ $$  $$$$ ╲____  $$│ $$  │ $$│ $$      │ $$__╱         │ $$__  $$│ $$____╱ │ $$│_  $$)EOF",
+        R"EOF(│ $$    $$│ $$  │ $$│ $$╲  $$$ ╱$$  ╲ $$│ $$  │ $$│ $$      │ $$            │ $$  ╲ $$│ $$      │ $$  ╲ $$)EOF",
+        R"EOF(│  $$$$$$╱│  $$$$$$╱│ $$ ╲  $$│  $$$$$$╱│  $$$$$$╱│ $$$$$$$$│ $$$$$$$$      │ $$  │ $$│ $$      │  $$$$$$╱)EOF",
+        R"EOF( ╲______╱  ╲______╱ │__╱  ╲__╱ ╲______╱  ╲______╱ │________╱│________╱      │__╱  │__╱│__╱       ╲______╱ )EOF",
+        R"EOF(                                                                                                          )EOF",
+        R"EOF(                                                                                                          )EOF",
+        R"EOF(                                                                                                          )EOF"
     };
     
-    int startX = 12; // 화면 오른쪽에서부터 띄우고 그리기 시작
-    int startY = 3; // 화면 위에서부터 띄우고 그리기 시작
+    // 가로 폭 110칸을 화면 중앙(150칸)에 맞추기 위해 x좌표 조정
+    int startX = 20; 
+    // 로고가 화면 약간 위쪽에 위치하도록 y좌표 조정 (메뉴와 안 겹치게)
+    int startY = 8; 
 
-    // 15줄을 한 줄씩 좌표를 밑으로 내리며(startY + i) 렌더링
-    for (int i = 0; i < 15; i++) {
-        PrintLineAt(startX, startY + i, art[i]);
+    // 11줄을 한 줄씩 좌표를 밑으로 내리며(startY + i) 렌더링
+    for (int i = 0; i < 11; i++) {
+        PrintTextAt(startX, startY + i, art[i]);
     }
 }
