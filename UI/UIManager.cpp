@@ -1,13 +1,6 @@
 ﻿#include "../Character/Character.h"
 #include "../Item/Inventory.h"
 #include "../Item/IItem.h"
-
-#include <iostream>
-#include <conio.h>
-#include <windows.h>
-#include <sstream>
-#include <iomanip>
-
 #include "UIManager.h"
 
 #define KEY_UP    72
@@ -34,6 +27,55 @@ void UIManager::Initialize() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
     
     SetConsoleOutputCP(CP_UTF8); // 콘솔을 UTF-8 모드로 강제 전환
+}
+
+std::string UIManager::ShowCharacterGeneration()
+{
+    // 기존 화면을 깔끔하게 지웁니다. 
+    // (캐릭터 생성은 게임 루프 시작 전의 독립된 '씬'이므로 cls를 써도 무방합니다.)
+    system("cls");
+
+    // 화면 정중앙에 그릴 박스의 크기와 좌표를 계산합니다.
+    int boxWidth = 50;
+    int boxHeight = 6;
+    int startX = (ConsoleWidth - boxWidth) / 2;
+    int startY = (ConsoleHeight - boxHeight) / 2;
+    int endX = startX + boxWidth;
+    int endY = startY + boxHeight;
+
+    // 중앙 박스 및 안내 문구 렌더링
+    DrawBox(startX, startY, endX, endY);
+    
+    PrintTextAlign(startX, endX, startY + 2, "새로운 모험가의 이름을 입력하세요", TextAlign::Center);
+    
+    // 입력 칸 프롬프트 렌더링
+    std::string prompt = "이름 : ";
+    PrintTextAt(startX + 4, startY + 4, prompt);
+
+    // 숨겨놨던 커서를 유저가 볼 수 있도록 임시로 켭니다.
+    CONSOLE_CURSOR_INFO cursorInfo = { 0, };
+    cursorInfo.dwSize = 1;
+    cursorInfo.bVisible = TRUE; // 커서 On!
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
+    // 이름 입력 받기
+    std::string name;
+    
+    // std::cin >> name; 대신 getline을 쓰는 이유:
+    // cin은 띄어쓰기를 입력하면 그 뒷부분을 잘라버립니다. ("빛의 기사" -> "빛의"만 저장됨)
+    // getline은 엔터를 칠 때까지의 모든 띄어쓰기를 포함해 온전히 가져옵니다.
+    std::getline(std::cin, name);
+
+    // 입력이 끝났으니 커서를 다시 숨겨서 게임 UI 모드로 복구합니다.
+    cursorInfo.bVisible = FALSE; // 커서 Off!
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
+    // 유저가 아무것도 안 치고 엔터만 쳤을 경우의 예외 처리 (방어 코드)
+    if (name.empty()) {
+        name = "무명"; // 디폴트 네임
+    }
+
+    return name;
 }
 
 void UIManager::Gotoxy(int x, int y) {

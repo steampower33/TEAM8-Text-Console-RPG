@@ -1,6 +1,11 @@
 ﻿#pragma once
 #include <string>
 #include <vector>
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <sstream>
+#include <iomanip>
 
 class Character;
 class Inventory;
@@ -28,9 +33,9 @@ struct Box
 class UIManager {
 public:
     void Initialize(); // 시스템 초기화 (창 크기 고정, 커서 숨기기)
+    std::string ShowCharacterGeneration();
     int GetTitleResult(); // 타이틀 화면 렌더링 및 메뉴 선택 (반환값: 0=게임시작, 1=종료)
     int GetMainResult();
-    
     void ShowMainFrame(); // 메인 게임 플레이 프레임 그리기
     int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
     int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
