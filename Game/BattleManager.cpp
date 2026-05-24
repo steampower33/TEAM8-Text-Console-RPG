@@ -1,21 +1,11 @@
 ﻿#include <iostream>
 #include <random>
 #include <conio.h>
+
 #include "BattleManager.h"
-
-
-
 #include "../Monster/utils/Create.h"
 #include "../Monster/data/MonsterStructs.h"
 #include "../UI/UIManager.h"
-#include "../UI/UIManager.cpp"
-// //이거 파일에 넣어야함??
-// #define KEY_UP    72
-// #define KEY_DOWN  80
-// #define KEY_LEFT  75
-// #define KEY_RIGHT 77
-// #define KEY_ENTER 13
-// #define KEY_ESC   27
 
 using namespace std;
 
@@ -26,7 +16,6 @@ using namespace std;
 
 // Notion 지문이 아이템 자동 사용이 맞는지 확인 필요
 // #include <random>
-
 // random_device rd;
 // mt19937 gen(rd());
 // uniform_int_distribution<int> chance30(1, 100);
@@ -51,7 +40,7 @@ using namespace std;
 
 UIManager ui;
 
-void BattleManager::BeforeBattle(Character& player, UIManager& ui)
+void BattleManager::BeforeBattle(Character& player)
 {
     system("cls");
     ui.ShowMainFrame();
@@ -67,11 +56,11 @@ void BattleManager::BeforeBattle(Character& player, UIManager& ui)
         return;
     }
     if (key != KEY_ENTER) 
-        Battle(player, ui); 
+        Battle(player); 
 }
 
 //각 턴의 전투로직
-void BattleManager::Battle(Character& player, UIManager& ui)
+void BattleManager::Battle(Character& player)
 {
     
 
@@ -111,12 +100,14 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
     if (IsMonsterDead == true)
     {
         PlayerWin(player, monster);
+        player.LevelUp(); 
         return true;
     }
 
     player.TakeDamage(monster.GetStatus().ATK); //몬스터 공격
     if (player.IsDead == true)
     {
+        MonsterWin(player);
         return false;
     }
 
@@ -142,17 +133,7 @@ void BattleManager::PlayerWin(Character& player, Monster& monster)
     // 아이템 : 30% 확률로 획득
     if (ResultOfItemPersent <= 30)
     {
-        auto reward = monster.GetReward();
-        player.CharacterInventory.AddItem(
-            make_unique<ConcreteItem>(reward)
-        );
-        unique_ptr<IItem> RewardItem;
-        RewardItem->GetName() = monster.GetReward().Item.name;
-        RewardItem->GetGold() = monster.GetReward().Item.gold;
-
-        player.CharacterInventory.AddItem(
-            (unique_ptr<IItem>)monster.GetReward().Item);
-
+        player.CharacterInventory.AddItem(monster.MonsterDropItems());
     }
 
 }

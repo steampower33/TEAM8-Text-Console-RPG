@@ -8,8 +8,8 @@ class UIManager;
 class BattleManager
 {
 public:
-    void BeforeBattle(Character& player, UIManager& ui);
-    void Battle(Character& player, UIManager& ui);
+    void BeforeBattle(Character& player);
+    void Battle(Character& player);
     bool BattleLoop(Character& player, Monster& monster);
     void PlayerWin(Character& player, Monster& monster);
     void MonsterWin(Character& player);
