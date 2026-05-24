@@ -13,6 +13,7 @@ public:
     bool BattleLoop(Character& player, Monster& monster);
     void PlayerWin(Character& player, Monster& monster);
     void MonsterWin(Character& player);
+    void UseRandomItem(Character& player);
 protected:
     //Monster monster;
     
