@@ -6,7 +6,7 @@
 #include "../classes/Orc.h"
 #include "../classes/Slime.h"
 #include "../classes/Troll.h"
-
+#include "../classes/Boss.h"
 
 #include <random>
 #include <stdexcept>
@@ -42,3 +42,14 @@ std::unique_ptr<Monster> CreateMonster(MonsterType type, int level)
     }
     throw std::invalid_argument("Invalid MonsterType");
 }
+
+
+
+std::unique_ptr<Monster> CreateBoss()
+{
+return std::make_unique<Boss>();
+}
+
+
+
+// 몬스터 소환 .

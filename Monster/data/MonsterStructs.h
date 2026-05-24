@@ -35,5 +35,7 @@ enum class MonsterType
     Orc,
     Troll,
     Slime,
+    Boss,
     Count,
+    
 };
