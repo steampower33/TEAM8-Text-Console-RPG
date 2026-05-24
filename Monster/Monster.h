@@ -24,7 +24,7 @@ public:
     //     return Info.Stats.Name;
     // } Get Status 으로 통합.
 
-    MonsterStats GetStatus() const
+    MonsterStats& GetStatus() 
     {
         return Info.Stats;
     }
