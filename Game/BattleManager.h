@@ -3,12 +3,16 @@
 #include "../Character/Character.h"
 #include "../Monster/Monster.h"
 
+class UIManager;
+
 class BattleManager
 {
 public:
-    void Battle(Character& player);
-    bool BattleLoop(Character& player, std::unique_ptr<Monster>& monster);
-    //bool IsBattleEnd(Character& player, Monster& monster);
+    void BeforeBattle(Character& player, UIManager& ui);
+    void Battle(Character& player, UIManager& ui);
+    bool BattleLoop(Character& player, Monster& monster);
+    void PlayerWin(Character& player, Monster& monster);
+    void MonsterWin(Character& player);
 protected:
     //Monster monster;
     
