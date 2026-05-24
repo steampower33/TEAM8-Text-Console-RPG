@@ -4,6 +4,7 @@
 #include <string>
 
 #include "data/MonsterStructs.h"
+#include "item/DropItem.h"
 
 class Monster
 {
@@ -49,6 +50,10 @@ public:
         return Info.Reward;
     }
     
-    
-
+    std::unique_ptr<IItem> MonsterDropItems() const
+    {
+        // return std::unique_ptr<IItem>(new MonsterItem(Info.Reward.Item));
+        return std::make_unique<MonsterItem>(Info.Reward.Item);
+        // 객체 생성 후 unique_ptr 로 변환 - >  리턴 
+    }
 };
