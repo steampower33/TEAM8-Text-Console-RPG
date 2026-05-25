@@ -2,6 +2,7 @@
 #include "../Item/Inventory.h"
 #include "../Item/IItem.h"
 #include "UIManager.h"
+UIManager ui;
 
 // 상점 들어갈지 말지 선택지
 // 상점 UI 만들기
