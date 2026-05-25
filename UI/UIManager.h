@@ -218,3 +218,4 @@ private:
     };
 };
 
+extern UIManager ui;
