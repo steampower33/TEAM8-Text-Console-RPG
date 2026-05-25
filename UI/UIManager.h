@@ -30,8 +30,6 @@ public:
     std::string ShowCharacterGeneration();
     int GetTitleResult();
     
-    // 💡 변경: GetMainResult, GetBattleResult, ShowMenu~ 함수 싹 다 삭제
-    
     void ShowMainFrame();
     void UpdateStat(Character* character);
     
@@ -40,11 +38,11 @@ public:
     std::vector<std::string> LogMessages;
     void PrintLog(const std::string& message = "");
     void UpdateInventory(Inventory* inven);
-    
-    // 💡 변경: ChooseItem 삭제 (명세서 규칙: 아이템 사용은 "자동/랜덤" 이므로 UI가 관여 안 함)
+    void ShowShop(Character* character);
 
 private:
     int HandleMenuInput(int& selectedIndex, int maxMenu);
+    int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
     int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
     void PrintTextAt(int x, int y, const std::string& text);
     int GetDisplayWidth(const std::string& text);
@@ -58,7 +56,6 @@ private:
     void DrawStatPanel();
     void DrawInventoryPanel();
     void DrawLogPanel();
-    // 💡 변경: DrawMenuPanel 삭제
 
 private:
     int ConsoleWidth = 150;
@@ -81,24 +78,24 @@ private:
     
     int StartLogX = StartSceneX;
     int StartLogY = EndSceneY + 1;
-    int EndLogX = ConsoleWidth - 1; // 💡 변경: Choose 패널이 사라졌으니 Log 패널을 화면 끝까지(150칸) 넓게 씁니다!
+    int EndLogX = ConsoleWidth - 1;
     int EndLogY = ConsoleHeight - 1;
     
     std::vector<std::string> warrior = {
-        R"_EOL(        $                                           )_EOL",
+        R"_EOL(        $$                                          )_EOL",
         R"_EOL(       $$ $$                                        )_EOL",
         R"_EOL(        $$   $$                                     )_EOL",
         R"_EOL(          $$$  $$                                   )_EOL",
         R"_EOL(             $$  $$                                 )_EOL",
-        R"_EOL(               $$  @$   $$*$$$                      )_EOL",
+        R"_EOL(               $$  @$     $$$$                      )_EOL",
         R"_EOL(                 $$  Q$  $    $$                    )_EOL",
         R"_EOL(                   $$   $  ^    $$                  )_EOL",
         R"_EOL(                     $$*  :.      $                 )_EOL",
-        R"_EOL(                       $ I`    .                    )_EOL",
+        R"_EOL(                       $ I`    .  $                 )_EOL",
         R"_EOL(                     $$$  ' ^I!!  $$                )_EOL",
         R"_EOL(                   $$    ^.^   ,:$                  )_EOL",
         R"_EOL(                 $$  ;|i:. ^ $$   n$$$$$$           )_EOL",
-        R"_EOL(                    -..    ^   $$$    i             )_EOL",
+        R"_EOL(                 $  -..    ^   $$$    i             )_EOL",
         R"_EOL(                 $ ]"       ^?   $   >  $$          )_EOL",
         R"_EOL(                 $ ,+         I $$Q$ "   $$$$       )_EOL",
         R"_EOL(                 $$ f.        ,       $$     $      )_EOL",
@@ -106,7 +103,7 @@ private:
         R"_EOL(                  $. -`        ^!|cQ}     $$$$$$    )_EOL",
         R"_EOL(                   $ .:       ^      L$$$           )_EOL",
         R"_EOL(                   $  ,       " $$$$$               )_EOL",
-        R"_EOL(                     !"       " $                   )_EOL",
+        R"_EOL(                  $  !"       " $                   )_EOL",
         R"_EOL(                 $$ !:.       .  $                  )_EOL",
         R"_EOL(                 $  <.         .  $$                )_EOL",
     };
