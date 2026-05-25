@@ -17,7 +17,7 @@ std::unique_ptr<Monster> CreateRandomMonster(int level)
 
     std::uniform_int_distribution<int> dist(
         0,
-        static_cast<int>(MonsterType::Count) - 1
+        static_cast<int>(MonsterType::RandomLength) - 1
     );
 
     MonsterType randomType = static_cast<MonsterType>(dist(gen));
@@ -37,8 +37,8 @@ std::unique_ptr<Monster> CreateMonster(MonsterType type, int level)
         return std::make_unique<Troll>(level);
     case MonsterType::Slime:
         return std::make_unique<Slime>(level);
-    case MonsterType::Count:
-        throw std::invalid_argument("Invalid MonsterType");
+    case MonsterType::RandomLength:
+        throw std::invalid_argument("value is RandomLength");
     }
     throw std::invalid_argument("Invalid MonsterType");
 }
