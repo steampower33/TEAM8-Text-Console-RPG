@@ -28,6 +28,16 @@ bool BuyAttackBoost(Character* player)
 }
 }
 
+bool SellItem(ShopItems item, Character* player)
+{
+    // 인벤토리에 있는 아이템 삭제.
+    
+    
+ player->Gold += ShopItemTable.at(item).gold;   
+    
+}
+
+
 bool BuyItem(ShopItems item, Character* player)
 {
     switch (item)
