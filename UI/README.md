@@ -28,10 +28,11 @@
 #include "Item/HealthPotion.h"
 #include "UI/UIManager.h"
 
-#include "Monster/utils/Create.h" 
+#include "Monster/utils/Create.h"
 #include "Monster/Monster.h"
 
-int main() {
+int main()
+{
     UIManager ui;
     ui.Initialize();
 
@@ -49,6 +50,8 @@ int main() {
         Character* character = Character::GetInstance(name);
     
         // 시작 아이템을 캐릭터 내부 인벤토리에 지급
+        character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
         character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
         character->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
         
@@ -76,12 +79,12 @@ int main() {
             // --- [2. 전투 모드 진입] ---
             std::unique_ptr<Monster> monster = CreateRandomMonster(character->Level);
             MonsterStats mStats = monster->GetStatus();
-
+            
             ui.PrintLog("\033[31m[새로운 전투!]\033[0m");
             ui.PrintLog("\033[31m[전투 발생!]\033[0m 야생의 " + mStats.Name + "이(가) 나타났다!");
             
             // 이번 전투에서만 쓰일 임시 공격력 버프
-            int tempAttackBuff = 0; 
+            int tempAttackBuff = 0;
             bool inCombat = true;
             while (inCombat)
             {
@@ -93,7 +96,7 @@ int main() {
                 // isCombat = true 전달
                 ui.UpdateScene(true, mStats.Name);
 
-                ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
+                ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 진행합니다.");
                 
                 int combatKey = _getch();
                 if (combatKey != KEY_ENTER) continue;
@@ -101,6 +104,8 @@ int main() {
                 // --- [턴 연산 시작] ---
                 
                 // 1) 플레이어의 아이템 자동 사용 (30% 확률)
+                std::vector<IItem*> items = character->CharacterInventory.GetItems();
+                
                 int itemCount = character->CharacterInventory.GetItems().size();
                 if (chance30(gen) <= 30 && itemCount > 0) {
                     
@@ -111,15 +116,15 @@ int main() {
                     // 주의: 아이템이 '해당 전투만 공격력 +10'이라면, 
                     // AttackBoost 아이템 내부에서 character->Attack을 직접 올리지 마시고,
                     // tempAttackBuff += 10; 으로 처리되도록 구조를 맞춰야 영구 스탯 뻥튀기 버그가 안 납니다.
-                    character->UseItem(randomIndex); 
-                    
-                    ui.PrintLog("\033[32m[아이템]\033[0m " + character->Name + "이(가) 가방에서 아이템을 사용했습니다!");
+                    std::string name = items[randomIndex]->GetName();
+                    character->UseItem(randomIndex);
+                    ui.PrintLog("\033[32m[아이템]\033[0m " + character->Name + "이(가) 가방에서 " + name + " 아이템을 사용했습니다!");
                 }
 
                 // 2) 플레이어 -> 몬스터 공격
                 int pAtk = character->Attack + tempAttackBuff; 
                 bool isDead = monster->TakeDamageWithIsDead(pAtk);
-                
+
                 ui.PrintLog(character->Name + "의 공격! " + mStats.Name + "에게 피해를 입혔습니다.");
 
                 // 몬스터 사망 체크 및 보상
@@ -157,6 +162,19 @@ int main() {
                     isPlaying = false; 
                 }
             } // -- 전투 루프(While inCombat) 종료 --
+            
+            // Shop UI
+            ui.UpdateStat(character);
+            ui.PrintLog("\033[33m[전투 종료]\033[0m [Enter]를 누르면 상점에 들어갑니다. [ESC]를 누르면 넘어갑니다.");
+                
+            int shopKey = _getch();
+            if (shopKey == KEY_ENTER)
+            {
+                ui.PrintLog("\033[33m[상점 입장]\033[0m");
+                ui.ShowShop(character);
+            }
+            else if (shopKey == KEY_ESC)
+                continue;
             
         } // -- 메인 루프(While isPlaying) 종료 --
         
