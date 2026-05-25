@@ -39,6 +39,15 @@ using namespace std;
 // }
 
 // UIManager ui;
+void BattleManager::WaitForEnter()
+{
+    int key;
+    do {
+        key = _getch();
+    } while (key != 13);
+
+    while (_kbhit()) _getch();
+}
 
 Phase BattleManager::BeforeBattle(Character& player)
 {
@@ -56,44 +65,37 @@ Phase BattleManager::BeforeBattle(Character& player)
     {
         return Phase::Escape;
     }
-    if (key != KEY_ENTER)
+    if (key == KEY_ENTER)
         return Phase::Enter;
 
-    //ESC, Enter 외 다른 키입력에 대한 방어코드 필요함
-    //return Phase::Continue; 등
+    // //ESC, Enter 외 다른 키입력에 대한 방어코드 필요함
+    // return Phase::Continue; //등
 }
 
 //각 턴의 전투로직
 bool BattleManager::Battle(Character& player)
 {
-    bool BattleResult = false;
+    bool ReturnBattleFunc = false;
     unique_ptr<Monster> monster = CreateRandomMonster(player.Level);
     MonsterStats MonsterStats = monster->GetStatus();
 
+    
+    
+    system("cls");
+    ui.ShowMainFrame();
+    ui.UpdateStat(&player);
+    ui.UpdateInventory(&player.CharacterInventory);
+    
     ui.PrintLog("\033[31m[새로운 전투!]\033[0m");
     ui.PrintLog(
         "\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "이(가) 나타났다!");
-
-    while (BattleResult == false)
-    {
-        system("cls");
-        ui.ShowMainFrame();
-        ui.UpdateStat(&player);
-        ui.UpdateInventory(&player.CharacterInventory);
-
-        // isCombat = true 전달
-        ui.UpdateScene(true, MonsterStats.Name);
-
-        ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
-
-        int combatKey = _getch();
-        if (combatKey != KEY_ENTER)
-            continue;
-
-        BattleResult = BattleLoop(player, *monster);
-    }
-
-    return player.Health > 0;
+    
+    // isCombat = true 전달
+    ui.UpdateScene(true, MonsterStats.Name);
+    
+    bool BattleResult = BattleLoop(player, *monster); //승리시true 패배시false
+    
+    return BattleResult;
 }
 
 bool BattleManager::BattleLoop(Character& player, Monster& monster)
@@ -102,31 +104,63 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
     mt19937 RandomEngine(rd()); //선우님 좋은 거 알아오셨네
     uniform_int_distribution<int> FightOrUseItem(1, 100); //1~100 사이 정수 값
 
-    int Result = FightOrUseItem(RandomEngine);
-
-    if (Result <= 50)
+    string MonsterName = monster.GetStatus().Name;
+    
+    bool fightResult = false; //false는 결과 안나옴
+    
+    while (true)
     {
-        bool IsMonsterDead = monster.TakeDamageWithIsDead(player.Attack);
-        //플레이어 공격
-        if (IsMonsterDead == true)
+        int Result = FightOrUseItem(RandomEngine);
+        
+        WaitForEnter();
+        ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
+        static int debugCount = 0;
+        ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
+        // int combatKey;
+        // do {
+        //     combatKey = _getch();
+        // } while (combatKey != KEY_ENTER);
+        // // 버퍼에 남은 거 전부 버리기
+        // while (_kbhit()) _getch();
+        
+        // int combatKey = _getch();
+        // if (combatKey != KEY_ENTER)
+        //     continue;
+        
+        if (Result <= 50)
         {
-            PlayerWin(player, monster);
-            player.LevelUp();
-            return true;
-        }
+            //플레이어 공격
+            bool IsMonsterDead = monster.TakeDamageWithIsDead(player.Attack);
+            ui.PrintLog(player.Name + "의 공격! " + MonsterName + "에게 피해를 입혔습니다. " + MonsterName + "의 잔여 HP = "+ std::to_string(monster.GetStatus().HP));
+                    
+            if (IsMonsterDead == true)
+            {
+                PlayerWin(player, monster);
+            
+                player.LevelUp();
+                fightResult = true;
+                return fightResult; //승리시 true반환
+            }
 
-        player.TakeDamage(monster.GetStatus().ATK); //몬스터 공격
-        if (player.IsDead == true)
-        {
-            MonsterWin(player);
-            return false;
+            player.TakeDamage(monster.GetStatus().ATK); //몬스터 공격
+            ui.PrintLog("\033[31m[반격]\033[0m " + MonsterName + "의 맹공! " + std::to_string(monster.GetStatus().ATK) + "의 피해!");
+            ui.UpdateStat(&player);
+            
+            if (player.IsDead == true)
+            {
+                MonsterWin(player);
+                return fightResult; //패배시 false반환
+            }
+        
         }
+        else
+        { // 아이템이 없을 때 여기 들어오면 안댐
+
+            UseRandomItem(player);
+        }
+        
     }
-    else
-    {
-        UseRandomItem(player);
-        return false;
-    }
+    //return fightResult;
 }
 
 void BattleManager::PlayerWin(Character& player, Monster& monster)
@@ -147,10 +181,16 @@ void BattleManager::PlayerWin(Character& player, Monster& monster)
     player.Gold += GoldAmount;
 
     // 아이템 : 30% 확률로 획득
-    if (ResultOfItemPersent <= 30)
+    if (ResultOfItemPersent <= 100)
     {
         player.CharacterInventory.AddItem(monster.MonsterDropItems());
+        ui.PrintLog("\033[36m[아이템 획득]\033[0m ++" + monster.MonsterDropItems()->GetName() + "++ 을 획득했습니다.");
+    }else
+    {
+        ui.PrintLog("\033[36m[아이템 획득 실패]\033[0m 몬스터의 사체를 뒤져보았지만 아이템을 발견하지 못했습니다.");
     }
+    
+    ui.PrintLog("\033[36m[전투 승리]\033[0m " + monster.GetStatus().Name + " 처치! (EXP +" + std::to_string(monster.GetReward().Exp) + " / Gold +" + std::to_string(GoldAmount) + ")");
 }
 
 void BattleManager::MonsterWin(Character& player)
@@ -168,20 +208,32 @@ void BattleManager::UseRandomItem(Character& player)
     int ResultOfUseItemPersent = UseItemPersent(RandomEngine);
     int itemCount = player.CharacterInventory.GetItems().size();
 
-    if (ResultOfUseItemPersent <= 50 && itemCount > 0)
+    if (ResultOfUseItemPersent <= 30 )
     {
 
         // 가지고 있는 아이템 중 랜덤으로 하나 선택
         std::uniform_int_distribution<int> itemDist(0, itemCount - 1);
         int randomIndex = itemDist(RandomEngine);
 
-        vector<IItem*> items = player.CharacterInventory.GetItems();
-        if (items[0]->GetName() == "HEALTH_POTION" || items[0]->GetName() ==
-            "ATTACK_BOOST")
+        vector<IItem*> items = player.CharacterInventory.GetItems(); //&쓰면 좋은데 vector<IItem*>& 타입으로 받아올수가 없네요
+        string itemName = items[randomIndex]->GetName();
+        if (itemName == "HealthPotion" || itemName == "AttackBoost")
+        {
+            
             player.UseItem(randomIndex);
-
-        ui.PrintLog(
-            "\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " + items[0]->
-            GetName() + "아이템을 사용했습니다!");
+            ui.UpdateStat(&player);
+            ui.UpdateInventory(&player.CharacterInventory);
+            ui.PrintLog("\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " + itemName + "아이템을 사용했습니다!");
+        }
+        else
+        {
+            ui.PrintLog("\033[32m[아이템]\033[0m " + itemName + "아이템은 전투 중 사용할 수 없는 아이템입니다.");
+        }
     }
+    else if (ResultOfUseItemPersent > 50 && itemCount > 0)
+    {
+        ui.PrintLog("\033[32m[아이템]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다. ㅋㅋ");
+    }
+    else if (itemCount <= 0)
+        ui.PrintLog("\033[32m[아이템]\033[0m 사용할 아이템이 없답니다? ㅋㅋ");
 }

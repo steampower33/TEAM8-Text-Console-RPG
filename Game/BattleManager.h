@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "GameManager.h"
 #include "../Character/Character.h"
 #include "../Monster/Monster.h"
@@ -8,12 +9,6 @@
 
 
 
-enum class Phase 
-{ 
-    Continue, 
-    Enter, 
-    Escape 
-};
 
 class UIManager;
 class Character;
@@ -26,6 +21,8 @@ public:
     void PlayerWin(Character& player, Monster& monster);
     void MonsterWin(Character& player);
     void UseRandomItem(Character& player);
+    void WaitForEnter();
+    
 protected:
     //Monster monster;
     
