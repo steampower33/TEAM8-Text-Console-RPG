@@ -38,55 +38,62 @@ using namespace std;
 //     }
 // }
 
-UIManager ui;
+// UIManager ui;
 
-void BattleManager::BeforeBattle(Character& player)
+Phase BattleManager::BeforeBattle(Character& player)
 {
     system("cls");
     ui.ShowMainFrame();
     ui.UpdateStat(&player);
     ui.UpdateInventory(&player.CharacterInventory);
-            
-    ui.UpdateScene(); 
-            
+
+    ui.UpdateScene();
+
     ui.PrintLog("\033[36m[탐험]\033[0m 미궁을 걷고 있습니다... [Enter] 전진 (ESC 종료)");
-            
+
     int key = _getch();
-    if (key == KEY_ESC) {
-        return;
+    if (key == KEY_ESC)
+    {
+        return Phase::Escape;
     }
-    if (key != KEY_ENTER) 
-        Battle(player); 
+    if (key != KEY_ENTER)
+        return Phase::Enter;
+
+    //ESC, Enter 외 다른 키입력에 대한 방어코드 필요함
+    //return Phase::Continue; 등
 }
 
 //각 턴의 전투로직
-void BattleManager::Battle(Character& player)
+bool BattleManager::Battle(Character& player)
 {
     bool BattleResult = false;
     unique_ptr<Monster> monster = CreateRandomMonster(player.Level);
     MonsterStats MonsterStats = monster->GetStatus();
-    
+
     ui.PrintLog("\033[31m[새로운 전투!]\033[0m");
-    ui.PrintLog("\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "이(가) 나타났다!");
-    
+    ui.PrintLog(
+        "\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "이(가) 나타났다!");
+
     while (BattleResult == false)
     {
         system("cls");
         ui.ShowMainFrame();
         ui.UpdateStat(&player);
         ui.UpdateInventory(&player.CharacterInventory);
-                
+
         // isCombat = true 전달
         ui.UpdateScene(true, MonsterStats.Name);
-        
+
         ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
-                
+
         int combatKey = _getch();
-        if (combatKey != KEY_ENTER) continue;
-        
+        if (combatKey != KEY_ENTER)
+            continue;
+
         BattleResult = BattleLoop(player, *monster);
     }
 
+    return player.Health > 0;
 }
 
 bool BattleManager::BattleLoop(Character& player, Monster& monster)
@@ -94,15 +101,17 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
     random_device rd;
     mt19937 RandomEngine(rd()); //선우님 좋은 거 알아오셨네
     uniform_int_distribution<int> FightOrUseItem(1, 100); //1~100 사이 정수 값
-    
+
     int Result = FightOrUseItem(RandomEngine);
-    
-    if (Result <= 50) {
-        bool IsMonsterDead = monster.TakeDamageWithIsDead(player.Attack); //플레이어 공격
+
+    if (Result <= 50)
+    {
+        bool IsMonsterDead = monster.TakeDamageWithIsDead(player.Attack);
+        //플레이어 공격
         if (IsMonsterDead == true)
         {
             PlayerWin(player, monster);
-            player.LevelUp(); 
+            player.LevelUp();
             return true;
         }
 
@@ -116,6 +125,7 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
     else
     {
         UseRandomItem(player);
+        return false;
     }
 }
 
@@ -154,20 +164,24 @@ void BattleManager::UseRandomItem(Character& player)
     random_device rd;
     mt19937 RandomEngine(rd()); //선우님 좋은 거 알아오셨네
     uniform_int_distribution<int> UseItemPersent(1, 100); //1~100 사이 정수 값
-    
+
     int ResultOfUseItemPersent = UseItemPersent(RandomEngine);
     int itemCount = player.CharacterInventory.GetItems().size();
-    
-    if (ResultOfUseItemPersent <= 50 && itemCount > 0) {
-                    
+
+    if (ResultOfUseItemPersent <= 50 && itemCount > 0)
+    {
+
         // 가지고 있는 아이템 중 랜덤으로 하나 선택
         std::uniform_int_distribution<int> itemDist(0, itemCount - 1);
         int randomIndex = itemDist(RandomEngine);
-        
+
         vector<IItem*> items = player.CharacterInventory.GetItems();
-        if (items[0]->GetName() =="HEALTH_POTION" || items[0]->GetName() =="ATTACK_BOOST")
-            player.UseItem(randomIndex); 
-                    
-        ui.PrintLog("\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " + items[0]->GetName() + "아이템을 사용했습니다!");
+        if (items[0]->GetName() == "HEALTH_POTION" || items[0]->GetName() ==
+            "ATTACK_BOOST")
+            player.UseItem(randomIndex);
+
+        ui.PrintLog(
+            "\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " + items[0]->
+            GetName() + "아이템을 사용했습니다!");
     }
 }
