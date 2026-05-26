@@ -17,6 +17,13 @@ enum class Phase
     Escape 
 };
 
+enum class BattleResult 
+{ 
+    BossClear, 
+    Win, 
+    Fail
+};
+
 class BattleManager;
 class Character;
 class StartEndManager;

@@ -16,9 +16,10 @@ class BattleManager
 {
 public:
     Phase BeforeBattle(Character& player);
-    bool Battle(Character& player);
-    bool BattleLoop(Character& player, Monster& monster);
+    BattleResult Battle(Character& player);
+    BattleResult BattleLoop(Character& player, Monster& monster);
     void PlayerWin(Character& player, Monster& monster);
+    void GameVictory(Monster& monster);
     void MonsterWin(Character& player);
     void UseRandomItem(Character& player);
     void WaitForEnter();

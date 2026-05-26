@@ -73,40 +73,48 @@ Phase BattleManager::BeforeBattle(Character& player)
 }
 
 //각 턴의 전투로직
-bool BattleManager::Battle(Character& player)
+BattleResult BattleManager::Battle(Character& player)
 {
-    bool ReturnBattleFunc = false;
-    unique_ptr<Monster> monster = CreateRandomMonster(player.Level);
+    unique_ptr<Monster> monster = nullptr;
+
+    if (player.Level == 10)
+        monster = CreateBoss();
+
+    else if (player.Level < 10)
+        monster = CreateRandomMonster(player.Level);
+
     MonsterStats MonsterStats = monster->GetStatus();
 
-    
-    
     system("cls");
     ui.ShowMainFrame();
     ui.UpdateStat(&player);
     ui.UpdateInventory(&player.CharacterInventory);
     
     ui.PrintLog("\033[31m[새로운 전투!]\033[0m");
-    ui.PrintLog(
-        "\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "이(가) 나타났다!");
+    if (MonsterStats.Name == "웅애 CPP 어려웡")
+    {
+        ui.PrintLog("\033[31m[전투 발생!]\033[0m 조져따! 보스 몬스터 " + MonsterStats.Name + "이(가) 나타났다!");
+    }
+    else
+    {
+        ui.PrintLog("\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "이(가) 나타났다!");
+    }
     
     // isCombat = true 전달
     ui.UpdateScene(true, MonsterStats.Name);
     
-    bool BattleResult = BattleLoop(player, *monster); //승리시true 패배시false
+    BattleResult BattleResult = BattleLoop(player, *monster); //승리시true 패배시false
     
     return BattleResult;
 }
 
-bool BattleManager::BattleLoop(Character& player, Monster& monster)
+BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
 {
     random_device rd;
     mt19937 RandomEngine(rd()); //선우님 좋은 거 알아오셨네
     uniform_int_distribution<int> FightOrUseItem(1, 100); //1~100 사이 정수 값
 
     string MonsterName = monster.GetStatus().Name;
-    
-    bool fightResult = false; //false는 결과 안나옴
     
     while (true)
     {
@@ -116,17 +124,7 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
         ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
         static int debugCount = 0;
         ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
-        // int combatKey;
-        // do {
-        //     combatKey = _getch();
-        // } while (combatKey != KEY_ENTER);
-        // // 버퍼에 남은 거 전부 버리기
-        // while (_kbhit()) _getch();
-        
-        // int combatKey = _getch();
-        // if (combatKey != KEY_ENTER)
-        //     continue;
-        
+                
         if (Result <= 50)
         {
             //플레이어 공격
@@ -138,8 +136,11 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
                 PlayerWin(player, monster);
             
                 player.LevelUp();
-                fightResult = true;
-                return fightResult; //승리시 true반환
+                if (MonsterName == "웅애 CPP 어려웡")
+                    return BattleResult::BossClear;
+                
+                return BattleResult::Win;
+                
             }
 
             player.TakeDamage(monster.GetStatus().ATK); //몬스터 공격
@@ -149,7 +150,7 @@ bool BattleManager::BattleLoop(Character& player, Monster& monster)
             if (player.IsDead == true)
             {
                 MonsterWin(player);
-                return fightResult; //패배시 false반환
+                return BattleResult::Fail;
             }
         
         }
@@ -176,27 +177,48 @@ void BattleManager::PlayerWin(Character& player, Monster& monster)
 
     // 경험치 : (Notion)50 획득, 100 이상 획득 시 레벨업 -> (실제구현) 생성된 몬스터 별 차등 경험치 획득, 100 이상 획득 시 레벨업
     player.Experience += monster.GetReward().Exp;
-
-    // 골드 : 10~20 범위에서 랜덤 획득
-    player.Gold += GoldAmount;
-
-    // 아이템 : 30% 확률로 획득
-    if (ResultOfItemPersent <= 100)
+    
+    if (monster.GetStatus().Name == "웅애 CPP 어려웡")
     {
+        // 골드 : 10~20 범위에서 랜덤 획득
+        player.Gold += 1000000;
         player.CharacterInventory.AddItem(monster.MonsterDropItems());
         ui.PrintLog("\033[36m[아이템 획득]\033[0m ++" + monster.MonsterDropItems()->GetName() + "++ 을 획득했습니다.");
-    }else
+        // 아이템 : 30% 확률로 획득
+        ui.PrintLog("\033[36m[전투 승리]\033[0m " + monster.GetStatus().Name + " 처치! (EXP +" + std::to_string(monster.GetReward().Exp) + " / Gold +" + std::to_string(GoldAmount) + ")");
+        
+        GameVictory(monster);
+    }
+    else
     {
-        ui.PrintLog("\033[36m[아이템 획득 실패]\033[0m 몬스터의 사체를 뒤져보았지만 아이템을 발견하지 못했습니다.");
+        // 골드 : 10~20 범위에서 랜덤 획득
+        player.Gold += GoldAmount;
+
+        // 아이템 : 30% 확률로 획득
+        if (ResultOfItemPersent <= 30)
+        {
+            player.CharacterInventory.AddItem(monster.MonsterDropItems());
+            ui.PrintLog("\033[36m[아이템 획득]\033[0m ++" + monster.MonsterDropItems()->GetName() + "++ 을 획득했습니다.");
+        }else
+        {
+            ui.PrintLog("\033[36m[아이템 획득 실패]\033[0m 몬스터의 사체를 뒤져보았지만 아이템을 발견하지 못했습니다.");
+        }
+    
+        ui.PrintLog("\033[36m[전투 승리]\033[0m " + monster.GetStatus().Name + " 처치! (EXP +" + std::to_string(monster.GetReward().Exp) + " / Gold +" + std::to_string(GoldAmount) + ")");
     }
     
-    ui.PrintLog("\033[36m[전투 승리]\033[0m " + monster.GetStatus().Name + " 처치! (EXP +" + std::to_string(monster.GetReward().Exp) + " / Gold +" + std::to_string(GoldAmount) + ")");
 }
 
 void BattleManager::MonsterWin(Character& player)
 {
     ui.PrintLog("\033[31m[사망]\033[0m " + player.Name + "이(가) 쓰러졌습니다... 게임 오버!");
     ui.PrintLog("\033[31m[게임 종료]\033[0m [Enter]를 누르면 게임이 종료됩니다.");
+}
+
+void BattleManager::GameVictory(Monster& monster)
+{
+    ui.PrintLog("\033[36m[게임클리어]\033[0m 보스 몬스터 "+ monster.GetStatus().Name +"을 물리치고 던전을 탈출합니다. 게임 클리어!");
+    ui.PrintLog("\033[36m[게임 종료]\033[0m [Enter]를 누르면 게임이 종료됩니다.");
 }
 
 void BattleManager::UseRandomItem(Character& player)
