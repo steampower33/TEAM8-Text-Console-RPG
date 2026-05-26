@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <vector>
-#include <iostream>
+#include <map>
 
 #define NOMINMAX // ★ windows.h가 min, max 매크로를 생성하지 못하게 차단
 #include <windows.h>
@@ -39,15 +39,17 @@ public:
     void PrintLog(const std::string& message = "");
     void UpdateInventory(Inventory* inven);
     void ShowShop(Character* character);
+    
+    std::map<std::string, int> killList;
+    void UpdateKillList(std::string monsterName = "");
+    std::string RepeatString(const std::string& str, int count);
 
-private:
     int HandleMenuInput(int& selectedIndex, int maxMenu);
     int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
     int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
     void PrintTextAt(int x, int y, const std::string& text);
     int GetDisplayWidth(const std::string& text);
     void PrintTextAlign(int startX, int endX, int y, const std::string& text, TextAlign align);
-    std::string RepeatString(const std::string& str, int count);
     void DrawBox(int startX, int startY, int endX, int endY);
     void Gotoxy(int x, int y);
     void DrawTitleMenu();
@@ -56,8 +58,8 @@ private:
     void DrawStatPanel();
     void DrawInventoryPanel();
     void DrawLogPanel();
+    void DrawKillListPanel();
 
-private:
     int ConsoleWidth = 150;
     int ConsoleHeight = 40;
     
@@ -78,9 +80,15 @@ private:
     
     int StartLogX = StartSceneX;
     int StartLogY = EndSceneY + 1;
-    int EndLogX = ConsoleWidth - 1;
+    int EndLogX = EndSceneX;
     int EndLogY = ConsoleHeight - 1;
     
+    int StartKillX = EndLogX + 1;
+    int StartKillY = StartLogY;
+    int EndKillX = ConsoleWidth - 1;
+    int EndKillY = ConsoleHeight - 1;
+    
+private:
     std::vector<std::string> warriorIdle = {
         R"_EOL(                                               @@ )_EOL",
         R"_EOL(                                              @ * )_EOL",
@@ -242,6 +250,33 @@ private:
         R"_EOL(                  $ -IX $           $ ;`,  $      )_EOL",
         R"_EOL(                $$       $                $       )_EOL",
         R"_EOL(              $$$$$$8$$$ $         $$$$$$$        )_EOL",
+    };
+    
+    std::vector<std::string> boss = {
+        R"_EOL(                               --                 )_EOL",
+        R"_EOL(                    #@@        @-#@               )_EOL",
+        R"_EOL(   @*@+%           @*@          @- @              )_EOL",
+        R"_EOL( @#--.+@           *=@ @#@ @%*#@::  %             )_EOL",
+        R"_EOL(=-----: @@         #.:#--.@:---::=@.#             )_EOL",
+        R"_EOL(--------.@        @#%:-:-*:=---===-.*             )_EOL",
+        R"_EOL(:%#------:@       -: #-+-:=----=--.@+    @+@      )_EOL",
+        R"_EOL(+  -------%       @ -:---+--------- @   @--%      )_EOL",
+        R"_EOL(  @@ -----:@       @-----:=-------=.@ @*---*      )_EOL",
+        R"_EOL(    @#*----%       %-------+--------* #----#      )_EOL",
+        R"_EOL(       @#:-.@     @---=-:------------#-----.@     )_EOL",
+        R"_EOL(         @*# @  @#---:::#:-----------------#      )_EOL",
+        R"_EOL(            @ @#-=-- @-*:------+=--=-------#      )_EOL",
+        R"_EOL(             #:----+@+.--:----------:-------#@    )_EOL",
+        R"_EOL(             #----# ===-:+==-------:#:--------*@  )_EOL",
+        R"_EOL(             @##+: @ -:--=:------==.:--------:+#@ )_EOL",
+        R"_EOL(                @*%=-----:+-------.@:------:.::-% )_EOL",
+        R"_EOL(                    *---:-:---------:-----=+@*-.= )_EOL",
+        R"_EOL(                   @---:@ *:--=:----+:--.*#@  +@@ )_EOL",
+        R"_EOL(                   @#.---# --=-+---- %%*@     *.% )_EOL",
+        R"_EOL(                     @.- @* :@%*--- @         =-  )_EOL",
+        R"_EOL(                @*#*@.--@ @+@   #-:*@         @@  )_EOL",
+        R"_EOL(           @*###--==-----#::.##*=-:+#             )_EOL",
+        R"_EOL(            ------------------------------        )_EOL",
     };
 };
 
