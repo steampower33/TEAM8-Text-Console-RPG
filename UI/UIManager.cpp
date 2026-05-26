@@ -404,6 +404,11 @@ void UIManager::UpdateScene(bool isCombat, std::string monsterName)
                 PrintTextAt(monsterX, startY + i, slime[i]);
             }
         }
+        else if (monsterName.find("웅애 CPP 어려웡") != std::string::npos)
+        {
+            PrintTextAt(monsterX, startY, "보스전 ASCII ART 아직 없음");
+        }
+        
     }
 }
 
