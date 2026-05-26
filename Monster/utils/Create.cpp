@@ -1,26 +1,25 @@
 #include "Create.h"
 
-#include <stdexcept>
-
 #include "../classes/Goblin.h"
 #include "../classes/Orc.h"
 #include "../classes/Slime.h"
 #include "../classes/Troll.h"
 #include "../classes/Boss.h"
+#include "common.h"
 
-#include <random>
-#include <stdexcept>
 std::unique_ptr<Monster> CreateRandomMonster(int level)
 {
-    static std::random_device rd; // AI 쪼아용 
-    static std::mt19937 gen(rd());
-
-    std::uniform_int_distribution<int> dist(
-        0,
-        static_cast<int>(MonsterType::RandomLength) - 1
-    );
-
-    MonsterType randomType = static_cast<MonsterType>(dist(gen));
+    
+    // static std::random_device rd; // AI 쪼아용 
+    // static std::mt19937 gen(rd());
+    //
+    // std::uniform_int_distribution<int> dist(
+    //     0,
+    //     static_cast<int>(MonsterType::RandomLength) - 1
+    // );
+ 
+    int RandMonster = GenRand(0,static_cast<int>(MonsterType::RandomLength) - 1);
+    MonsterType randomType = static_cast<MonsterType>(RandMonster);
 
     return CreateMonster(randomType, level);
 }
@@ -45,9 +44,9 @@ std::unique_ptr<Monster> CreateMonster(MonsterType type, int level)
 
 
 
-std::unique_ptr<Monster> CreateBoss()
+std::unique_ptr<Monster> CreateBoss(int level)
 {
-return std::make_unique<Boss>();
+    return std::make_unique<Boss>(level);
 }
 
 

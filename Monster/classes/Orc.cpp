@@ -1,6 +1,7 @@
 #include "Orc.h"
 
 #include "../data/MonsterTable.h"
+#include "../utils/common.h"
 
 namespace
 {
@@ -14,8 +15,8 @@ MonsterInfo MakeOrcInfo(int level)
         return info;
     }
 
-    info.Stats.HP += level;
-    info.Stats.ATK += level;
+    info.Stats.HP = (GenRand(20, 30) * level);
+    info.Stats.ATK = (GenRand(5, 10) * level);
     info.Stats.DEF += level;
 
     return info;

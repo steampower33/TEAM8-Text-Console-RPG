@@ -1,6 +1,8 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
+#include <random>
 #include <string>
 
 #include "data/MonsterStructs.h"
@@ -18,11 +20,6 @@ public:
     }
 
     virtual ~Monster() = default;
-
-    // std::string GetName() const
-    // {
-    //     return Info.Stats.Name;
-    // } Get Status 으로 통합.
 
     MonsterStats& GetStatus() 
     {
