@@ -33,7 +33,7 @@ bool SellItem(int index, Character* player)
     IItem* ItemName = player->CharacterInventory.GetItems()[index];
     if (ItemName->GetName() == HEALTH_POTION)
     {
-    player->Gold += ShopItemTable.at(ShopItems::HEALTH_POTION).gold;
+        player->Gold += ShopItemTable.at(ShopItems::HEALTH_POTION).gold;
         player->CharacterInventory.RemoveItem(index);
         return true; 
     }
