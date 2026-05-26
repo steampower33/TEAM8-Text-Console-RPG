@@ -30,16 +30,30 @@ bool BuyAttackBoost(Character* player)
 
 bool SellItem(int index, Character* player) 
 {
-    IItem* ItemName = player->CharacterInventory.GetItems()[index];
-    if (ItemName->GetName() == HEALTH_POTION)
+    auto items = player->CharacterInventory.GetItems();
+
+    if (index < 0 || index >= items.size())
+        return false;
+
+    IItem* item = items[index];
+    if (item->GetName() == HEALTH_POTION)
     {
         player->Gold += ShopItemTable.at(ShopItems::HEALTH_POTION).gold;
-        player->CharacterInventory.RemoveItem(index);
+        item->count--;
+        if (item->count <= 0)
+        {
+            player->CharacterInventory.RemoveItem(index);
+        }
         return true; 
     }
-    if (ItemName->GetName() == HEALTH_POTION)
-    {player->Gold += ShopItemTable.at(ShopItems::HEALTH_POTION).gold;
-        player->CharacterInventory.RemoveItem(index);
+    if (item->GetName() == ATTACK_BOOST)
+    {
+        player->Gold += ShopItemTable.at(ShopItems::ATTACK_BOOST).gold;
+        item->count--;
+        if (item->count <= 0)
+        {
+            player->CharacterInventory.RemoveItem(index);
+        }
         return true;
     }
     return false;

@@ -17,6 +17,8 @@ int main() {
 
     character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
     character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+    character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+    character->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
 
     bool result = SellItem(0, character);
 
@@ -26,11 +28,12 @@ int main() {
     {
         if (item != nullptr)
         {
-            std::cout << item->GetName() << std::endl;
+            std::cout << item->GetName() << ":" << item->count << std::endl;
+            std::cout << item->count<< std::endl; 
         }
     }
 
-    std::cout << "판매 결과: " << result << std::endl;
+    // std::cout << "판매 결과: " << result << std::endl;
     std::cout << "끝" << std::endl;
 
     system("pause");

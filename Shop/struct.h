@@ -19,6 +19,6 @@ struct ShopItemInfo
   static const std::unordered_map<ShopItems, ShopItemInfo> ShopItemTable =
   {
       {ShopItems::HEALTH_POTION, {HEALTH_POTION, 200}},
-      {ShopItems::ATTACK_BOOST, {HEALTH_POTION, 100}},
+      {ShopItems::ATTACK_BOOST, {ATTACK_BOOST, 100}},
   };
 
