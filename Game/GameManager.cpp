@@ -131,7 +131,19 @@ void GameManager::Run()
         {
             BattleResult BattleResult = battleManager->Battle(*player);
             if (BattleResult == BattleResult::Win  )
+            {
                 curentGameState = GameStateMachine::Explore;
+                ui.PrintLog("\033[36m[상점]\033[0m 미궁 속 미지의 상점을 발견했습니다. [Enter] 입장 (ESC 무서웡.. 패쓰!)");
+                int key = _getch();
+                if (key == KEY_ESC)
+                {
+                    curentGameState = GameStateMachine::Explore;
+                }
+                if (key == KEY_ENTER)
+                    ui.ShowShop(player); //엔터입력받아서 엔터면 들어가고 , esc면 안들어가고
+                
+            }
+                
             else
                 curentGameState = GameStateMachine::GameEnd;
             break;
