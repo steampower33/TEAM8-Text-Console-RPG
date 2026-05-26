@@ -1,5 +1,4 @@
-﻿
-#include "function.h"
+﻿#include "function.h"
 
 #include "../Character/Character.h"
 #include "../Item/HealthPotion.h"
@@ -41,16 +40,15 @@ int GetSellByItemName(const std::string& itemName)
 
     for (const auto& [type, info] : monsterTable)
     {
-            return info.Reward.Item.gold;
+        return info.Reward.Item.gold;
     }
     return 0;
 }
 
 
-
 }
 
-bool SellItem(int index, Character* player) 
+bool SellItem(int index, Character* player)
 {
     auto items = player->CharacterInventory.GetItems();
     if (index < 0 || index >= items.size())
@@ -59,16 +57,23 @@ bool SellItem(int index, Character* player)
     IItem* item = items[index];
     if (item == nullptr)
         return false;
-    
-    int sellGold = GetSellByItemName(item->GetName());
+    std::string ItemName = item->GetName();
+    int sellGold = GetSellByItemName(ItemName);
     if (sellGold < 0)
         return false;
 
-    player->Gold += sellGold;
-        player->CharacterInventory.RemoveItem(index);
-        return true;
+    if (ItemName == HEALTH_POTION || ItemName == ATTACK_BOOST)
+    {
+        player->Gold += sellGold * 60 / 100;
     }
-    
+    else
+    {
+        player->Gold += sellGold;
+    }
+    player->CharacterInventory.RemoveItem(index);
+    return true;
+}
+
 
 bool BuyItem(ShopItems item, Character* player)
 {
