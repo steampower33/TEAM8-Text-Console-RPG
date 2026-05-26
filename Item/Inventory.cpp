@@ -2,24 +2,43 @@
 #include  "IItem.h"
 
 
-Inventory::Inventory()
-{
-}
+Inventory::Inventory() = default;
 
 
 void Inventory::AddItem(std::unique_ptr<IItem> item)
 {
-    items.push_back(move(item));
+    // 이미 있는지 확인    
+    for (const auto& existing : items)
+    {
+        if (existing->GetName() == item->GetName()) 
+        {
+            existing->count++;   
+            return;              
+        }
+    }
+    
+    
+    items.push_back(std::move(item));
+    
 }
 
 
 void Inventory::UseItem(int index, Character* character)
 {
+    // 카운트 확인
     if (index >= 0 && index < items.size())
     {
         items[index]->Use(character);
-        items.erase(items.begin() + index); 
-    }
+        
+        items[index]->count--;          
+
+        if (items[index]->count <= 0)   
+        {
+            items.erase(items.begin() + index);
+        }
+        
+    }   
+
 }
 
 void Inventory::RemoveItem(int index)

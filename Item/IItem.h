@@ -23,14 +23,20 @@ class IItem
 {
 protected:
     std::string name;  
-    int gold; // 추후 상점 시스템에 필요
+    int gold; 
     
 public:
 
+    // 다들 그냥 public 으로 푸셔서 그냥 public 으로 선언 했습니다.
+    int count = 1;
+    
+    //
     virtual ~IItem() {}
     
     virtual std::string GetName() const = 0; 
     virtual void Use(Character* character) = 0;
     
     virtual int GetGold() const { return gold; } 
+    
+    
 };
