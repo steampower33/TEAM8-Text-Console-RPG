@@ -3,6 +3,7 @@
 #include "../Character/Character.h"
 #include "../Item/HealthPotion.h"
 #include "../Item/AttackBoost.h"
+#include "../Monster/Monster.h"
 #include "../Monster/data/MonsterTable.h"
 
 namespace
@@ -37,10 +38,13 @@ int GetSellByItemName(const std::string& itemName)
         return ShopItemTable.at(ShopItems::ATTACK_BOOST).gold;
 
     const auto& monsterTable = GetMonsterTable();
-
+    
     for (const auto& [type, info] : monsterTable)
-    {
-        return info.Reward.Item.gold;
+    { 
+        if (info.Reward.Item.name == itemName)
+        {
+            return info.Reward.Item.gold;
+        }
     }
     return 0;
 }
@@ -64,6 +68,7 @@ bool SellItem(int index, Character* player)
 
     if (ItemName == HEALTH_POTION || ItemName == ATTACK_BOOST)
     {
+        
         player->Gold += sellGold * 60 / 100;
     }
     else
