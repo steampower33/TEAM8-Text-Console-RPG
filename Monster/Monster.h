@@ -1,8 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <memory>
-#include <random>
 #include <string>
 
 #include "data/MonsterStructs.h"
