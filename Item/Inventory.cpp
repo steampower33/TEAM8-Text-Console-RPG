@@ -45,7 +45,12 @@ void Inventory::RemoveItem(int index)
 {
     if (index >= 0 && index < items.size())
     {
-        items.erase(items.begin() + index);
+        items[index]->count--;          
+
+        if (items[index]->count <= 0)   
+        {
+            items.erase(items.begin() + index);
+        }
     }
 }
 
