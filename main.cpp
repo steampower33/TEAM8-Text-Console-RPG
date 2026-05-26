@@ -16,10 +16,10 @@ void InitConsoleWindow() {
     }
 }
 
-int main() {
+// int main() {
 
     // GameManager::GetInstance().StartGame();
     
-    return 0;
-}
+    // return 0;
+// }
 
