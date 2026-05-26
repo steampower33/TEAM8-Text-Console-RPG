@@ -104,6 +104,9 @@ BattleResult BattleManager::Battle(Character& player)
     ui.UpdateScene(true, MonsterStats.Name);
     
     BattleResult BattleResult = BattleLoop(player, *monster); //승리시true 패배시false
+    //ui 갱신
+    ui.UpdateStat(&player);
+    ui.UpdateInventory(&player.CharacterInventory);
     
     return BattleResult;
 }
