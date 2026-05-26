@@ -211,14 +211,18 @@ void BattleManager::PlayerWin(Character& player, Monster& monster)
 
 void BattleManager::MonsterWin(Character& player)
 {
+    
     ui.PrintLog("\033[31m[사망]\033[0m " + player.Name + "이(가) 쓰러졌습니다... 게임 오버!");
     ui.PrintLog("\033[31m[게임 종료]\033[0m [Enter]를 누르면 게임이 종료됩니다.");
+    WaitForEnter();
 }
 
 void BattleManager::GameVictory(Monster& monster)
 {
+    
     ui.PrintLog("\033[36m[게임클리어]\033[0m 보스 몬스터 "+ monster.GetStatus().Name +"을 물리치고 던전을 탈출합니다. 게임 클리어!");
     ui.PrintLog("\033[36m[게임 종료]\033[0m [Enter]를 누르면 게임이 종료됩니다.");
+    WaitForEnter();
 }
 
 void BattleManager::UseRandomItem(Character& player)
@@ -230,7 +234,7 @@ void BattleManager::UseRandomItem(Character& player)
     int ResultOfUseItemPersent = UseItemPersent(RandomEngine);
     int itemCount = player.CharacterInventory.GetItems().size();
 
-    if (ResultOfUseItemPersent <= 30 )
+    if (ResultOfUseItemPersent <= 30 && itemCount > 0)
     {
 
         // 가지고 있는 아이템 중 랜덤으로 하나 선택
@@ -252,7 +256,7 @@ void BattleManager::UseRandomItem(Character& player)
             ui.PrintLog("\033[32m[아이템]\033[0m " + itemName + "아이템은 전투 중 사용할 수 없는 아이템입니다.");
         }
     }
-    else if (ResultOfUseItemPersent > 50 && itemCount > 0)
+    else if (ResultOfUseItemPersent > 30 && itemCount > 0)
     {
         ui.PrintLog("\033[32m[아이템]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다. ㅋㅋ");
     }
