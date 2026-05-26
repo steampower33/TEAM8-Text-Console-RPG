@@ -21,39 +21,71 @@ class Inventory;
 class IItem;
 
 enum class TextAlign { Left, Center, Right };
-struct Vec2 { int x; int y; };
-struct Box { int startX; int startY; int endX; int endY; };
 
-class UIManager {
+struct Vec2
+{
+    int x;
+    int y;
+};
+
+struct Box
+{
+    int startX;
+    int startY;
+    int endX;
+    int endY;
+};
+
+// https://oualator.com/calculate/ascii-art-generator/
+// Width 50
+// Brightness 100 
+// Contrast 29
+// Sharpness 10
+// Invert Colors True
+
+class UIManager
+{
 public:
     void Initialize();
     std::string ShowCharacterGeneration();
     int GetTitleResult();
-    
+
     void ShowMainFrame();
     void UpdateStat(Character* character);
-    
+
     void UpdateScene(bool isCombat = false, std::string monsterName = "");
-    
+
     std::vector<std::string> LogMessages;
     void PrintLog(const std::string& message = "");
     void UpdateInventory(Inventory* inven);
     void ShowShop(Character* character);
-    
+
     std::map<std::string, int> killList;
     void UpdateKillList(std::string monsterName = "");
     std::string RepeatString(const std::string& str, int count);
 
     int HandleMenuInput(int& selectedIndex, int maxMenu);
-    int ShowMenuAt(Vec2 at, const std::vector<std::string>& menuList, int step = 2, bool isVertical = true);
-    int ShowMenuAlign(int startX, int endX, int y, const std::vector<std::string>& menuList, int step = 2, TextAlign textAlign = TextAlign::Left);
+    int ShowMenuAt(Vec2 at,
+                   const std::vector<std::string>& menuList,
+                   int step = 2,
+                   bool isVertical = true);
+    int ShowMenuAlign(int startX,
+                      int endX,
+                      int y,
+                      const std::vector<std::string>& menuList,
+                      int step = 2,
+                      TextAlign textAlign = TextAlign::Left);
     void PrintTextAt(int x, int y, const std::string& text);
     int GetDisplayWidth(const std::string& text);
-    void PrintTextAlign(int startX, int endX, int y, const std::string& text, TextAlign align);
+    void PrintTextAlign(int startX,
+                        int endX,
+                        int y,
+                        const std::string& text,
+                        TextAlign align);
     void DrawBox(int startX, int startY, int endX, int endY);
     void Gotoxy(int x, int y);
     void DrawTitleMenu();
-    
+
     void DrawScenePanel();
     void DrawStatPanel();
     void DrawInventoryPanel();
@@ -62,32 +94,32 @@ public:
 
     int ConsoleWidth = 150;
     int ConsoleHeight = 40;
-    
+
     int StartSceneX = 0;
     int StartSceneY = 0;
     int EndSceneX = 110;
     int EndSceneY = 25;
-    
+
     int StartStatX = EndSceneX + 1;
     int StartStatY = StartSceneY;
     int EndStatX = ConsoleWidth - 1;
     int EndStatY = 9;
-    
+
     int StartInventoryX = StartStatX;
     int StartInventoryY = EndStatY + 1;
     int EndInventoryX = ConsoleWidth - 1;
     int EndInventoryY = EndSceneY;
-    
+
     int StartLogX = StartSceneX;
     int StartLogY = EndSceneY + 1;
     int EndLogX = EndSceneX;
     int EndLogY = ConsoleHeight - 1;
-    
+
     int StartKillX = EndLogX + 1;
     int StartKillY = StartLogY;
     int EndKillX = ConsoleWidth - 1;
     int EndKillY = ConsoleHeight - 1;
-    
+
 private:
     std::vector<std::string> warriorIdle = {
         R"_EOL(                                               @@ )_EOL",
@@ -97,8 +129,8 @@ private:
         R"_EOL(                   @##@                      @:*  )_EOL",
         R"_EOL(                 @*----#@                    #-@  )_EOL",
         R"_EOL(                @--------@                  @.#   )_EOL",
-        R"_EOL(                @:-------#                  +-*   )_EOL",
-        R"_EOL(                *--------#                  #-@   )_EOL",
+        R"_EOL(                @:-(*-*)-#                  +-*   )_EOL",
+        R"_EOL(                *----^---#                  #-@   )_EOL",
         R"_EOL(                %--------*                 @:-%   )_EOL",
         R"_EOL(             @*%*:-------# @@              @-#    )_EOL",
         R"_EOL(         @*##---:---------#--###+@        @ -#    )_EOL",
@@ -115,7 +147,7 @@ private:
         R"_EOL(   @:---:@ @ -----------------@        +#         )_EOL",
         R"_EOL(   @.---@  @:-----------------#       @:+         )_EOL",
     };
-    
+
     std::vector<std::string> warriorBattle = {
         R"_EOL(      @@+*@                                       )_EOL",
         R"_EOL(       @%.+@                                      )_EOL",
@@ -124,10 +156,10 @@ private:
         R"_EOL(             @=--#@    @*+@                       )_EOL",
         R"_EOL(               @*#-@   %--:##@                    )_EOL",
         R"_EOL(                  @%+*#-------#@                  )_EOL",
-        R"_EOL(                    @*:--------#                  )_EOL",
-        R"_EOL(                     +----------@                 )_EOL",
-        R"_EOL(                   @**:---------@                 )_EOL",
-        R"_EOL(                 @+.-:---------%                  )_EOL",
+        R"_EOL(                    @*:----(*)-#                  )_EOL",
+        R"_EOL(                     +---------@                 )_EOL",
+        R"_EOL(                   @**:-----\===@                 )_EOL",
+        R"_EOL(                 @+.-:---------@                 )_EOL",
         R"_EOL(               @*.---------==-::*%:@#@            )_EOL",
         R"_EOL(               %--------------@@+-=--*            )_EOL",
         R"_EOL(               +-------------#  *:----#@          )_EOL",
@@ -142,126 +174,127 @@ private:
         R"_EOL(               *----------------@                 )_EOL",
         R"_EOL(               #-----------------*@               )_EOL",
     };
-    
+
     std::vector<std::string> goblin = {
-        R"_EOL(                   $$$$$$$$    $$] $              )_EOL",
-        R"_EOL(                $ $        $$$$  $$               )_EOL",
-        R"_EOL(              $$    +^...^     $$                 )_EOL",
-        R"_EOL(              $  }].      `   $                   )_EOL",
-        R"_EOL(             $  $  +.`-rr-" $  $$                 )_EOL",
-        R"_EOL(   $$$$      $$$ $ k-.    }      $$$$$            )_EOL",
-        R"_EOL( $$    $$            $"$$ `^.` .      $           )_EOL",
-        R"_EOL( $  $J. $        $$$$     )`    .   `  $$$        )_EOL",
-        R"_EOL(  $   '+ $$             $ |tc}:     >     $$      )_EOL",
-        R"_EOL(    $$     $           $ :    !:    ~ $$    $     )_EOL",
-        R"_EOL(      $$    $          $ : $$  :    _ C $   $     )_EOL",
-        R"_EOL(        $$   $       $$   $ $ _:    ^ $  $  $     )_EOL",
-        R"_EOL(          $$  $$$$$$    $$$$  >     `  $ $  $     )_EOL",
-        R"_EOL(            $      $$$$$  $  >      '~ $  $  $    )_EOL",
-        R"_EOL(            $$$$  $     $$  ?`      ^?  $$    $   )_EOL",
-        R"_EOL(                $  $   $  n0]'`I;, `I{ $$ $ L ~   )_EOL",
-        R"_EOL(                 $$  $       nx< ~I,    $$$  L$   )_EOL",
-        R"_EOL(                       $ $ $      )  $$  $ $$     )_EOL",
-        R"_EOL(                     $  : $ $$ $$ I?< $           )_EOL",
-        R"_EOL(                      $   %  $$ $$$    J$         )_EOL",
-        R"_EOL(                       $  $        $$$$  $$$$     )_EOL",
-        R"_EOL(                      $  > $           $ ~  $     )_EOL",
-        R"_EOL(                 $  $   $  %$         $    $      )_EOL",
-        R"_EOL(                 $|$$$$$ $$         $$ $$$$       )_EOL",
+        R"_EOL(                  @######@    @%**@              )_EOL",
+        R"_EOL(                @*#--------####::#@               )_EOL",
+        R"_EOL(              @*:-------------:%@                 )_EOL",
+        R"_EOL(              @:--*)----------@                   )_EOL",
+        R"_EOL(             @---------------=--#@                 )_EOL",
+        R"_EOL(  -ㅡㅡㅡ      @%@/------::--------###*@            )_EOL",
+        R"_EOL( /-:--=#\        +:::#*@#-------------*@          )_EOL",
+        R"_EOL( |-:----|\       @@@@   *--------------:*@        )_EOL",
+        R"_EOL(  \+.:---#\             #-------------:.-:*@      )_EOL",
+        R"_EOL(    \% :---\           @.--:.--------:=@=---@     )_EOL",
+        R"_EOL(     \#.:--|          *--.@@:--------* @=--#     )_EOL",
+        R"_EOL(      \%::-|       @#--:@ %:--------#  #:-#     )_EOL",
+        R"_EOL(       =\@@\-###@#%*:: #*@%.----------@ @:-#     )_EOL",
+        R"_EOL(         \@@ %:---::###@@  *------------%  @:-@    )_EOL",
+        R"_EOL(           \@%*#.-@     @#:------------@ @.---@   )_EOL",
+        R"_EOL(                @ :@   @:-------------@ @ %:--@   )_EOL",
+        R"_EOL(                 @@  @::---:----------@ @=@ :*@   )_EOL",
+        R"_EOL(                      :--*:@@@@.------@  @:@@     )_EOL",
+        R"_EOL(                     @:--:@    @*.----*@          )_EOL",
+        R"_EOL(                      @.--*      @**::::#@        )_EOL",
+        R"_EOL(                       @.-%        @@%@.-##*@     )_EOL",
+        R"_EOL(                      @:---@           @:---@     )_EOL",
+        R"_EOL(                 @**#*..#:.*@         @:--:@      )_EOL",
+        R"_EOL(                 @#@%#@@ @@         @@**#*@       )_EOL",
     };
-    
+
+
     std::vector<std::string> slime = {
-        R"_EOL(                      $$$$$                       )_EOL",
-        R"_EOL(                 $  $c     $$$$                   )_EOL",
-        R"_EOL(               $ $$$ $ r-]:    $$                 )_EOL",
-        R"_EOL(              $  $  o     . 'l   $                )_EOL",
-        R"_EOL(             $    $   ^..     `>  $               )_EOL",
-        R"_EOL(                $   .          ';                 )_EOL",
-        R"_EOL(             $    ;'           !1 o$              )_EOL",
-        R"_EOL(            $  i!i'         `-t                   )_EOL",
-        R"_EOL(           $  }|]^.        `}   $$ $$             )_EOL",
-        R"_EOL(          $       ..       `  $      $$           )_EOL",
-        R"_EOL(       $$$    $$ + ;:"     `]  $ :rC   $$         )_EOL",
-        R"_EOL(    $$$    a$    I    ^   'I<("  ,``+d,  $$$$$$   )_EOL",
-        R"_EOL(  $            x+  }$ '  `    -1`             $   )_EOL",
-        R"_EOL(   $$$$$$${  $       fm0+   $    $| '$$$$$$$$     )_EOL",
-        R"_EOL(        $$$$$ $$$$$$     $$$$$&|$ $$     $        )_EOL",
-        R"_EOL(                    $$$$$           $$$$$         )_EOL",
+        R"_EOL(                     @##*%@                       )_EOL",
+        R"_EOL(                 @**@:----:##*@                   )_EOL",
+        R"_EOL(               @*=@% #---------#@                 )_EOL",
+        R"_EOL(              @--@ *#------------@                )_EOL",
+        R"_EOL(             @:---#---------------@               )_EOL",
+        R"_EOL(             *--+-----------------*               )_EOL",
+        R"_EOL(             #--------------------=@              )_EOL",
+        R"_EOL(            @----------------------*              )_EOL",
+        R"_EOL(           @------------------.-+=-=@             )_EOL",
+        R"_EOL(          @----:-------------:@.-----#@           )_EOL",
+        R"_EOL(       @##----+*--------------.=------:%@         )_EOL",
+        R"_EOL(    @*#-----=--:-------------------------##@#@@   )_EOL",
+        R"_EOL(  @ :::::-----------=---------------------::.*@   )_EOL",
+        R"_EOL(   @#@%@++=:-#--------------=---.#=--=++=+@@@     )_EOL",
+        R"_EOL(        @##%@ @%####.... ####@*+@ @#.. ..@        )_EOL",
+        R"_EOL(                    @@@@@           @@@@@         )_EOL",
     };
-    
+
     std::vector<std::string> orc = {
-        R"_EOL(                            $$$$                  )_EOL",
-        R"_EOL(                          $$    $                 )_EOL",
-        R"_EOL(                        $$  .?u  BW               )_EOL",
-        R"_EOL(                         )        $               )_EOL",
-        R"_EOL(                       $$ $$ $ $o  $$$            )_EOL",
-        R"_EOL(                    $$$          >"   $$$$        )_EOL",
-        R"_EOL(        $$$$$     $$    `:lll;-_~^.,[;   o$       )_EOL",
-        R"_EOL(     $$$          $  "'.              '~,  $      )_EOL",
-        R"_EOL(     $   [Z $$$   $ .....           `ll;l_  $     )_EOL",
-        R"_EOL(    $   +      $$$  .   ..         "+    :{ $$    )_EOL",
-        R"_EOL(_$z$  ' f $$  C    ';:];  .       `!  $m  <  $$   )_EOL",
-        R"_EOL( $$   )<C $$  $   0Q   r[ .       ,  $  $ .+   $  )_EOL",
-        R"_EOL(   $$        $$ $    $$   .       ,  $ $  ,,<     )_EOL",
-        R"_EOL(     $$B$$$$$ $$ $$$$  a `        `!   $" !? *p   )_EOL",
-        R"_EOL(                      $  .         `'.$   \   $   )_EOL",
-        R"_EOL(                     $   .          .   i}   $    )_EOL",
-        R"_EOL(                    $  `.            `:_   $$     )_EOL",
-        R"_EOL(                   $  ..  ..   :ll`  ".  $$  $ $$ )_EOL",
-        R"_EOL(                   *  ",}nLc{}/    ` !  $    $ $$ )_EOL",
-        R"_EOL(                   $  :'        $$ ]>i  $         )_EOL",
-        R"_EOL(                  $   ! c$$$$ $$     ]  u         )_EOL",
-        R"_EOL(                  $  .!  $   $$   $$ -,  $$       )_EOL",
-        R"_EOL(                  $   ,)  $       $  c:;          )_EOL",
-        R"_EOL(                  $   ^x  $           Ii"  $      )_EOL",
-        R"_EOL(                   %  ,| $         $$i i $$       )_EOL",
-        R"_EOL(                  $l;ut  $           q t{  $      )_EOL",
-        R"_EOL(                $-     ~$$           $      $     )_EOL",
-        R"_EOL(                $q$$$$$              $$$$$$$$     )_EOL",
+        R"_EOL(                            @*%@                  )_EOL",
+        R"_EOL(                          @#----@                 )_EOL",
+        R"_EOL(                        @#-------#%               )_EOL",
+        R"_EOL(                         #-(*--*))-.@               )_EOL",
+        R"_EOL(                       @#-==-^-+--.*#@            )_EOL",
+        R"_EOL(                   @+##--------------:##%@        )_EOL",
+        R"_EOL(        @###@     @:---------------------=@       )_EOL",
+        R"_EOL(     @**----:+#   *------------------------@      )_EOL",
+        R"_EOL(     *-----:*@@   #-------------------------@     )_EOL",
+        R"_EOL(    @-----:.*+ %*#-------------------------:+@    )_EOL",
+        R"_EOL(-#*#-----:*@  :-----------------------%*----:+@   )_EOL",
+        R"_EOL( @#------:=@  @.-------=-------------@  *----:.@  )_EOL",
+        R"_EOL(   @# ----::*@@ @....%#--------------@ @------*@  )_EOL",
+        R"_EOL(     @+*%%*##+%@ @@@@  *-------------* @=-----@   )_EOL",
+        R"_EOL(                      @---------------#------ @   )_EOL",
+        R"_EOL(                     @---------------------:-@    )_EOL",
+        R"_EOL(                    @---------------------:*@     )_EOL",
+        R"_EOL(                   @=--------------------#@@      )_EOL",
+        R"_EOL(                   #--------------------@         )_EOL",
+        R"_EOL(                   #-----: .@@@@%:------@         )_EOL",
+        R"_EOL(                  @-----=:@@    @@.:----*         )_EOL",
+        R"_EOL(                  #------@        %+-----#@       )_EOL",
+        R"_EOL(                  #-----:.@       %=------+       )_EOL",
+        R"_EOL(                  @-----::@        @:----:-@      )_EOL",
+        R"_EOL(                   #----:@         @+----=@       )_EOL",
+        R"_EOL(                  @----- @           #---- @      )_EOL",
+        R"_EOL(                @#---: *@@           #----- @     )_EOL",
+        R"_EOL(                @####@@              @#%%%#@@     )_EOL",
     };
-    
+
     std::vector<std::string> troll = {
-        R"_EOL(                                   $$             )_EOL",
-        R"_EOL(                              $$$$$  $$$          )_EOL",
-        R"_EOL(                            $$     f>   $         )_EOL",
-        R"_EOL(                      $$$$$$  Ifv,:  $ $          )_EOL",
-        R"_EOL(                    $a       i    $ $             )_EOL",
-        R"_EOL(                 $q$    ''' : ($ $                )_EOL",
-        R"_EOL(          $$ $$$     `      :!     $              )_EOL",
-        R"_EOL(      $$$$  $   Y$ |         :}\u|  $$$$          )_EOL",
-        R"_EOL(     $     `  $ [  i             ._.    [$        )_EOL",
-        R"_EOL( $}k    I ~  $ $ ;_'                 ':" $        )_EOL",
-        R"_EOL( $b@$ $   _ $ w  ^                     ~   $$     )_EOL",
-        R"_EOL(       $  ~   " `l[[l                   >i        )_EOL",
-        R"_EOL(       $ ^ ~]]^l(    l              .,;,' _ $     )_EOL",
-        R"_EOL(       $  ; i1?   $$ !             .    ^'`  $$   )_EOL",
-        R"_EOL(        $      l$$   !             .  $  : `  W   )_EOL",
-        R"_EOL(         $$${$$   $                ' @ $ l  . $   )_EOL",
-        R"_EOL(                  v ^ !            .< $   . , $   )_EOL",
-        R"_EOL(                  $                 u $ $ . ] $   )_EOL",
-        R"_EOL(                   $                \ $ $  ./ $   )_EOL",
-        R"_EOL(                  $  !              l  $ | .f $   )_EOL",
-        R"_EOL(                  $ ^        ..     [      :+ $   )_EOL",
-        R"_EOL(                 $  ^ ~fCCf)(}! .  I  $  $ +"  $  )_EOL",
-        R"_EOL(                 r ! ~         I'  l $ |$}   +$   )_EOL",
-        R"_EOL(                $  ~ ~ $$$$ $$   .~:  ($ $$$$     )_EOL",
-        R"_EOL(                 $ l'~' $  $   $$  ; I  $         )_EOL",
-        R"_EOL(                  } + Q $        $ $  -  $ $      )_EOL",
-        R"_EOL(                  $ -IX $           $ ;`,  $      )_EOL",
-        R"_EOL(                $$       $                $       )_EOL",
-        R"_EOL(              $$$$$$8$$$ $         $$$$$$$        )_EOL",
+        R"_EOL(                                   @@             )_EOL",
+        R"_EOL(                              @####:.##@          )_EOL",
+        R"_EOL(                           @*#--------- @         )_EOL",
+        R"_EOL(                      @####:--------:#*@          )_EOL",
+        R"_EOL(                    @#---------.- #*@             )_EOL",
+        R"_EOL(                 @*#----------===@. @             )_EOL",
+        R"_EOL(          @@ @##*@-@---(*---*).**-*==@             )_EOL",
+        R"_EOL(     @+###--#--@@ @---------------=--:#@          )_EOL",
+        R"_EOL(   @*@-------@  @:-------\/-------------@          )_EOL",
+        R"_EOL( @@@@ @-----@  @------------------------:@        )_EOL",
+        R"_EOL( @#@  @----:@:@--------------------------:@       )_EOL",
+        R"_EOL(       #----:------------------------------@      )_EOL",
+        R"_EOL(       #------------------------------------@     )_EOL",
+        R"_EOL(       @---------.@+-------------------------#@   )_EOL",
+        R"_EOL(        @-----:*#@ *------------------#-------@@  )_EOL",
+        R"_EOL(         @*#*@@   @------------------#  %------#  )_EOL",
+        R"_EOL(                  *------------------@  @------*  )_EOL",
+        R"_EOL(                  @------------------.@  #-----#  )_EOL",
+        R"_EOL(                   #------------------@  @----:@  )_EOL",
+        R"_EOL(                  @-------------------@  @.-----# )_EOL",
+        R"_EOL(                  %-------------------@  @------@ )_EOL",
+        R"_EOL(                 @-------------------:@  @-=----@@)_EOL",
+        R"_EOL(                 *-----:.:@@@:-------@  @@=---*@@ )_EOL",
+        R"_EOL(                @:----:=@@   @@+------@  @@@@@@   )_EOL",
+        R"_EOL(                 @:----.@      @#:-----@          )_EOL",
+        R"_EOL(                  *----:@        @*#-----@@@      )_EOL",
+        R"_EOL(                  @:---:@           @----- @      )_EOL",
+        R"_EOL(                @#:-----.@          *----.@       )_EOL",
+        R"_EOL(              @@####*%#*=@         @####*@        )_EOL",
     };
-    
+
     std::vector<std::string> boss = {
-        R"_EOL(                               --                 )_EOL",
+        R"_EOL(                               @@                 )_EOL",
         R"_EOL(                    #@@        @-#@               )_EOL",
         R"_EOL(   @*@+%           @*@          @- @              )_EOL",
         R"_EOL( @#--.+@           *=@ @#@ @%*#@::  %             )_EOL",
-        R"_EOL(=-----: @@         #.:#--.@:---::=@.#             )_EOL",
-        R"_EOL(--------.@        @#%:-:-*:=---===-.*             )_EOL",
-        R"_EOL(:%#------:@       -: #-+-:=----=--.@+    @+@      )_EOL",
-        R"_EOL(+  -------%       @ -:---+--------- @   @--%      )_EOL",
-        R"_EOL(  @@ -----:@       @-----:=-------=.@ @*---*      )_EOL",
+        R"_EOL(@-----: @@         #.:#--.@:---::=@.#             )_EOL",
+        R"_EOL(@-------.@        @#%:-(*---*)--===-.*             )_EOL",
+        R"_EOL(@%#------:@      @-:--------------.@+    @+@      )_EOL",
+        R"_EOL(@@ -------%       @ -:---\/-------- @   @--%      )_EOL",
+        R"_EOL( @@@ -----:@       @-----:=-------=.@ @*---*      )_EOL",
         R"_EOL(    @#*----%       %-------+--------* #----#      )_EOL",
         R"_EOL(       @#:-.@     @---=-:------------#-----.@     )_EOL",
         R"_EOL(         @*# @  @#---:::#:-----------------#      )_EOL",
@@ -269,15 +302,15 @@ private:
         R"_EOL(             #:----+@+.--:----------:-------#@    )_EOL",
         R"_EOL(             #----# ===-:+==-------:#:--------*@  )_EOL",
         R"_EOL(             @##+: @ -:--=:------==.:--------:+#@ )_EOL",
-        R"_EOL(                @*%=-----:+-------.@:------:.::-% )_EOL",
-        R"_EOL(                    *---:-:---------:-----=+@*-.= )_EOL",
-        R"_EOL(                   @---:@ *:--=:----+:--.*#@  +@@ )_EOL",
-        R"_EOL(                   @#.---# --=-+---- %%*@     *.% )_EOL",
-        R"_EOL(                     @.- @* :@%*--- @         =-  )_EOL",
-        R"_EOL(                @*#*@.--@ @+@   #-:*@         @@  )_EOL",
-        R"_EOL(           @*###--==-----#::.##*=-:+#             )_EOL",
-        R"_EOL(            ------------------------------        )_EOL",
+        R"_EOL(                @*%=-----:+-------.@:------:.:.=@ )_EOL",
+        R"_EOL(                    *---:-:---------:-----=+@@    )_EOL",
+        R"_EOL(                   @---:@ *:--=:----+:--.*#@      )_EOL",
+        R"_EOL(                   @#.---# --=-+---- %%*@         )_EOL",
+        R"_EOL(                     @.- @@=:@%*--- @             )_EOL",
+        R"_EOL(                @*#*@.--@       #-:*@             )_EOL",
+        R"_EOL(             @##--==-----@   ##*=-:+@             )_EOL",
     };
 };
+
 
 extern UIManager ui;
