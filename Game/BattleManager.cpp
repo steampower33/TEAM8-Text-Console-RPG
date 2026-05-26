@@ -39,8 +39,15 @@ using namespace std;
 // }
 
 // UIManager ui;
+void BattleManager::Line()
+{
+    std::string line = ui.RepeatString("-", ui.EndLogX - ui.StartLogX - 4);
+    ui.PrintLog(line);
+}
+
 void BattleManager::WaitForEnter()
 {
+    Line();
     int key;
     do {
         key = _getch();
@@ -55,11 +62,12 @@ Phase BattleManager::BeforeBattle(Character& player)
     ui.ShowMainFrame();
     ui.UpdateStat(&player);
     ui.UpdateInventory(&player.CharacterInventory);
+    ui.UpdateKillList();
 
     ui.UpdateScene();
-
+    Line();
     ui.PrintLog("\033[36m[탐험]\033[0m 미궁을 걷고 있습니다... [Enter] 전진 (ESC 종료)");
-
+    
     int key = _getch();
     if (key == KEY_ESC)
     {
@@ -89,9 +97,10 @@ BattleResult BattleManager::Battle(Character& player)
     ui.ShowMainFrame();
     ui.UpdateStat(&player);
     ui.UpdateInventory(&player.CharacterInventory);
+    ui.UpdateKillList();
     
     ui.PrintLog("\033[31m[새로운 전투!]\033[0m");
-    if (MonsterStats.Name == "웅애 CPP 어려웡")
+    if (MonsterStats.Name == "Boss")
     {
         ui.PrintLog("\033[31m[전투 발생!]\033[0m 조져따! 보스 몬스터 " + MonsterStats.Name + "이(가) 나타났다!");
     }
@@ -122,6 +131,7 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
     while (true)
     {
         int Result = FightOrUseItem(RandomEngine);
+        
         ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
         WaitForEnter();
         
@@ -136,6 +146,7 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
                     
             if (IsMonsterDead == true)
             {
+                ui.UpdateKillList(MonsterName);
                 PlayerWin(player, monster);
             
                 player.LevelUp();
@@ -143,7 +154,7 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
                 if (player.Level == 10)
                     ui.PrintLog("\033[36m[레벨 업]\033[0m 이제 일반 몬스터는 상대도 안 된다!");
                 
-                if (MonsterName == "웅애 CPP 어려웡")
+                if (MonsterName == "Boss")
                     return BattleResult::BossClear;
                 
                 return BattleResult::Win;
@@ -185,7 +196,7 @@ void BattleManager::PlayerWin(Character& player, Monster& monster)
     // 경험치 : (Notion)50 획득, 100 이상 획득 시 레벨업 -> (실제구현) 생성된 몬스터 별 차등 경험치 획득, 100 이상 획득 시 레벨업
     player.Experience += monster.GetReward().Exp;
     
-    if (monster.GetStatus().Name == "웅애 CPP 어려웡")
+    if (monster.GetStatus().Name == "Boss")
     {
         // 골드 : 10~20 범위에서 랜덤 획득
         player.Gold += 1000000;
@@ -218,7 +229,7 @@ void BattleManager::PlayerWin(Character& player, Monster& monster)
 
 void BattleManager::MonsterWin(Character& player)
 {
-    
+    Line();
     ui.PrintLog("\033[31m[사망]\033[0m " + player.Name + "이(가) 쓰러졌습니다... 게임 오버!");
     ui.PrintLog("\033[31m[게임 종료]\033[0m [Enter]를 누르면 게임이 종료됩니다.");
     WaitForEnter();
@@ -226,7 +237,7 @@ void BattleManager::MonsterWin(Character& player)
 
 void BattleManager::GameVictory(Monster& monster)
 {
-    
+    Line();
     ui.PrintLog("\033[36m[게임클리어]\033[0m 보스 몬스터 "+ monster.GetStatus().Name +"을 물리치고 던전을 탈출합니다. 게임 클리어!");
     ui.PrintLog("\033[36m[게임 종료]\033[0m [Enter]를 누르면 게임이 종료됩니다.");
     WaitForEnter();
@@ -244,7 +255,7 @@ void BattleManager::UseRandomItem(Character& player)
     //아이템 목록 추리기 전 가방이 아예 비었으면 리턴함
     if (items.empty())
     {
-        ui.PrintLog("\033[32m[아이템]\033[0m 인벤토리가 텅텅 비었네요 ㅋㅋ");
+        ui.PrintLog("\033[32m[아이템 사용 시도]\033[0m 인벤토리가 텅텅 비었네요 ㅋㅋ");
         return;
     }
     
@@ -260,7 +271,7 @@ void BattleManager::UseRandomItem(Character& player)
     // 쓸 수 있는 아이템이 아예 없는 경우
     if (usableItems.empty())
     {
-        ui.PrintLog("\033[32m[아이템]\033[0m 인벤토리에 전투 중 사용 가능한 아이템이 없네요?");
+        ui.PrintLog("\033[32m[아이템 사용 시도]\033[0m 인벤토리에 전투 중 사용 가능한 아이템이 없네요?");
         return;
     }
     
@@ -278,13 +289,13 @@ void BattleManager::UseRandomItem(Character& player)
         player.UseItem(selectedIndex);
         ui.UpdateStat(&player);
         ui.UpdateInventory(&player.CharacterInventory);
-        ui.PrintLog("\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " +
+        ui.PrintLog("\033[32m[아이템 사용 시도]\033[0m " + player.Name + "이(가) 가방에서 " +
                     name + " 아이템을 사용했습니다!");
     }
     //70%확률로 방해받아 사용실패
     else if (ResultOfUseItemPercent > 30 && usableItems.size() > 0)
     {
-        ui.PrintLog("\033[32m[아이템]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다. ㅋㅋ");
+        ui.PrintLog("\033[32m[아이템 사용 시도]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다. ㅋㅋ");
     }
     //공격력 포션 일회성 스텟 증가 설정
     if (name == ATTACK_BOOST)

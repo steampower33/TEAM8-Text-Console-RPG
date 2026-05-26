@@ -23,6 +23,7 @@ public:
     void MonsterWin(Character& player);
     void UseRandomItem(Character& player);
     void WaitForEnter();
+    void Line();
     
 protected:
     //Monster monster;
