@@ -1,7 +1,9 @@
 ﻿#include "../Character/Character.h"
 #include "../Item/Inventory.h"
 #include "../Item/IItem.h"
+#include "../Shop/function.h"
 #include "UIManager.h"
+
 UIManager ui;
 
 // 상점 들어갈지 말지 선택지
@@ -343,7 +345,7 @@ void UIManager::UpdateScene(bool isCombat, std::string monsterName)
 {
     if (!isCombat)
     {
-        // 1. 비전투(Idle) 상태: 대검 출력
+        // 비전투(Idle) 상태: 대검 출력
         for (int i = 0; i < warrior.size(); i++)
         {
             PrintTextAlign(StartSceneX + 1,
@@ -364,7 +366,7 @@ void UIManager::UpdateScene(bool isCombat, std::string monsterName)
                            TextAlign::Left);
         }
 
-        // 2. 전투(Combat) 상태: 몬스터 이름에 따라 아트 스왑
+        // 전투(Combat) 상태: 몬스터 이름에 따라 아트 스왑
         int monsterX = StartSceneX + 55; // 우측 배치 기준 X좌표
         int startY = StartSceneY + 1;
 
@@ -449,15 +451,31 @@ void UIManager::UpdateInventory(Inventory* inven)
     }
     
     std::vector<IItem*> items = inven->GetItems();
-    for (int i = 0; i < inven->GetItems().size(); i++)
+    if (items.empty()) return;
+    for (int i = 0; i < items.size(); i++)
     {
-        std::string name = items[i]->GetName();
-        PrintTextAt(StartInventoryX + 5, StartInventoryY + 2 + (i * 1), name);
+        IItem* item = items[i];
+        std::string name = item->GetName();
+
+        int nameWidth = GetDisplayWidth(name);
+    
+        int paddingSize = 15 - nameWidth;
+    
+        if (paddingSize < 0) paddingSize = 0; 
+
+        std::string padding(paddingSize, ' ');
+
+        std::string text = name + padding + " x " + std::to_string(item->count);
+    
+        PrintTextAt(StartInventoryX + 5, StartInventoryY + 2 + i, text);
     }
 }
 
 void UIManager::ShowShop(Character* character)
 {
+    UpdateInventory(&character->CharacterInventory);
+    UpdateStat(character);
+    
     int boxWidth = 50;
     int boxHeight = 20;
     int startX = (ConsoleWidth - boxWidth) / 2;
@@ -488,17 +506,34 @@ void UIManager::ShowShop(Character* character)
         case 0:
         {
             std::vector<std::string> menuList;
-            for (int i = 0; i < 4; i++)
-                menuList.push_back(std::string("구매") + std::to_string(i));
+            std::vector<ShopItems> keyList;
+            for (auto i = ShopItemTable.begin(); i != ShopItemTable.end(); i++)
+            {
+                menuList.push_back(i->second.name + "(" + std::to_string(i->second.gold) + ")");
+                keyList.push_back(i->first);
+            }
             menuList.push_back("뒤로가기");
             int choose = ShowMenuAlign(startX + 2 + actMenuWidth + 2, endX - 1, startY + 2, menuList, 2, TextAlign::Center);
             
             if (choose != menuList.size() - 1)
             {
                 int buyOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"구매", "취소"}, 2, false);
-                if (buyOrNot)
+                if (buyOrNot == 0)
                 {
+                    ShopItems selectedKey = keyList[choose];
+                    std::string itemName = ShopItemTable.at(selectedKey).name;
                     
+                    bool buy = BuyItem(selectedKey, character);
+                    if (buy)
+                    {
+                        PrintLog("\033[32m[아이템]\033[0m " + itemName + "을 구매했습니다.");
+                    }
+                    else
+                    {
+                        PrintLog("\033[32m[아이템]\033[0m 골드가 부족해서 " + itemName + "을 구매하지못했습니다.");
+                    }
+                    UpdateInventory(&inventory);
+                    UpdateStat(character);
                 }
             }
             break;
@@ -520,11 +555,14 @@ void UIManager::ShowShop(Character* character)
                 int purchaseOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"판매", "취소"}, 2, false);
                 if (purchaseOrNot == 0)
                 {
-                    character->Gold += std::max(0, items[choose]->GetGold());
-                    // inventory.RemoveItem(choose); // inventory 헤더에 함수 추가해야함
+                    std::string itemName = items[choose]->GetName();
+                    bool sell = SellItem(choose, character);
+                    if (sell)
+                    {
+                        PrintLog("\033[32m[아이템]\033[0m " + itemName + " 을 판매했습니다.");
+                    }
                     UpdateInventory(&inventory);
                     UpdateStat(character);
-                    PrintLog("\033[32m[아이템]\033[0m 아이템을 판매했습니다.");
                 }
             }
             break;
