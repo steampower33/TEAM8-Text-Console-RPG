@@ -129,8 +129,8 @@ void GameManager::Run()
         }
         case GameStateMachine::Battle:
         {
-            bool BattleResult = battleManager->Battle(*player); //승리시true 패배시false
-            if (BattleResult == true)
+            BattleResult BattleResult = battleManager->Battle(*player);
+            if (BattleResult == BattleResult::Win  )
                 curentGameState = GameStateMachine::Explore;
             else
                 curentGameState = GameStateMachine::GameEnd;
