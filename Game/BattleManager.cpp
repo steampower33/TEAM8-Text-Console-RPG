@@ -139,6 +139,10 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
                 PlayerWin(player, monster);
             
                 player.LevelUp();
+                //레벨 10 달성 시, “이제 일반 몬스터는 상대도 안 된다!” 메시지 출력
+                if (player.Level == 10)
+                    ui.PrintLog("\033[36m[레벨 업]\033[0m 이제 일반 몬스터는 상대도 안 된다!");
+                
                 if (MonsterName == "웅애 CPP 어려웡")
                     return BattleResult::BossClear;
                 
@@ -262,13 +266,14 @@ void BattleManager::UseRandomItem(Character& player)
     
     // 쓸 수 있는 아이템이 있으면 확률적으로 사용
     //30%확률로 아이템 사용
+    string name;
     if (ResultOfUseItemPercent <= 30 && usableItems.size() > 0)
     {
         // 사용 가능한 것들 중에서 균일하게 선택
         uniform_int_distribution<int> usableDist(0, usableItems.size() - 1);
         int selectedIndex = usableItems[usableDist(RandomEngine)];
         
-        string name = items[selectedIndex]->GetName();
+        name = items[selectedIndex]->GetName();
 
         player.UseItem(selectedIndex);
         ui.UpdateStat(&player);
@@ -281,5 +286,9 @@ void BattleManager::UseRandomItem(Character& player)
     {
         ui.PrintLog("\033[32m[아이템]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다. ㅋㅋ");
     }
-    
+    //공격력 포션 일회성 스텟 증가 설정
+    if (name == ATTACK_BOOST)
+    {
+        player.Attack -= 10;
+    }
 }
