@@ -4,6 +4,7 @@
 #include "../Character/Character.h"
 #include "../Item/HealthPotion.h"
 #include "../Item/AttackBoost.h"
+#include "../Monster/data/MonsterTable.h"
 
 namespace
 {
@@ -26,40 +27,48 @@ bool BuyAttackBoost(Character* player)
     player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
     return true;
 }
+
+
+int GetSellByItemName(const std::string& itemName)
+{
+    if (itemName == HEALTH_POTION)
+        return ShopItemTable.at(ShopItems::HEALTH_POTION).gold;
+
+    if (itemName == ATTACK_BOOST)
+        return ShopItemTable.at(ShopItems::ATTACK_BOOST).gold;
+
+    const auto& monsterTable = GetMonsterTable();
+
+    for (const auto& [type, info] : monsterTable)
+    {
+            return info.Reward.Item.gold;
+    }
+    return 0;
+}
+
+
+
 }
 
 bool SellItem(int index, Character* player) 
 {
     auto items = player->CharacterInventory.GetItems();
-
     if (index < 0 || index >= items.size())
         return false;
 
     IItem* item = items[index];
-    if (item->GetName() == HEALTH_POTION)
-    {
-        player->Gold += ShopItemTable.at(ShopItems::HEALTH_POTION).gold;
-        item->count--;
-        if (item->count <= 0)
-        {
-            player->CharacterInventory.RemoveItem(index);
-        }
-        return true; 
-    }
-    if (item->GetName() == ATTACK_BOOST)
-    {
-        player->Gold += ShopItemTable.at(ShopItems::ATTACK_BOOST).gold;
-        item->count--;
-        if (item->count <= 0)
-        {
-            player->CharacterInventory.RemoveItem(index);
-        }
+    if (item == nullptr)
+        return false;
+    
+    int sellGold = GetSellByItemName(item->GetName());
+    if (sellGold < 0)
+        return false;
+
+    player->Gold += sellGold;
+        player->CharacterInventory.RemoveItem(index);
         return true;
     }
-    return false;
-
-}
-
+    
 
 bool BuyItem(ShopItems item, Character* player)
 {
