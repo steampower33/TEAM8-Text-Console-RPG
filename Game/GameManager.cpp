@@ -131,7 +131,11 @@ void GameManager::Run()
         {
             BattleResult BattleResult = battleManager->Battle(*player);
             if (BattleResult == BattleResult::Win  )
+            {
                 curentGameState = GameStateMachine::Explore;
+                ui.ShowShop(player);
+            }
+                
             else
                 curentGameState = GameStateMachine::GameEnd;
             break;
