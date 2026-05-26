@@ -2,6 +2,7 @@
 #include "../Item/Inventory.h"
 #include "../Item/IItem.h"
 #include "../Shop/function.h"
+#include "../Monster/data/MonsterTable.h"
 #include "UIManager.h"
 
 UIManager ui;
@@ -29,6 +30,13 @@ void UIManager::Initialize()
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 
     SetConsoleOutputCP(CP_UTF8); // 콘솔을 UTF-8 모드로 강제 전환
+    
+    auto monsterList = GetMonsterTable();
+    
+    for (auto& m : monsterList)
+    {
+        killList[m.second.Stats.Name] = 0;
+    }
 }
 
 std::string UIManager::ShowCharacterGeneration()
@@ -319,7 +327,7 @@ void UIManager::UpdateStat(Character* character)
          std::to_string(character->Health) + " / " + std::to_string(
              character->MaxHealth)},
         {"공격력 ", std::to_string(character->Attack)},
-        {"경험치 ", std::to_string(character->Experience)},
+        {"경험치 ", std::to_string(character->Experience) + " / 100"},
         {"골드   ", std::to_string(character->Gold)}
         // 나중에 "방어력"이 생기면 그냥 여기에 한 줄만 추가하면 끝납니다!
     };
@@ -404,11 +412,38 @@ void UIManager::UpdateScene(bool isCombat, std::string monsterName)
                 PrintTextAt(monsterX, startY + i, slime[i]);
             }
         }
-        else if (monsterName.find("웅애 CPP 어려웡") != std::string::npos)
+        else if (monsterName.find("Boss") != std::string::npos)
         {
-            PrintTextAt(monsterX, startY, "보스전 ASCII ART 아직 없음");
+            for (int i = 0; i < std::min(int(boss.size()), SceneHeight); i++)
+            {
+                PrintTextAt(monsterX, startY + i, boss[i]);
+            }
         }
         
+    }
+}
+
+void UIManager::UpdateKillList(std::string monsterName)
+{
+    if (monsterName.size() != 0)
+    {
+        killList[monsterName]++;
+    }
+    int h = 0;
+    for (auto& m : killList)
+    {
+        std::string name = m.first;
+        int nameWidth = GetDisplayWidth(name);
+    
+        int paddingSize = 10 - nameWidth;
+    
+        if (paddingSize < 0) paddingSize = 0; 
+
+        std::string padding(paddingSize, ' ');
+
+        std::string text = name + padding + " x " + std::to_string(m.second);
+        PrintTextAt(StartKillX + 4, StartKillY + 2 +  h, text);
+        h++;
     }
 }
 
@@ -472,7 +507,7 @@ void UIManager::UpdateInventory(Inventory* inven)
 
         std::string text = name + padding + " x " + std::to_string(item->count);
     
-        PrintTextAt(StartInventoryX + 5, StartInventoryY + 2 + i, text);
+        PrintTextAt(StartInventoryX + 4, StartInventoryY + 2 + i, text);
     }
 }
 
@@ -603,6 +638,7 @@ void UIManager::ShowMainFrame()
     DrawStatPanel();
     DrawInventoryPanel();
     DrawLogPanel();
+    DrawKillListPanel();
 }
 
 void UIManager::DrawScenePanel()
@@ -634,7 +670,15 @@ void UIManager::DrawLogPanel()
     DrawBox(StartLogX, StartLogY, EndLogX, EndLogY);
 
     std::string line = "Log";
-    PrintTextAt(StartSceneX + 5, EndSceneY + 1, line);
+    PrintTextAt(StartSceneX + 5, StartLogY, line);
+}
+
+void UIManager::DrawKillListPanel()
+{
+    DrawBox(StartKillX, StartKillY, EndKillX, EndKillY);
+
+    std::string line = "Kill List";
+    PrintTextAt(StartKillX + 5, StartKillY, line);
 }
 
 void UIManager::DrawTitleMenu()
