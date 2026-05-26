@@ -13,11 +13,10 @@ public:
     {
         name = HEALTH_POTION;
         healthRestore = 50;
+        gold = 200;
     }
     
     std::string GetName() const override;
     void Use(Character* character) override;
     
-   
-
 };
