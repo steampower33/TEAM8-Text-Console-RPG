@@ -133,7 +133,14 @@ void GameManager::Run()
             if (BattleResult == BattleResult::Win  )
             {
                 curentGameState = GameStateMachine::Explore;
-                ui.ShowShop(player);
+                int key = _getch();
+                if (key == KEY_ESC)
+                {
+                    curentGameState = GameStateMachine::Explore;
+                }
+                if (key == KEY_ENTER)
+                    ui.ShowShop(player); //엔터입력받아서 엔터면 들어가고 , esc면 안들어가고
+                
             }
                 
             else

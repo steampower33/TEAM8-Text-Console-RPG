@@ -125,7 +125,7 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
         static int debugCount = 0;
         ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
                 
-        if (Result <= 50)
+        if (Result > 30) //result가 31~100일때는 공격 (70%확률로)
         {
             //플레이어 공격
             bool IsMonsterDead = monster.TakeDamageWithIsDead(player.Attack);
@@ -154,8 +154,8 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
             }
         
         }
-        else
-        { // 아이템이 없을 때 여기 들어오면 안댐
+        else //result가 1~30일때는 아이템 사용 시도
+        { // 인벤이 비었을 때에도 들어가서 시도합니다 UseRandomItem() 안에서 로그출력후 리턴합니다 
 
             UseRandomItem(player);
         }
@@ -233,7 +233,14 @@ void BattleManager::UseRandomItem(Character& player)
 
     int ResultOfUseItemPercent = UseItemPercent(RandomEngine);
     vector<IItem*> items = player.CharacterInventory.GetItems();
-
+    
+    //아이템 목록 추리기 전 가방이 아예 비었으면 리턴함
+    if (items.empty())
+    {
+        ui.PrintLog("\033[32m[아이템]\033[0m 인벤토리가 텅텅 비었네요 ㅋㅋ");
+        return;
+    }
+    
     // 사용 가능한 아이템 목록만 추려내기
     vector<int> usableItems;
     for (int i = 0; i < items.size(); i++)
@@ -251,11 +258,12 @@ void BattleManager::UseRandomItem(Character& player)
     }
     
     // 쓸 수 있는 아이템이 있으면 확률적으로 사용
+    //30%확률로 아이템 사용
     if (ResultOfUseItemPercent <= 30 && usableItems.size() > 0)
     {
         // 사용 가능한 것들 중에서 균일하게 선택
         uniform_int_distribution<int> usableDist(0, usableItems.size() - 1);
-        int selectedIndex = usableItems[usableDist(RandomEngine)];
+        int selectedIndex = usableItems[usableDist(RandomEngine)];ㄴ
 
         player.UseItem(selectedIndex);
         ui.UpdateStat(&player);
@@ -263,6 +271,7 @@ void BattleManager::UseRandomItem(Character& player)
         ui.PrintLog("\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " +
                     items[selectedIndex]->GetName() + " 아이템을 사용했습니다!");
     }
+    //70%확률로 방해받아 사용실패
     else if (ResultOfUseItemPercent > 30 && usableItems.size() > 0)
     {
         ui.PrintLog("\033[32m[아이템]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다. ㅋㅋ");
