@@ -3,14 +3,10 @@
 #include "../Item/IItem.h"
 #include "../Shop/function.h"
 #include "../Monster/data/MonsterTable.h"
+#include "../Sound/SoundManager.h"
 #include "UIManager.h"
 
 UIManager ui;
-
-// 상점 들어갈지 말지 선택지
-// 상점 UI 만들기
-// 메타몽 그리기
-// 오디오 추가
 
 void UIManager::Initialize()
 {
@@ -35,8 +31,12 @@ void UIManager::Initialize()
     
     for (auto& m : monsterList)
     {
+        if (m.second.Stats.Name == "Boss")
+            continue;
         killList[m.second.Stats.Name] = 0;
     }
+    
+    // SoundManager::GetInstance()->PlayBGM("Assets/Sound/music.wav");
 }
 
 std::string UIManager::ShowCharacterGeneration()
@@ -90,6 +90,7 @@ std::string UIManager::ShowCharacterGeneration()
         name = "무명"; // 디폴트 네임
     }
 
+    SoundManager::GetInstance()->PlaySFX("Assets/Sound/keyInput.wav", "keyInput");
     return name;
 }
 
@@ -208,6 +209,7 @@ int UIManager::GetTitleResult()
 int UIManager::HandleMenuInput(int& selectedIndex, int maxMenu)
 {
     int key = _getch();
+    
     if (key == KEY_ESC)
         return -1;
     if (key == 224)
@@ -220,18 +222,21 @@ int UIManager::HandleMenuInput(int& selectedIndex, int maxMenu)
             selectedIndex--;
             if (selectedIndex < 0)
                 selectedIndex = maxMenu - 1;
+            SoundManager::GetInstance()->PlaySFX("Assets/Sound/keyInput.wav", "keyInput");
             break;
         case KEY_DOWN:
         case KEY_RIGHT:
             selectedIndex++;
             if (selectedIndex >= maxMenu)
                 selectedIndex = 0;
+            SoundManager::GetInstance()->PlaySFX("Assets/Sound/keyInput.wav", "keyInput");
             break;
         }
         return 0; // 아직 엔터 안 침
     }
     else if (key == KEY_ENTER)
     {
+        SoundManager::GetInstance()->PlaySFX("Assets/Sound/keyInput.wav", "keyInput");
         return 1; // 엔터 침! (선택 완료)
     }
     return 0;
@@ -244,7 +249,7 @@ int UIManager::ShowMenuAt(Vec2 at,
 {
     int maxMenu = menuList.size();
     int selectedIndex = 0;
-
+    
     while (true)
     {
         for (int i = 0; i < maxMenu; i++)
