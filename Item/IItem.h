@@ -32,5 +32,5 @@ public:
     virtual std::string GetName() const = 0; 
     virtual void Use(Character* character) = 0;
     
-    virtual int GetGold() const { return gold; } // 추후
+    virtual int GetGold() const { return gold; } 
 };

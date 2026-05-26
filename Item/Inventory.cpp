@@ -6,25 +6,6 @@ Inventory::Inventory()
 {
 }
 
-/*
-// uniq 라 뺌
-// 순회 하면서 지우기
-Inventory::~Inventory()
-{
-    for (IItem* item : items)
-    {
-        delete item;
-    }
-    items.clear();
-}
-
-
-void Inventory::AddItem(IItem* item)
-{
-    items.push_back(item);
-}
-*/
-
 
 void Inventory::AddItem(std::unique_ptr<IItem> item)
 {
@@ -38,6 +19,14 @@ void Inventory::UseItem(int index, Character* character)
     {
         items[index]->Use(character);
         items.erase(items.begin() + index); 
+    }
+}
+
+void Inventory::RemoveItem(int index)
+{
+    if (index >= 0 && index < items.size())
+    {
+        items.erase(items.begin() + index);
     }
 }
 
