@@ -489,7 +489,7 @@ void UIManager::ShowShop(Character* character)
     int endY = startY + boxHeight;
     DrawBox(startX, startY, endX, endY);
 
-    int actMenuWidth = 16;
+    int actMenuWidth = 16; 
     
     std::string blankLine = RepeatString(" ", endX - startX - 1);
     std::string verticalAxis = "║";
@@ -554,7 +554,11 @@ void UIManager::ShowShop(Character* character)
             std::vector<std::string> menuList;
             for (int i = 0; i < items.size(); i++)
             {
-                menuList.push_back(items[i]->GetName() + "(" + std::to_string(items[i]->GetGold()) + ")");
+                std::string itemName = items[i]->GetName();
+                int itemGold = items[i]->GetGold();
+                if (itemName == HEALTH_POTION || itemName == ATTACK_BOOST)
+                    itemGold *= 0.6;
+                menuList.push_back(items[i]->GetName() + "(" + std::to_string(itemGold) + ")");
             }
             menuList.push_back("뒤로가기");
             int choose = ShowMenuAlign(startX + 2 + actMenuWidth + 2, endX - 1, startY + 2, menuList, 2, TextAlign::Center);
@@ -563,7 +567,7 @@ void UIManager::ShowShop(Character* character)
             {
                 break;
             }
-            else if (choose != menuList.size() - 1 )
+            else if (choose != menuList.size() - 1)
             {
                 int purchaseOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"판매", "취소"}, 2, false);
                 if (purchaseOrNot == 0)
