@@ -1,25 +1,20 @@
-#include <iostream>
-#include <windows.h>
+// #include <iostream>
+// #include <windows.h>
 
 #include "Game/GameManager.h"
+#include "UI/UIManager.h"
 
-void InitConsoleWindow() {
-    // 창 크기와 버퍼를 DOS 명령어로 강제 고정 (가로 120, 세로 30)
-    system("mode con cols=150 lines=50");
+int main() {
+    ui.Initialize();
 
-    // 창 크기 조절 비활성화 (이 코드는 유지)
-    HWND hConsole = GetConsoleWindow();
-    if (hConsole != NULL) {
-        LONG style = GetWindowLong(hConsole, GWL_STYLE);
-        style = style & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX;
-        SetWindowLong(hConsole, GWL_STYLE, style);
-    }
+    GameManager::GetInstance().Run();
+    return 0;
 }
 
-// int main() {
+//현재 아이템사용 로직 구조상 잡템이 늘어날수록 포션 사용하기 어려워지는 구조임...
 
-    // GameManager::GetInstance().StartGame();
-    
-    // return 0;
-// }
+//아이템 50퍼센트 확률로 아이템 사용시도,
+//소지중인 모든 아이템 중 균일한 확률로 한가지 선택
+//사용 시도 시 30퍼센트 확률로 사용 성공
 
+//**소지중인 아이템 중 사용이 가능한 아이템에 대해** 조건을 맨 앞에 추가하면 좋을 듯 
