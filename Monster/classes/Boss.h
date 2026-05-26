@@ -6,4 +6,5 @@ class Boss : public Monster
 {
 public:
     explicit Boss(int level = 1);
+    
 };

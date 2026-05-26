@@ -19,11 +19,6 @@ public:
 
     virtual ~Monster() = default;
 
-    // std::string GetName() const
-    // {
-    //     return Info.Stats.Name;
-    // } Get Status 으로 통합.
-
     MonsterStats& GetStatus() 
     {
         return Info.Stats;

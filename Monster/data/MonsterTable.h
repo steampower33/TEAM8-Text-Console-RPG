@@ -10,7 +10,7 @@ inline const std::unordered_map<MonsterType, MonsterInfo>& GetMonsterTable()
         {MonsterType::Orc, {{"Orc", 80, 15, 10, 0}, {20, {"오크 몽둥이", 60}}}},
         {MonsterType::Troll, {{"Troll", 120, 20, 5, 5}, {50, {"트롤 몽둥이", 50}}}},
         {MonsterType::Slime, {{"Slime", 30, 5, 0, 0}, {5, {"슬라임진액", 10}}}},
-        {MonsterType::Boss, {{"웅애 CPP 어려웡" ,300,30,10,5},{100,{"메타몽의 온기",2000}}}}
+        {MonsterType::Boss, {{"Boss" ,300,30,10,5},{100,{"메타몽의 온기",2000}}}}
     };
 
     return table;
