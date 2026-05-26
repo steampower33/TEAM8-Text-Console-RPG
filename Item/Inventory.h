@@ -15,14 +15,13 @@ private:
 
 public:
     Inventory();
-    ~Inventory() = default; // unique_ptr 이니깐 따로 메모리 해제 안함.
+    ~Inventory() = default; 
     
-    //void AddItem(IItem* item);
     
     void AddItem(std::unique_ptr<IItem> item);
     void UseItem(int index, Character* character);
     
-    //vector<IItem*> GetItems() { return items; }
+    void RemoveItem(int index);
     
     std::vector<IItem*> GetItems() const;
 
