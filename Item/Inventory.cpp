@@ -7,7 +7,7 @@ Inventory::Inventory() = default;
 
 void Inventory::AddItem(std::unique_ptr<IItem> item)
 {
-    // 이미 있는지 확인    
+    
     for (const auto& existing : items)
     {
         if (existing->GetName() == item->GetName()) 
@@ -25,7 +25,7 @@ void Inventory::AddItem(std::unique_ptr<IItem> item)
 
 void Inventory::UseItem(int index, Character* character)
 {
-    // 카운트 확인
+    
     if (index >= 0 && index < items.size())
     {
         items[index]->Use(character);
