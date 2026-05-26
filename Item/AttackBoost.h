@@ -11,6 +11,7 @@ public:
     {
         name = ATTACK_BOOST;
         attackTempIncrease = 10;
+        gold = 100;
     }
 
 
