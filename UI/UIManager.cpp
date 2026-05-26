@@ -346,23 +346,23 @@ void UIManager::UpdateScene(bool isCombat, std::string monsterName)
     if (!isCombat)
     {
         // 비전투(Idle) 상태: 대검 출력
-        for (int i = 0; i < warrior.size(); i++)
+        for (int i = 0; i < warriorIdle.size(); i++)
         {
             PrintTextAlign(StartSceneX + 1,
                            EndSceneX - 1,
                            StartSceneY + 1 + i,
-                           warrior[i],
+                           warriorIdle[i],
                            TextAlign::Left);
         }
     }
     else
     {
-        for (int i = 0; i < warrior.size(); i++)
+        for (int i = 0; i < warriorBattle.size(); i++)
         {
             PrintTextAlign(StartSceneX + 1,
                            EndSceneX - 1,
                            StartSceneY + 1 + i,
-                           warrior[i],
+                           warriorBattle[i],
                            TextAlign::Left);
         }
 
@@ -515,7 +515,11 @@ void UIManager::ShowShop(Character* character)
             menuList.push_back("뒤로가기");
             int choose = ShowMenuAlign(startX + 2 + actMenuWidth + 2, endX - 1, startY + 2, menuList, 2, TextAlign::Center);
             
-            if (choose != menuList.size() - 1)
+            if (choose == -1)
+            {
+                break;
+            }
+            else if (choose != menuList.size() - 1)
             {
                 int buyOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"구매", "취소"}, 2, false);
                 if (buyOrNot == 0)
@@ -550,7 +554,11 @@ void UIManager::ShowShop(Character* character)
             menuList.push_back("뒤로가기");
             int choose = ShowMenuAlign(startX + 2 + actMenuWidth + 2, endX - 1, startY + 2, menuList, 2, TextAlign::Center);
             
-            if (choose != menuList.size() - 1)
+            if (choose == -1)
+            {
+                break;
+            }
+            else if (choose != menuList.size() - 1 )
             {
                 int purchaseOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"판매", "취소"}, 2, false);
                 if (purchaseOrNot == 0)
@@ -567,6 +575,7 @@ void UIManager::ShowShop(Character* character)
             }
             break;
         }
+        case -1:
         case 2:
         {
             loop = false;
