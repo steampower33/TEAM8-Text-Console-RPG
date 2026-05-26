@@ -119,11 +119,11 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
     while (true)
     {
         int Result = FightOrUseItem(RandomEngine);
-        
-        WaitForEnter();
         ui.PrintLog("\033[33m[전투 대기]\033[0m [Enter]를 누르면 턴이 진행됩니다.");
-        static int debugCount = 0;
-        ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
+        WaitForEnter();
+        
+        // static int debugCount = 0;
+        // ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
                 
         if (Result > 30) //result가 31~100일때는 공격 (70%확률로)
         {
@@ -263,13 +263,15 @@ void BattleManager::UseRandomItem(Character& player)
     {
         // 사용 가능한 것들 중에서 균일하게 선택
         uniform_int_distribution<int> usableDist(0, usableItems.size() - 1);
-        int selectedIndex = usableItems[usableDist(RandomEngine)];ㄴ
+        int selectedIndex = usableItems[usableDist(RandomEngine)];
+        
+        string name = items[selectedIndex]->GetName();
 
         player.UseItem(selectedIndex);
         ui.UpdateStat(&player);
         ui.UpdateInventory(&player.CharacterInventory);
         ui.PrintLog("\033[32m[아이템]\033[0m " + player.Name + "이(가) 가방에서 " +
-                    items[selectedIndex]->GetName() + " 아이템을 사용했습니다!");
+                    name + " 아이템을 사용했습니다!");
     }
     //70%확률로 방해받아 사용실패
     else if (ResultOfUseItemPercent > 30 && usableItems.size() > 0)
