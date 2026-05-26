@@ -1,11 +1,12 @@
 ﻿#pragma once
 #include <string>
 #include <unordered_map>
+#include "../Item/IItem.h"
 
 enum class ShopItems
 {
-    HealthPotion,
-    AttackBoost,
+    HEALTH_POTION,
+    ATTACK_BOOST,
 };
 
 
@@ -15,9 +16,9 @@ struct ShopItemInfo
     int gold;
 };
 
-static const std::unordered_map<ShopItems, ShopItemInfo> ShopItemTable =
-{
-    {ShopItems::HealthPotion, {"HealthPotion", 200}},
-    {ShopItems::AttackBoost, {"AttackBoost", 100}},
-};
+  static const std::unordered_map<ShopItems, ShopItemInfo> ShopItemTable =
+  {
+      {ShopItems::HEALTH_POTION, {HEALTH_POTION, 200}},
+      {ShopItems::ATTACK_BOOST, {ATTACK_BOOST, 100}},
+  };
 

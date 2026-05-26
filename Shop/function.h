@@ -6,4 +6,4 @@
 class Character;
 
 bool BuyItem(ShopItems item, Character* player);
-bool SellItem(ShopItems item, Character* player);
+bool SellItem(int index, Character* player);

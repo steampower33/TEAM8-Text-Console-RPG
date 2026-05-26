@@ -31,8 +31,8 @@ public:
 
     void TakeDamage(int damage)
     {
-        int finalDamage = std::max(1, damage - Info.Stats.DEF);
-        Info.Stats.HP = std::max(0, Info.Stats.HP - finalDamage);
+        int finalDamage = (std::max)(1, damage - Info.Stats.DEF);
+        Info.Stats.HP = (std::max)(0, Info.Stats.HP - finalDamage);
                
     }
     bool TakeDamageWithIsDead(int damage)
