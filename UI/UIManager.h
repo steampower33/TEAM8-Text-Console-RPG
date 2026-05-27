@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <conio.h>
+#include <random>
+#include <cmath>
 
 #define NOMINMAX // ★ windows.h가 min, max 매크로를 생성하지 못하게 차단
 #include <windows.h>
@@ -76,6 +79,7 @@ public:
     void ShowShop(Character* character);
     void ShowPlayerDead();
     void ShowEndingCredit();
+    float ShowTimingGauge();
 
     std::map<std::string, int> killList;
     void UpdateKillList(std::string monsterName = "");

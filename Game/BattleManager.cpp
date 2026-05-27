@@ -136,35 +136,39 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
         // static int debugCount = 0;
         // ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
                 
-        if (Result > 30) //result가 31~100일때는 공격 (70%확률로)
+        if (Result < 30) // result가 1~30일때는 아이템 사용 시도
         {
-            //플레이어 공격
-            bool IsMonsterDead = monster.TakeDamageWithIsDead(player.Attack);
+            UseRandomItem(player);
+        }
+        
+        //플레이어 공격
+        float damageMultiplier = ui.ShowTimingGauge();
+
+        bool IsMonsterDead = false;
+        if (damageMultiplier > 0.0f)
+        {
+            // 공격 성공 로직 (몬스터 체력 깎기, 흔들림 애니메이션 재생 등)
+            IsMonsterDead = monster.TakeDamageWithIsDead(int(float(player.Attack) * damageMultiplier));
             SoundManager::GetInstance()->PlaySFX("Assets/Sound/07_human_atk_sword_1.wav", "PlayerAttack");
             ui.AnimateStrike(true, MonsterName, IsMonsterDead,false, true);
             ui.PrintLog("\033[31m[플레이어 공격]\033[0m " + player.Name + "의 공격! " + MonsterName + "에게 피해를 입혔습니다. " + MonsterName + "의 잔여 HP = "+ std::to_string(monster.GetStatus().HP));
-                    
-            if (IsMonsterDead == true)
-            {
-                ui.UpdateKillList(MonsterName);
-                PlayerWin(player, monster);
-            
-                player.LevelUp();
-                //레벨 10 달성 시, “이제 일반 몬스터는 상대도 안 된다!” 메시지 출력
-                if (player.Level == 10)
-                    ui.PrintLog("\033[36m[레벨 업]\033[0m 이제 일반 몬스터는 상대도 안 된다!");
-                
-                if (MonsterName == "Boss")
-                    return BattleResult::BossClear;
-                
-                return BattleResult::Win;
-                
-            }
         }
-        else //result가 1~30일때는 아이템 사용 시도
-        { // 인벤이 비었을 때에도 들어가서 시도합니다 UseRandomItem() 안에서 로그출력후 리턴합니다 
-
-            UseRandomItem(player);
+            
+        if (IsMonsterDead == true)
+        {
+            ui.UpdateKillList(MonsterName);
+            PlayerWin(player, monster);
+            
+            player.LevelUp();
+            //레벨 10 달성 시, “이제 일반 몬스터는 상대도 안 된다!” 메시지 출력
+            if (player.Level == 10)
+                ui.PrintLog("\033[36m[레벨 업]\033[0m 이제 일반 몬스터는 상대도 안 된다!");
+                
+            if (MonsterName == "Boss")
+                return BattleResult::BossClear;
+                
+            return BattleResult::Win;
+                
         }
         
         SoundManager::GetInstance()->PlaySFX("Assets/Sound/17_orc_atk_sword_1.wav", "MonsterAttack");
