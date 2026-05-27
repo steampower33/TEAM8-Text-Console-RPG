@@ -32,3 +32,12 @@
     - git convention
         - branch 이름을 대소문자구분해서 이름을 짓다가 branch 이름 충돌? 이 발생함
         - 그래서 대소문자 구분을 하지않고 이름을 짓기로 결정
+
+### 🎵 Audio Assets & Credits
+This project uses free audio assets from the incredible creators on itch.io.
+Big thanks to the following creators:
+
+* **Minifantasy - Dungeon Audio Pack** by [Leohpaz](https://leohpaz.itch.io/minifantasy-dungeon-sfx-pack)
+* **400 Sounds Pack** by [Chequered Ink](https://ci.itch.io/400-sounds-pack)
+
+> **Note:** The audio files included in the `Assets/Sound/` directory are for game execution purposes only. Do not redistribute or resell these unaltered audio assets. Support the original creators!

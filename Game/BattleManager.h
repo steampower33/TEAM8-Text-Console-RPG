@@ -25,6 +25,8 @@ public:
     void WaitForEnter();
     void Line();
     
+    bool UseAttackBoostThisTime = false;
+    
 protected:
     //Monster monster;
     
