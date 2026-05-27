@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>TEAM8 RPG — UML Class Diagram</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght=300;400;600;700&display=swap');
+
+:root {
+  --bg:      #0b0e14;
+  --bg2:     #131820;
+  --bg3:     #1a2030;
+  --border:  #252d3d;
+  --border2: #2e3a50;
+  --text:    #cdd9e5;
+  --text2:   #768390;
+  --text3:   #4a5568;
+  --purple:  #c792ea;
+  --blue:    #82aaff;
+  --cyan:    #89ddff;
+  --teal:    #21c08b;
+  --coral:   #f07178;
+  --amber:   #ffcb6b;
+  --green:   #c3e88d;
+  --pink:    #f78c6c;
+  --gray:    #546178;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  background: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 탭 헤더 ── */
+.tab-header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  flex-wrap: wrap;
+}
+.tab-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  color: var(--text2);
+  padding: 14px 20px 12px;
+  margin-right: 20px;
+  border-right: 1px solid var(--border);
+}
+.tab-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 18px 10px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--blue); }
+
+.legend {
+  margin-left: auto;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+.leg { display:flex; align-items:center; gap:5px; font-size:10px; color: var(--text3); }
+.leg-line { width:22px; height:2px; }
+.leg-line.inherit { background: var(--purple); }
+.leg-line.compose { background: var(--blue); }
+.leg-line.dep     { background: repeating-linear-gradient(90deg,var(--amber) 0 4px,transparent 4px 8px); }
+.leg-line.use     { background: repeating-linear-gradient(90deg,var(--teal) 0 3px,transparent 3px 7px); }
+
+/* ── 탭 패널 ── */
+.tab-panel { display:none; flex:1; overflow:auto; padding:36px 32px 60px; }
+.tab-panel.active { display:block; }
+
+/* ── SVG 공통 ── */
+svg { display:block; }
+
+/* ── UML 텍스트 스타일 ── */
+.t-pkg    { font-size:10px; fill:var(--text3); letter-spacing:.1em; font-family:'JetBrains Mono',monospace; }
+.t-stereo { font-size:9px;  fill:var(--text3); font-style:italic; font-family:'JetBrains Mono',monospace; }
+.t-name   { font-weight:700; font-family:'JetBrains Mono',monospace; }
+.t-file   { font-size:9px;  fill:var(--text3); font-family:'JetBrains Mono',monospace; }
+.t-vis    { font-size:10px; fill:var(--text3); font-family:'JetBrains Mono',monospace; }
+.t-f      { font-size:10px; fill:var(--text2); font-family:'JetBrains Mono',monospace; }
+.t-m      { font-size:10px; fill:var(--cyan);  font-family:'JetBrains Mono',monospace; }
+.t-type   { fill:var(--amber); }
+.t-note   { font-size:9px;  fill:var(--coral); font-style:italic; font-family:'JetBrains Mono',monospace; }
+.t-enum   { font-size:10px; fill:var(--green); font-family:'JetBrains Mono',monospace; }
+.t-sm     { font-size:9px;  fill:var(--teal);  font-family:'JetBrains Mono',monospace; }
+.div-l    { stroke:var(--border2); stroke-width:1; }
+
+/* 관계선 */
+.r-inherit { fill:none; stroke:var(--purple); stroke-width:1.5; }
+.r-compose { fill:none; stroke:var(--blue);   stroke-width:1.5; }
+.r-dep     { fill:none; stroke:var(--amber);  stroke-width:1.2; stroke-dasharray:5 3; }
+.r-use     { fill:none; stroke:var(--teal);   stroke-width:1.2; stroke-dasharray:3 3; }
+.r-assoc   { fill:none; stroke:var(--text3);  stroke-width:1.2; }
+.r-lbl     { font-size:9px; fill:var(--text3); font-family:'JetBrains Mono',monospace; }
+</style>
+</head>
+<body>
+
+<div class="tab-header">
+  <div class="tab-title">TEAM8 RPG · UML</div>
+  <button class="tab-btn active" onclick="switchTab(0)">① Game · UI · Sound</button>
+  <button class="tab-btn"        onclick="switchTab(1)">② Character · Item</button>
+  <button class="tab-btn"        onclick="switchTab(2)">③ Monster · Shop · Enums</button>
+  <div class="legend">
+    <div class="leg"><div class="leg-line inherit"></div><span style="color:var(--purple)">▷ 상속</span></div>
+    <div class="leg"><div class="leg-line compose"></div><span style="color:var(--blue)">◆ 컴포지션</span></div>
+    <div class="leg"><div class="leg-line delete"></div><span style="color:var(--amber)">- - 의존</span></div>
+    <div class="leg"><div class="leg-line use"></div><span style="color:var(--teal)">··· 사용</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 1: Game · UI · Sound
+══════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab0">
+<svg viewBox="0 0 1320 780" style="width:100%;min-width:900px;">
+<defs>
+  <marker id="a-inh" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><polygon points="0,0 10,4.5 0,9" fill="none" stroke="var(--purple)" stroke-width="1.5"/></marker>
+  <marker id="a-cmp-e" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--blue)" stroke-width="1.5"/></marker>
+  <marker id="a-cmp-s" markerWidth="12" markerHeight="9" refX="1" refY="4.5" orient="auto"><polygon points="0,4.5 6,0 12,4.5 6,9" fill="var(--blue)" stroke="var(--blue)"/></marker>
+  <marker id="a-dep" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--amber)" stroke-width="1.5"/></marker>
+  <marker id="a-use" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--teal)" stroke-width="1.5"/></marker>
+</defs>
+
+<rect x="14" y="14" width="520" height="740" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="26" y="28" class="t-pkg">« Game »</text>
+
+<rect x="550" y="14" width="756" height="740" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="562" y="28" class="t-pkg">« UI · Sound »</text>
+
+<!-- main.cpp -->
+<g transform="translate(30,36)">
+  <rect width="190" height="58" rx="6" fill="#141820" stroke="var(--gray)" stroke-width="1.5"/>
+  <rect width="190" height="24" rx="6" fill="#1e2230"/><rect y="18" width="190" height="6" fill="#1e2230"/>
+  <text x="95" y="10" text-anchor="middle" class="t-stereo">«entry»</text>
+  <text x="95" y="20" text-anchor="middle" class="t-name" style="fill:var(--gray);font-size:12px;">main.cpp</text>
+  <line x1="0" y1="24" x2="190" y2="24" class="div-l"/>
+  <text x="6" y="37" class="t-m" style="font-size:9.5px;">ui.Initialize()</text>
+  <text x="6" y="49" class="t-m" style="font-size:9.5px;">GameManager::GetInstance().Run()</text>
+</g>
+
+<!-- GameManager -->
+<g transform="translate(30,120)">
+  <rect width="290" height="280" rx="6" fill="#140f28" stroke="var(--purple)" stroke-width="1.5"/>
+  <rect width="290" height="28" rx="6" fill="#1e1540"/><rect y="22" width="290" height="6" fill="#1e1540"/>
+  <text x="145" y="11" text-anchor="middle" class="t-stereo">«singleton»</text>
+  <text x="145" y="22" text-anchor="middle" class="t-name" style="fill:var(--purple);font-size:13px;">GameManager</text>
+  <line x1="0" y1="28" x2="290" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">-</text><text x="14" y="41" class="t-f">instance: <tspan class="t-type">GameManager*</tspan> {static}</text>
+  <text x="6" y="53" class="t-vis">-</text><text x="14" y="53" class="t-f">curentGameState: <tspan class="t-type">GameStateMachine</tspan></text>
+  <text x="6" y="65" class="t-vis">-</text><text x="14" y="65" class="t-f">battleManager: <tspan class="t-type">BattleManager*</tspan></text>
+  <text x="6" y="77" class="t-vis">-</text><text x="14" y="77" class="t-f">player: <tspan class="t-type">Character*</tspan></text>
+  <line x1="0" y1="85" x2="290" y2="85" class="div-l"/>
+  <text x="6" y="98" class="t-vis">+</text><text x="14" y="98" class="t-m">«static» GetInstance(): <tspan class="t-type">GameManager&amp;</tspan></text>
+  <text x="6" y="111" class="t-vis">+</text><text x="14" y="111" class="t-m">Run(): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="124" class="t-vis">-</text><text x="14" y="124" class="t-m">GameManager() {private}</text>
+  <line x1="0" y1="132" x2="290" y2="132" class="div-l"/>
+  <text x="6" y="145" class="t-sm">FSM: Start → Explore ↔ Battle</text>
+  <text x="6" y="157" class="t-sm">     → Shop → GameEnd</text>
+  <line x1="0" y1="165" x2="290" y2="165" class="div-l"/>
+  <text x="6" y="178" class="t-note">타이틀 → 캐릭터생성 → 메인루프</text>
+  <text x="6" y="190" class="t-note">Battle승리 후 Shop 진입 선택</text>
+  <line x1="0" y1="198" x2="290" y2="198" class="div-l"/>
+  <text x="6" y="211" class="t-file">Game/GameManager.h · .cpp</text>
+</g>
+
+<!-- BattleManager -->
+<g transform="translate(30,430)">
+  <rect width="290" height="310" rx="6" fill="#1a0c10" stroke="var(--coral)" stroke-width="1.5"/>
+  <rect width="290" height="28" rx="6" fill="#261218"/><rect y="22" width="290" height="6" fill="#261218"/>
+  <text x="145" y="11" text-anchor="middle" class="t-stereo">«manager»</text>
+  <text x="145" y="22" text-anchor="middle" class="t-name" style="fill:var(--coral);font-size:13px;">BattleManager</text>
+  <line x1="0" y1="28" x2="290" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">+</text><text x="14" y="41" class="t-m" style="font-size:9.5px;">BeforeBattle(p): <tspan class="t-type">Phase</tspan></text>
+  <text x="6" y="53" class="t-vis">+</text><text x="14" y="53" class="t-m" style="font-size:9.5px;">Battle(p): <tspan class="t-type">BattleResult</tspan></text>
+  <text x="6" y="65" class="t-vis">+</text><text x="14" y="65" class="t-m" style="font-size:9.5px;">BattleLoop(p,m): <tspan class="t-type">BattleResult</tspan></text>
+  <text x="6" y="77" class="t-vis">+</text><text x="14" y="77" class="t-m" style="font-size:9.5px;">PlayerWin(p,m): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="89" class="t-vis">+</text><text x="14" y="89" class="t-m" style="font-size:9.5px;">MonsterWin(p): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="101" class="t-vis">+</text><text x="14" y="101" class="t-m" style="font-size:9.5px;">GameVictory(m): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="113" class="t-vis">+</text><text x="14" y="113" class="t-m" style="font-size:9.5px;">UseRandomItem(p): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="125" class="t-vis">+</text><text x="14" y="125" class="t-m" style="font-size:9.5px;">WaitForEnter(): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="137" class="t-vis">+</text><text x="14" y="137" class="t-m" style="font-size:9.5px;">Line(): <tspan class="t-type">void</tspan></text>
+  <line x1="0" y1="145" x2="290" y2="145" class="div-l"/>
+  <text x="6" y="158" class="t-note">턴: 70%공격/30%아이템</text>
+  <text x="6" y="170" class="t-note">아이템: 30%성공/70%방해</text>
+  <text x="6" y="182" class="t-note">Lv=10 → CreateBoss()</text>
+  <text x="6" y="194" class="t-note">AttackBoost 후 ATK-=10</text>
+  <line x1="0" y1="202" x2="290" y2="202" class="div-l"/>
+  <text x="6" y="215" class="t-file">Game/BattleManager.h · .cpp</text>
+</g>
+
+<!-- UIManager -->
+<g transform="translate(566,36)">
+  <rect width="550" height="420" rx="6" fill="#0c1c18" stroke="var(--teal)" stroke-width="1.5"/>
+  <rect width="550" height="28" rx="6" fill="#0e2820"/><rect y="22" width="550" height="6" fill="#0e2820"/>
+  <text x="275" y="11" text-anchor="middle" class="t-stereo">«global extern ui»</text>
+  <text x="275" y="22" text-anchor="middle" class="t-name" style="fill:var(--teal);font-size:13px;">UIManager</text>
+  <line x1="0" y1="28" x2="550" y2="28" class="div-l"/>
+  <text x="6"   y="41" class="t-vis">+</text><text x="14"  y="41" class="t-f">LogMessages: <tspan class="t-type">vector&lt;string&gt;</tspan></text>
+  <text x="280" y="41" class="t-vis">+</text><text x="288" y="41" class="t-f">killList: <tspan class="t-type">map&lt;string,int&gt;</tspan></text>
+  <text x="6"   y="53" class="t-vis">-</text><text x="14"  y="53" class="t-f">ConsoleWidth=150  ConsoleHeight=40</text>
+  <line x1="0" y1="61" x2="550" y2="61" class="div-l"/>
+  <text x="6"   y="74" class="t-vis">+</text><text x="14"  y="74" class="t-m">Initialize()  GetTitleResult(): <tspan class="t-type">int</tspan></text>
+  <text x="6"   y="86" class="t-vis">+</text><text x="14"  y="86" class="t-m">ShowCharacterGeneration(): <tspan class="t-type">string</tspan></text>
+  <text x="6"   y="98" class="t-vis">+</text><text x="14"  y="98" class="t-m">ShowMainFrame()  ShowShop(char*)</text>
+  <text x="6"   y="110" class="t-vis">+</text><text x="14" y="110" class="t-m">UpdateStat(char*)  UpdateInventory(inven*)</text>
+  <text x="6"   y="122" class="t-vis">+</text><text x="14" y="122" class="t-m">UpdateScene(isCombat, name)</text>
+  <text x="6"   y="134" class="t-vis">+</text><text x="14" y="134" class="t-m">UpdateKillList(name)  PrintLog(msg)</text>
+  <text x="6"   y="146" class="t-vis">-</text><text x="14" y="146" class="t-m">DrawBox / Gotoxy / RepeatString</text>
+  <text x="6"   y="158" class="t-vis">-</text><text x="14" y="158" class="t-m">ShowMenuAt / ShowMenuAlign / HandleMenuInput</text>
+  <line x1="0" y1="166" x2="550" y2="166" class="div-l"/>
+  <text x="6" y="179" class="t-note">콘솔 레이아웃 (150×40):</text>
+  <rect x="6"   y="184" width="290" height="54" rx="3" fill="none" stroke="var(--border2)" stroke-width="1"/>
+  <rect x="6"   y="184" width="194" height="28" rx="2" fill="#0d1e1a" stroke="var(--border2)" stroke-width="0.5"/>
+  <rect x="200" y="184" width="96"  height="14" rx="2" fill="#0a1a14" stroke="var(--border2)" stroke-width="0.5"/>
+  <rect x="200" y="198" width="96"  height="14" rx="2" fill="#0a1a14" stroke="var(--border2)" stroke-width="0.5"/>
+  <rect x="6"   y="212" width="194" height="26" rx="2" fill="#0d1e0a" stroke="var(--border2)" stroke-width="0.5"/>
+  <rect x="200" y="212" width="96"  height="26" rx="2" fill="#1a0d0a" stroke="var(--border2)" stroke-width="0.5"/>
+  <text x="103" y="200" text-anchor="middle" class="t-sm" style="font-size:8px;">Scene  x:0~110  y:0~25</text>
+  <text x="248" y="192" text-anchor="middle" class="t-sm" style="font-size:7.5px;">Stat  y:0~12</text>
+  <text x="248" y="206" text-anchor="middle" class="t-sm" style="font-size:7.5px;">Inv   y:13~25</text>
+  <text x="103" y="228" text-anchor="middle" class="t-sm" style="font-size:8px;">Log  x:0~110  y:26~39</text>
+  <text x="248" y="228" text-anchor="middle" class="t-sm" style="font-size:8px;">KillList</text>
+  <line x1="0" y1="244" x2="550" y2="244" class="div-l"/>
+  <text x="6" y="257" class="t-note">ASCII 아트 내장: warriorIdle · warriorBattle · goblin · slime · orc · troll · boss</text>
+  <text x="6" y="269" class="t-note">Windows API: SetConsoleCursorPosition · SetConsoleOutputCP(65001)</text>
+  <line x1="0" y1="277" x2="550" y2="277" class="div-l"/>
+  <text x="6" y="290" class="t-file">UI/UIManager.h · .cpp</text>
+</g>
+
+<!-- SoundManager -->
+<g transform="translate(566,472)">
+  <rect width="550" height="110" rx="6" fill="#18100e" stroke="var(--pink)" stroke-width="1.5"/>
+  <rect width="550" height="28" rx="6" fill="#221412"/><rect y="22" width="550" height="6" fill="#221412"/>
+  <text x="275" y="11" text-anchor="middle" class="t-stereo">«singleton»</text>
+  <text x="275" y="22" text-anchor="middle" class="t-name" style="fill:var(--pink);font-size:13px;">SoundManager</text>
+  <line x1="0" y1="28" x2="550" y2="28" class="div-l"/>
+  <text x="6"   y="41" class="t-vis">+</text><text x="14"  y="41" class="t-m">«static» GetInstance(): <tspan class="t-type">SoundManager*</tspan></text>
+  <text x="6"   y="53" class="t-vis">+</text><text x="14"  y="53" class="t-m">PlayBGM(path): <tspan class="t-type">bool</tspan></text>
+  <text x="280" y="41" class="t-vis">+</text><text x="288" y="41" class="t-m">PlaySFX(path, alias): <tspan class="t-type">void</tspan></text>
+  <text x="280" y="53" class="t-vis">+</text><text x="288" y="53" class="t-m">StopBGM(): <tspan class="t-type">void</tspan></text>
+  <line x1="0" y1="61" x2="550" y2="61" class="div-l"/>
+  <text x="6"   y="74" class="t-note">Windows MCI API (winmm.lib) · BGM: mp4→wav, repeat · SFX: 연타 가능 (채널 재생성)</text>
+  <text x="6"   y="86" class="t-file">Sound/SoundManager.h · .cpp</text>
+</g>
+
+<!-- 관계선 -->
+<line x1="125" y1="94" x2="125" y2="120" class="r-dep" marker-end="url(#a-dep)"/>
+<line x1="175" y1="400" x2="175" y2="430" class="r-compose" marker-start="url(#a-cmp-s)" marker-end="url(#a-cmp-e)"/>
+<text x="185" y="418" class="r-lbl">owns</text>
+<line x1="320" y1="170" x2="566" y2="170" class="r-use" marker-end="url(#a-use)"/>
+<text x="400" y="163" class="r-lbl" style="fill:var(--teal);">«use»</text>
+<line x1="320" y1="500" x2="566" y2="256" class="r-use" marker-end="url(#a-use)"/>
+<line x1="320" y1="300" x2="560" y2="510" class="r-use" marker-end="url(#a-use)"/>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2: Character · Item (화살표 명확화를 위해 하단 박스 내림)
+══════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab1">
+<svg viewBox="0 0 1200 860" style="width:100%;min-width:900px;">
+<defs>
+  <marker id="b-inh" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><polygon points="0,0 10,4.5 0,9" fill="none" stroke="var(--purple)" stroke-width="1.5"/></marker>
+  <marker id="b-cmp-e" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--blue)" stroke-width="1.5"/></marker>
+  <marker id="b-cmp-s" markerWidth="12" markerHeight="9" refX="1" refY="4.5" orient="auto"><polygon points="0,4.5 6,0 12,4.5 6,9" fill="var(--blue)" stroke="var(--blue)"/></marker>
+  <marker id="b-dep" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--amber)" stroke-width="1.5"/></marker>
+  <marker id="b-use" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--teal)" stroke-width="1.5"/></marker>
+</defs>
+
+<rect x="14" y="14" width="400" height="490" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="26" y="28" class="t-pkg">« Character »</text>
+
+<rect x="430" y="14" width="756" height="820" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="442" y="28" class="t-pkg">« Item »</text>
+
+<!-- Character -->
+<g transform="translate(30,36)">
+  <rect width="370" height="300" rx="6" fill="#0a1628" stroke="var(--blue)" stroke-width="1.5"/>
+  <rect width="370" height="28" rx="6" fill="#0d1e3c"/><rect y="22" width="370" height="6" fill="#0d1e3c"/>
+  <text x="185" y="11" text-anchor="middle" class="t-stereo">«singleton»</text>
+  <text x="185" y="22" text-anchor="middle" class="t-name" style="fill:var(--blue);font-size:13px;">Character</text>
+  <line x1="0" y1="28" x2="370" y2="28" class="div-l"/>
+  <text x="6" y="41"  class="t-vis">-</text><text x="14" y="41"  class="t-f">Instance: <tspan class="t-type">Character*</tspan> {static}</text>
+  <text x="6" y="53"  class="t-vis">+</text><text x="14" y="53"  class="t-f">Name: <tspan class="t-type">string</tspan></text>
+  <text x="6" y="65"  class="t-vis">+</text><text x="14" y="65"  class="t-f">Level: <tspan class="t-type">int</tspan>  Health: <tspan class="t-type">int</tspan>  MaxHealth: <tspan class="t-type">int</tspan></text>
+  <text x="6" y="77"  class="t-vis">+</text><text x="14" y="77"  class="t-f">Attack: <tspan class="t-type">int</tspan>  Experience: <tspan class="t-type">int</tspan>  Gold: <tspan class="t-type">int</tspan></text>
+  <text x="6" y="89"  class="t-vis">+</text><text x="14" y="89"  class="t-f">IsDead: <tspan class="t-type">bool</tspan> = false</text>
+  <text x="6" y="101" class="t-vis">+</text><text x="14" y="101" class="t-f">CharacterInventory: <tspan class="t-type">Inventory</tspan></text>
+  <line x1="0" y1="109" x2="370" y2="109" class="div-l"/>
+  <text x="6" y="122" class="t-vis">+</text><text x="14" y="122" class="t-m">«static» GetInstance(name): <tspan class="t-type">Character*</tspan></text>
+  <text x="6" y="134" class="t-vis">+</text><text x="14" y="134" class="t-m">SetHealth(hp): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="146" class="t-vis">+</text><text x="14" y="146" class="t-m">TakeDamage(dmg): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="158" class="t-vis">+</text><text x="14" y="158" class="t-m">LevelUp(): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="170" class="t-vis">+</text><text x="14" y="170" class="t-m">UseItem(index): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="182" class="t-vis">+</text><text x="14" y="182" class="t-m">DisplayStatus(): <tspan class="t-type">void</tspan></text>
+  <line x1="0" y1="190" x2="370" y2="190" class="div-l"/>
+  <text x="6" y="203" class="t-note">Init: HP=200  ATK=30  Lv=1</text>
+  <text x="6" y="215" class="t-note">LvUp: MaxHP+=Lv×20, ATK+=Lv×5, maxLv=10</text>
+  <text x="6" y="227" class="t-note">SetHealth: 0≤hp≤MaxHealth, IsDead 자동 관리</text>
+  <line x1="0" y1="235" x2="370" y2="235" class="div-l"/>
+  <text x="6" y="248" class="t-file">Character/Character.h · .cpp</text>
+</g>
+
+<!-- Inventory -->
+<g transform="translate(30,356)">
+  <rect width="370" height="130" rx="6" fill="#0a1628" stroke="var(--blue)" stroke-width="1.5"/>
+  <rect width="370" height="28" rx="6" fill="#0d1e3c"/><rect y="22" width="370" height="6" fill="#0d1e3c"/>
+  <text x="185" y="18" text-anchor="middle" class="t-name" style="fill:var(--blue);font-size:13px;">Inventory</text>
+  <line x1="0" y1="28" x2="370" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">-</text><text x="14" y="41" class="t-f">items: <tspan class="t-type">vector&lt;unique_ptr&lt;IItem&gt;&gt;</tspan></text>
+  <line x1="0" y1="49" x2="370" y2="49" class="div-l"/>
+  <text x="6"   y="62" class="t-vis">+</text><text x="14"  y="62" class="t-m">AddItem(item): <tspan class="t-type">void</tspan></text>
+  <text x="190" y="62" class="t-vis">+</text><text x="198" y="62" class="t-m">UseItem(idx, char*): <tspan class="t-type">void</tspan></text>
+  <text x="6"   y="74" class="t-vis">+</text><text x="14"  y="74" class="t-m">RemoveItem(idx): <tspan class="t-type">void</tspan></text>
+  <text x="190" y="74" class="t-vis">+</text><text x="198" y="74" class="t-m">GetItems(): <tspan class="t-type">vector&lt;IItem*&gt;</tspan></text>
+  <line x1="0" y1="82" x2="370" y2="82" class="div-l"/>
+  <text x="6" y="95"  class="t-note">AddItem: 동명 아이템 → count++  /  UseItem: Use()→count--→erase</text>
+  <text x="6" y="107" class="t-file">Item/Inventory.h · .cpp</text>
+</g>
+
+<!-- IItem (interface) -->
+<g transform="translate(446,36)">
+  <rect width="320" height="232" rx="6" fill="#181600" stroke="var(--amber)" stroke-width="1.5"/>
+  <rect width="320" height="28" rx="6" fill="#221e00"/><rect y="22" width="320" height="6" fill="#221e00"/>
+  <text x="160" y="11" text-anchor="middle" class="t-stereo">«interface»</text>
+  <text x="160" y="22" text-anchor="middle" class="t-name" style="fill:var(--amber);font-size:13px;">IItem</text>
+  <line x1="0" y1="28" x2="320" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">#</text><text x="14" y="41" class="t-f">name: <tspan class="t-type">string</tspan></text>
+  <text x="6" y="53" class="t-vis">#</text><text x="14" y="53" class="t-f">gold: <tspan class="t-type">int</tspan></text>
+  <text x="6" y="65" class="t-vis">+</text><text x="14" y="65" class="t-f">count: <tspan class="t-type">int</tspan> = 1</text>
+  <line x1="0" y1="73" x2="320" y2="73" class="div-l"/>
+  <text x="6" y="86"  class="t-vis">+</text><text x="14" y="86"  class="t-m">«abstract» GetName(): <tspan class="t-type">string</tspan></text>
+  <text x="6" y="98"  class="t-vis">+</text><text x="14" y="98"  class="t-m">«abstract» Use(char*): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="110" class="t-vis">+</text><text x="14" y="110" class="t-m">GetGold(): <tspan class="t-type">int</tspan></text>
+  <line x1="0" y1="118" x2="320" y2="118" class="div-l"/>
+  <text x="6" y="131" class="t-note">전역: HEALTH_POTION = "HealthPotion"</text>
+  <text x="6" y="143" class="t-note">전역: ATTACK_BOOST  = "AttackBoost"</text>
+  <text x="6" y="155" class="t-note">⚠ const string 헤더 직접 정의 → ODR 주의</text>
+  <line x1="0" y1="163" x2="320" y2="163" class="div-l"/>
+  <text x="6" y="176" class="t-file">Item/IItem.h</text>
+</g>
+
+<!-- HealthPotion (Y좌표 295 -> 330 하향 조정) -->
+<g transform="translate(446,330)">
+  <rect width="320" height="170" rx="6" fill="#181600" stroke="var(--amber)" stroke-width="1.5"/>
+  <rect width="320" height="28" rx="6" fill="#221e00"/><rect y="22" width="320" height="6" fill="#221e00"/>
+  <text x="160" y="18" text-anchor="middle" class="t-name" style="fill:var(--amber);font-size:13px;">HealthPotion</text>
+  <line x1="0" y1="28" x2="320" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">-</text><text x="14" y="41" class="t-f">healthRestore: <tspan class="t-type">int</tspan> = 50</text>
+  <text x="6" y="53" class="t-vis">#</text><text x="14" y="53" class="t-f">gold = 200</text>
+  <line x1="0" y1="61" x2="320" y2="61" class="div-l"/>
+  <text x="6" y="74" class="t-vis">+</text><text x="14" y="74" class="t-m">GetName(): <tspan class="t-type">string</tspan></text>
+  <text x="6" y="86" class="t-vis">+</text><text x="14" y="86" class="t-m">Use(char*): <tspan class="t-type">void</tspan></text>
+  <line x1="0" y1="94" x2="320" y2="94" class="div-l"/>
+  <text x="6" y="107" class="t-note">SetHealth(HP + 50)  / MaxHealth 초과 방지</text>
+  <line x1="0" y1="115" x2="320" y2="115" class="div-l"/>
+  <text x="6" y="128" class="t-file">Item/HealthPotion.h · .cpp</text>
+</g>
+
+<!-- AttackBoost (Y좌표 492 -> 540 하향 조정) -->
+<g transform="translate(446,540)">
+  <rect width="320" height="185" rx="6" fill="#181600" stroke="var(--amber)" stroke-width="1.5"/>
+  <rect width="320" height="28" rx="6" fill="#221e00"/><rect y="22" width="320" height="6" fill="#221e00"/>
+  <text x="160" y="18" text-anchor="middle" class="t-name" style="fill:var(--amber);font-size:13px;">AttackBoost</text>
+  <line x1="0" y1="28" x2="320" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">-</text><text x="14" y="41" class="t-f">attackTempIncrease: <tspan class="t-type">int</tspan> = 10</text>
+  <text x="6" y="53" class="t-vis">#</text><text x="14" y="53" class="t-f">gold = 100</text>
+  <line x1="0" y1="61" x2="320" y2="61" class="div-l"/>
+  <text x="6" y="74" class="t-vis">+</text><text x="14" y="74" class="t-m">GetName(): <tspan class="t-type">string</tspan></text>
+  <text x="6" y="86" class="t-vis">+</text><text x="14" y="86" class="t-m">Use(char*): <tspan class="t-type">void</tspan></text>
+  <line x1="0" y1="94" x2="320" y2="94" class="div-l"/>
+  <text x="6" y="107" class="t-note">Attack += 10</text>
+  <text x="6" y="119" class="t-note">BattleManager UseRandomItem 후 Attack -= 10 원복</text>
+  <line x1="0" y1="127" x2="320" y2="127" class="div-l"/>
+  <text x="6" y="140" class="t-file">Item/AttackBoost.h · .cpp</text>
+</g>
+
+<!-- MonsterItem -->
+<g transform="translate(800,36)">
+  <rect width="370" height="195" rx="6" fill="#181600" stroke="var(--amber)" stroke-width="1.2"/>
+  <rect width="370" height="28" rx="6" fill="#221e00"/><rect y="22" width="370" height="6" fill="#221e00"/>
+  <text x="185" y="18" text-anchor="middle" class="t-name" style="fill:var(--amber);font-size:13px;">MonsterItem</text>
+  <line x1="0" y1="28" x2="370" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">+</text><text x="14" y="41" class="t-m">MonsterItem(item: <tspan class="t-type">DevItem</tspan>)</text>
+  <text x="6" y="53" class="t-vis">+</text><text x="14" y="53" class="t-m">GetName(): <tspan class="t-type">string</tspan></text>
+  <text x="6" y="65" class="t-vis">+</text><text x="14" y="65" class="t-m">Use(char*): <tspan class="t-type">void</tspan> {empty}</text>
+  <line x1="0" y1="73" x2="370" y2="73" class="div-l"/>
+  <text x="6" y="86"  class="t-note">Use() 의도적 빈 구현</text>
+  <text x="6" y="98"  class="t-note">BattleManager 이름 체크로 전투 중 사용 차단</text>
+  <text x="6" y="110" class="t-note">DevItem → IItem 브릿지 역할</text>
+  <line x1="0" y1="118" x2="370" y2="118" class="div-l"/>
+  <text x="6" y="131" class="t-file">Monster/item/DropItem.h · .cpp</text>
+</g>
+
+<!-- 관계선 (조정된 Y좌표에 맞춰 연장 및 재배치) -->
+<line x1="215" y1="336" x2="215" y2="356" class="r-compose" marker-start="url(#b-cmp-s)" marker-end="url(#b-cmp-e)"/>
+<text x="220" y="349" class="r-lbl">CharacterInventory</text>
+
+<path d="M 400 421 L 426 421 L 426 250 L 446 250" class="r-compose" marker-start="url(#b-cmp-s)" marker-end="url(#b-cmp-e)"/>
+<text x="432" y="345" class="r-lbl" style="fill:var(--blue)">0..*</text>
+
+<!-- IItem ←── HealthPotion 상속선 분리 연장 -->
+<line x1="606" y1="268" x2="606" y2="330" class="r-inherit" marker-end="url(#b-inh)"/>
+
+<!-- IItem ←── AttackBoost 상속선 분리 연장 -->
+<path d="M 606 268 L 730 268 L 730 540" class="r-inherit" marker-end="url(#b-inh)"/>
+
+<path d="M 766 250 L 985 250 L 985 231" class="r-inherit" marker-end="url(#b-inh)"/>
+<text x="772" y="244" class="r-lbl" style="fill:var(--purple)">«extends»</text>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 3: Monster · Shop · Enums (화살표 공간 확보를 위해 하단 클래스 대거 내림)
+══════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab2">
+<svg viewBox="0 0 1400 1000" style="width:100%;min-width:960px;">
+<defs>
+  <marker id="c-inh" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><polygon points="0,0 10,4.5 0,9" fill="none" stroke="var(--purple)" stroke-width="1.5"/></marker>
+  <marker id="c-cmp-e" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--blue)" stroke-width="1.5"/></marker>
+  <marker id="c-dep" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--amber)" stroke-width="1.5"/></marker>
+  <marker id="c-use" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><polyline points="0,0 8,4.5 0,9" fill="none" stroke="var(--teal)" stroke-width="1.5"/></marker>
+</defs>
+
+<rect x="14" y="14" width="1370" height="630" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="26" y="28" class="t-pkg">« Monster »</text>
+
+<rect x="14" y="666" width="680" height="300" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="26" y="680" class="t-pkg">« Shop »</text>
+
+<rect x="710" y="666" width="674" height="300" rx="8" fill="none" stroke="var(--border2)" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="722" y="680" class="t-pkg">« Enumerations »</text>
+
+<!-- Monster (base) -->
+<g transform="translate(530,36)">
+  <rect width="340" height="244" rx="6" fill="#1a0c10" stroke="var(--coral)" stroke-width="1.5"/>
+  <rect width="340" height="28" rx="6" fill="#261218"/><rect y="22" width="340" height="6" fill="#261218"/>
+  <text x="170" y="11" text-anchor="middle" class="t-stereo">«abstract»</text>
+  <text x="170" y="22" text-anchor="middle" class="t-name" style="fill:var(--coral);font-size:13px;">Monster</text>
+  <line x1="0" y1="28" x2="340" y2="28" class="div-l"/>
+  <text x="6" y="41" class="t-vis">#</text><text x="14" y="41" class="t-f">Info: <tspan class="t-type">MonsterInfo</tspan></text>
+  <line x1="0" y1="49" x2="340" y2="49" class="div-l"/>
+  <text x="6" y="62"  class="t-vis">+</text><text x="14" y="62"  class="t-m">Monster(info: <tspan class="t-type">MonsterInfo</tspan>)</text>
+  <text x="6" y="74"  class="t-vis">+</text><text x="14" y="74"  class="t-m">GetStatus(): <tspan class="t-type">MonsterStats&amp;</tspan></text>
+  <text x="6" y="86"  class="t-vis">+</text><text x="14" y="86"  class="t-m">TakeDamage(dmg): <tspan class="t-type">void</tspan></text>
+  <text x="6" y="98"  class="t-vis">+</text><text x="14" y="98"  class="t-m">TakeDamageWithIsDead(dmg): <tspan class="t-type">bool</tspan></text>
+  <text x="6" y="110" class="t-vis">+</text><text x="14" y="110" class="t-m">GetReward(): <tspan class="t-type">MonsterReward</tspan></text>
+  <text x="6" y="122" class="t-vis">+</text><text x="14" y="122" class="t-m">MonsterDropItems(): <tspan class="t-type">unique_ptr&lt;IItem&gt;</tspan></text>
+  <line x1="0" y1="130" x2="340" y2="130" class="div-l"/>
+  <text x="6" y="143" class="t-note">TakeDamage: finalDmg = max(1, dmg - DEF)</text>
+  <text x="6" y="155" class="t-note">MonsterDropItems → MonsterItem(DevItem)</text>
+  <line x1="0" y1="163" x2="340" y2="163" class="div-l"/>
+  <text x="6" y="176" class="t-file">Monster/Monster.h</text>
+</g>
+
+<!-- 상속 분리 수평 공통선 유지 -->
+<line x1="700" y1="280" x2="700" y2="320" class="r-inherit"/>
+<line x1="130" y1="320" x2="1030" y2="320" class="r-inherit"/>
+
+<!-- ────────────────────────────────
+     서브타입 5개 (Y좌표 320 -> 350 하향 조정으로 화살표 공간 확보)
+──────────────────────────────── -->
+<!-- Goblin -->
+<g transform="translate(30,350)">
+  <rect width="200" height="200" rx="6" fill="#140a0c" stroke="var(--coral)" stroke-width="1.2"/>
+  <rect width="200" height="24" rx="4" fill="#1e0c10"/><rect y="18" width="200" height="6" fill="#1e0c10"/>
+  <text x="100" y="15" text-anchor="middle" class="t-name" style="fill:var(--coral);font-size:12px;">Goblin</text>
+  <line x1="0" y1="24" x2="200" y2="24" class="div-l"/>
+  <text x="6" y="38" class="t-m" style="font-size:9.5px;">Goblin(level=1)</text>
+  <line x1="0" y1="46" x2="200" y2="46" class="div-l"/>
+  <text x="6" y="60"  class="t-note">HP: GenRand(20,30)×Lv</text>
+  <text x="6" y="72"  class="t-note">ATK: GenRand(5,10)×Lv</text>
+  <text x="6" y="84"  class="t-note">DEF: 2+Lv  /  EXP: 10</text>
+  <text x="6" y="96"  class="t-note">드롭: 고블린 몽둥이 (32G)</text>
+  <line x1="0" y1="104" x2="200" y2="104" class="div-l"/>
+  <text x="6" y="117" class="t-file">Monster/classes/Goblin</text>
+</g>
+<!-- Orc -->
+<g transform="translate(255,350)">
+  <rect width="200" height="200" rx="6" fill="#140a0c" stroke="var(--coral)" stroke-width="1.2"/>
+  <rect width="200" height="24" rx="4" fill="#1e0c10"/><rect y="18" width="200" height="6" fill="#1e0c10"/>
+  <text x="100" y="15" text-anchor="middle" class="t-name" style="fill:var(--coral);font-size:12px;">Orc</text>
+  <line x1="0" y1="24" x2="200" y2="24" class="div-l"/>
+  <text x="6" y="38" class="t-m" style="font-size:9.5px;">Orc(level=1)</text>
+  <line x1="0" y1="46" x2="200" y2="46" class="div-l"/>
+  <text x="6" y="60"  class="t-note">HP: GenRand(20,30)×Lv</text>
+  <text x="6" y="72"  class="t-note">ATK: GenRand(5,10)×Lv</text>
+  <text x="6" y="84"  class="t-note">DEF: 10+Lv  /  EXP: 20</text>
+  <text x="6" y="96"  class="t-note">드롭: 오크 몽둥이 (60G)</text>
+  <line x1="0" y1="104" x2="200" y2="104" class="div-l"/>
+  <text x="6" y="117" class="t-file">Monster/classes/Orc</text>
+</g>
+<!-- Troll -->
+<g transform="translate(480,350)">
+  <rect width="200" height="200" rx="6" fill="#140a0c" stroke="var(--coral)" stroke-width="1.2"/>
+  <rect width="200" height="24" rx="4" fill="#1e0c10"/><rect y="18" width="200" height="6" fill="#1e0c10"/>
+  <text x="100" y="15" text-anchor="middle" class="t-name" style="fill:var(--coral);font-size:12px;">Troll</text>
+  <line x1="0" y1="24" x2="200" y2="24" class="div-l"/>
+  <text x="6" y="38" class="t-m" style="font-size:9.5px;">Troll(level=1)</text>
+  <line x1="0" y1="46" x2="200" y2="46" class="div-l"/>
+  <text x="6" y="60"  class="t-note">HP: GenRand(20,30)×Lv</text>
+  <text x="6" y="72"  class="t-note">ATK: GenRand(5,10)×Lv</text>
+  <text x="6" y="84"  class="t-note">DEF: 5+Lv  /  EXP: 50</text>
+  <text x="6" y="96"  class="t-note">드롭: 트롤 몽둥이 (50G)</text>
+  <line x1="0" y1="104" x2="200" y2="104" class="div-l"/>
+  <text x="6" y="117" class="t-file">Monster/classes/Troll</text>
+</g>
+<!-- Slime -->
+<g transform="translate(705,350)">
+  <rect width="200" height="200" rx="6" fill="#140a0c" stroke="var(--coral)" stroke-width="1.2"/>
+  <rect width="200" height="24" rx="4" fill="#1e0c10"/><rect y="18" width="200" height="6" fill="#1e0c10"/>
+  <text x="100" y="15" text-anchor="middle" class="t-name" style="fill:var(--coral);font-size:12px;">Slime</text>
+  <line x1="0" y1="24" x2="200" y2="24" class="div-l"/>
+  <text x="6" y="38" class="t-m" style="font-size:9.5px;">Slime(level=1)</text>
+  <line x1="0" y1="46" x2="200" y2="46" class="div-l"/>
+  <text x="6" y="60"  class="t-note">HP: GenRand(20,30)×Lv</text>
+  <text x="6" y="72"  class="t-note">ATK: GenRand(5,10)×Lv</text>
+  <text x="6" y="84"  class="t-note">DEF: 0+Lv  /  EXP: 5</text>
+  <text x="6" y="96"  class="t-note">드롭: 슬라임진액 (10G)</text>
+  <line x1="0" y1="104" x2="200" y2="104" class="div-l"/>
+  <text x="6" y="117" class="t-file">Monster/classes/Slime</text>
+</g>
+<!-- Boss -->
+<g transform="translate(930,350)">
+  <rect width="200" height="200" rx="6" fill="#180820" stroke="var(--pink)" stroke-width="1.5"/>
+  <rect width="200" height="24" rx="4" fill="#220a2c"/><rect y="18" width="200" height="6" fill="#220a2c"/>
+  <text x="100" y="12" text-anchor="middle" class="t-stereo" style="fill:var(--pink);">«boss»</text>
+  <text x="100" y="22" text-anchor="middle" class="t-name" style="fill:var(--pink);font-size:12px;">Boss ★</text>
+  <line x1="0" y1="24" x2="200" y2="24" class="div-l"/>
+  <text x="6" y="38" class="t-m" style="font-size:9.5px;">Boss(level=10)</text>
+  <line x1="0" y1="46" x2="200" y2="46" class="div-l"/>
+  <text x="6" y="60"  class="t-note">HP: GenRand(30,45)×Lv</text>
+  <text x="6" y="72"  class="t-note">ATK: GenRand(7,15)×Lv</text>
+  <text x="6" y="84"  class="t-note">DEF: 10+Lv  /  EXP: 100</text>
+  <text x="6" y="96"  class="t-note">드롭: 메타몽의 온기 (2000G)</text>
+  <text x="6" y="108" class="t-note" style="fill:var(--pink);">★ Level=10 전용 소환</text>
+  <line x1="0" y1="116" x2="200" y2="116" class="div-l"/>
+  <text x="6" y="129" class="t-file">Monster/classes/Boss</text>
+</g>
+
+<!-- 상속 진입 화살표 유격 연장 제공 -->
+<line x1="130"  y1="320" x2="130"  y2="350" class="r-inherit" marker-end="url(#c-inh)"/>
+<line x1="355"  y1="320" x2="355"  y2="350" class="r-inherit" marker-end="url(#c-inh)"/>
+<line x1="580"  y1="320" x2="580"  y2="350" class="r-inherit" marker-end="url(#c-inh)"/>
+<line x1="805"  y1="320" x2="805"  y2="350" class="r-inherit" marker-end="url(#c-inh)"/>
+<line x1="1030" y1="320" x2="1030" y2="350" class="r-inherit" marker-end="url(#c-inh)"/>
+
+<!-- Create + common -->
+<g transform="translate(1160,36)">
+  <rect width="210" height="200" rx="6" fill="#0c180c" stroke="var(--teal)" stroke-width="1.5"/>
+  <rect width="210" height="28" rx="6" fill="#0e2010"/><rect y="22" width="210" height="6" fill="#0e2010"/>
+  <text x="105" y="11" text-anchor="middle" class="t-stereo">«factory»</text>
+  <text x="105" y="22" text-anchor="middle" class="t-name" style="fill:var(--teal);font-size:12px;">Create + common</text>
+  <line x1="0" y1="28" x2="210" y2="28" class="div-l"/>
+  <text x="6" y="41"  class="t-m" style="font-size:9px;">CreateRandomMonster(lv)</text>
+  <text x="6" y="53"  class="t-m" style="font-size:9px;">CreateMonster(type, lv)</text>
+  <text x="6" y="65"  class="t-m" style="font-size:9px;">CreateBoss(lv=10)</text>
+  <text x="6" y="77"  class="t-m" style="font-size:9px;">GenRand(min, max): <tspan class="t-type">int</tspan></text>
+  <line x1="0" y1="85" x2="210" y2="85" class="div-l"/>
+  <text x="6" y="98"  class="t-note">static mt19937 엔진 재사용</text>
+  <text x="6" y="110" class="t-note">미지원 타입 → throw</text>
+  <text x="6" y="122" class="t-note">RandomLength로 Boss 제외</text>
+  <line x1="0" y1="130" x2="210" y2="130" class="div-l"/>
+  <text x="6" y="143" class="t-file">utils/Create.h · common.h</text>
+</g>
+
+<!-- MonsterStructs + MonsterTable -->
+<g transform="translate(30,36)">
+  <rect width="480" height="200" rx="6" fill="#0c180c" stroke="var(--green)" stroke-width="1.2"/>
+  <rect width="480" height="28" rx="6" fill="#0e200e"/><rect y="22" width="480" height="6" fill="#0e200e"/>
+  <text x="240" y="11" text-anchor="middle" class="t-stereo">«data structs»</text>
+  <text x="240" y="22" text-anchor="middle" class="t-name" style="fill:var(--green);font-size:12px;">MonsterStructs + MonsterTable</text>
+  <line x1="0" y1="28" x2="480" y2="28" class="div-l"/>
+  <text x="6"   y="41" class="t-enum">struct DevItem     { name:string; gold:int }</text>
+  <text x="6"   y="53" class="t-enum">struct MonsterStats  { Name HP ATK DEF AVD }</text>
+  <text x="6"   y="65" class="t-enum">struct MonsterReward { Exp; Item:DevItem }</text>
+  <text x="6"   y="77" class="t-enum">struct MonsterInfo   { Stats; Reward }</text>
+  <text x="6"   y="89" class="t-enum">enum MonsterType { Goblin Orc Troll Slime | RandomLength | Boss | Length }</text>
+  <line x1="0" y1="97" x2="480" y2="97" class="div-l"/>
+  <text x="6"   y="110" class="t-m" style="font-size:9.5px;">«inline static» GetMonsterTable(): <tspan class="t-type">unordered_map&lt;MonsterType, MonsterInfo&gt;&amp;</tspan></text>
+  <text x="6"   y="122" class="t-note">메이어스 싱글턴 · RandomLength로 Boss 랜덤 제외</text>
+  <line x1="0" y1="130" x2="480" y2="130" class="div-l"/>
+  <text x="6"   y="143" class="t-file">Monster/data/MonsterStructs.h · MonsterTable.h</text>
+</g>
+
+<line x1="1160" y1="136" x2="870" y2="136" class="r-dep" marker-end="url(#c-dep)"/>
+<text x="1000" y="126" class="r-lbl" style="fill:var(--amber);">«creates»</text>
+
+<!-- Shop -->
+<g transform="translate(30,688)">
+  <rect width="644" height="258" rx="6" fill="#0c180c" stroke="var(--green)" stroke-width="1.5"/>
+  <rect width="644" height="28" rx="6" fill="#0e2010"/><rect y="22" width="644" height="6" fill="#0e2010"/>
+  <text x="322" y="11" text-anchor="middle" class="t-stereo">«functions»</text>
+  <text x="322" y="22" text-anchor="middle" class="t-name" style="fill:var(--green);font-size:13px;">Shop</text>
+  <line x1="0" y1="28" x2="644" y2="28" class="div-l"/>
+  <text x="6"   y="41" class="t-enum">enum ShopItems { HEALTH_POTION · ATTACK_BOOST }</text>
+  <text x="6"   y="53" class="t-enum">struct ShopItemInfo { name:string; gold:int }</text>
+  <text x="6"   y="65" class="t-note">ShopItemTable: static const unordered_map  ⚠ ODR 주의</text>
+  <text x="6"   y="77" class="t-note">  HealthPotion: 200G  /  AttackBoost: 100G</text>
+  <line x1="0" y1="85" x2="644" y2="85" class="div-l"/>
+  <text x="6"   y="98"  class="t-vis">+</text><text x="14"  y="98"  class="t-m">BuyItem(item, player*): <tspan class="t-type">bool</tspan></text>
+  <text x="6"   y="110" class="t-vis">+</text><text x="14"  y="110" class="t-m">SellItem(index, player*): <tspan class="t-type">bool</tspan></text>
+  <line x1="0" y1="118" x2="644" y2="118" class="div-l"/>
+  <text x="6"   y="131" class="t-note">구매: Gold 부족 체크 → 차감 → AddItem</text>
+  <text x="6"   y="143" class="t-note">판매: HP/ATK 아이템 60% / 몬스터 드롭 아이템 100%</text>
+  <text x="6"   y="155" class="t-note">     MonsterTable 참조로 드롭 가격 동적 조회</text>
+  <line x1="0" y1="163" x2="644" y2="163" class="div-l"/>
+  <text x="6"   y="176" class="t-file">Shop/struct.h · function.h · .cpp</text>
+</g>
+
+<!-- Enumerations -->
+<g transform="translate(726,688)">
+  <rect width="644" height="258" rx="6" fill="#0c140c" stroke="var(--green)" stroke-width="1"/>
+  <rect width="644" height="28" rx="6" fill="#0e1c0e"/><rect y="22" width="644" height="6" fill="#0e1c0e"/>
+  <text x="322" y="18" text-anchor="middle" class="t-name" style="fill:var(--green);font-size:13px;">Enumerations</text>
+  <line x1="0" y1="28" x2="644" y2="28" class="div-l"/>
+  <text x="6"   y="42" class="t-enum">GameStateMachine:</text>
+  <text x="6"   y="54" class="t-enum">  Start · Explore · Battle · Shop · GameEnd</text>
+  <text x="6"   y="70" class="t-enum">Phase:</text>
+  <text x="6"   y="82" class="t-enum">  Continue · Enter · Escape</text>
+  <text x="6"   y="98" class="t-enum">BattleResult:</text>
+  <text x="6"   y="110" class="t-enum">  Win · Fail · BossClear</text>
+  <text x="330" y="42" class="t-enum">MonsterType:</text>
+  <text x="330" y="54" class="t-enum">  Goblin · Orc · Troll · Slime</text>
+  <text x="330" y="66" class="t-enum">  RandomLength · Boss · Length</text>
+  <text x="330" y="82" class="t-enum">ShopItems:</text>
+  <text x="330" y="94" class="t-enum">  HEALTH_POTION · ATTACK_BOOST</text>
+  <text x="330" y="110" class="t-enum">TextAlign: Left · Center · Right</text>
+  <line x1="0" y1="118" x2="644" y2="118" class="div-l"/>
+  <text x="6"   y="131" class="t-file">GameManager.h · BattleManager.h · MonsterStructs.h · UIManager.h · Shop/struct.h</text>
+</g>
+</svg>
+</div>
+
+<script>
+function switchTab(n) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>
