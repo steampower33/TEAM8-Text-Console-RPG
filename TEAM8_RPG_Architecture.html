@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEAM8 Text Console RPG — Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2330;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --purple: #a371f7;
+    --blue: #58a6ff;
+    --teal: #39d353;
+    --coral: #f85149;
+    --amber: #e3b341;
+    --green: #3fb950;
+    --pink: #f778ba;
+    --gray: #484f58;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: var(--gray);
+    margin-bottom: 32px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* ── 전체 레이아웃 ── */
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── 레이어 행 ── */
+  .layer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .layer-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    padding-left: 4px;
+    border-left: 2px solid var(--border);
+    margin-bottom: 2px;
+  }
+  .row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  /* ── 카드 ── */
+  .card {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    padding: 14px 16px;
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.15s;
+    cursor: default;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    z-index: 2;
+  }
+  .card.purple  { border-top: 2px solid var(--purple); }
+  .card.blue    { border-top: 2px solid var(--blue); }
+  .card.teal    { border-top: 2px solid var(--teal); }
+  .card.coral   { border-top: 2px solid var(--coral); }
+  .card.amber   { border-top: 2px solid var(--amber); }
+  .card.green   { border-top: 2px solid var(--green); }
+  .card.pink    { border-top: 2px solid var(--pink); }
+  .card.gray    { border-top: 2px solid var(--gray); }
+
+  .card.purple:hover  { border-color: var(--purple); }
+  .card.blue:hover    { border-color: var(--blue); }
+  .card.teal:hover    { border-color: var(--teal); }
+  .card.coral:hover   { border-color: var(--coral); }
+  .card.amber:hover   { border-color: var(--amber); }
+  .card.green:hover   { border-color: var(--green); }
+  .card.pink:hover    { border-color: var(--pink); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge-singleton { background: #2d1f61; color: var(--purple); }
+  .badge-interface { background: #2a1f0a; color: var(--amber); }
+  .badge-enum      { background: #0d2b18; color: var(--green); }
+  .badge-factory   { background: #0d2424; color: var(--teal); }
+  .badge-global    { background: #2a0a18; color: var(--pink); }
+  .badge-bug       { background: #3b0a0a; color: var(--coral); }
+  .badge-wip       { background: #2a2000; color: var(--amber); }
+
+  .card-file {
+    font-size: 10px;
+    color: var(--gray);
+    margin-bottom: 8px;
+  }
+
+  .member-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .member-list li {
+    font-size: 11px;
+    color: var(--text2);
+    padding-left: 12px;
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.6;
+  }
+  .member-list li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gray);
+  }
+  .fn   { color: #79c0ff; }
+  .var  { color: #a8daff; }
+  .type { color: var(--amber); }
+  .note { color: #f85149; font-style: italic; }
+
+  /* ── 화살표 / 연결 표시 ── */
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 4px 0;
+    font-size: 18px;
+    color: var(--border);
+    flex-wrap: wrap;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: var(--gray);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* ── 인라인 관계 그룹 ── */
+  .group-box {
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    background: var(--bg3);
+  }
+  .group-title {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 10px;
+  }
+
+  /* ── 이슈 테이블 ── */
+  .issue-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 8px;
+  }
+  .issue-table th {
+    text-align: left;
+    padding: 6px 10px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+  }
+  .issue-table td {
+    padding: 6px 10px;
+    color: var(--text2);
+    border-bottom: 1px solid #1c2330;
+    vertical-align: top;
+  }
+  .issue-table tr:hover td { background: #1c2330; }
+  .sev-red    { color: var(--coral); font-weight: 700; }
+  .sev-orange { color: var(--amber); font-weight: 700; }
+  .sev-yellow { color: #d2a679; font-weight: 700; }
+
+  /* ── 화면 레이아웃 시각화 ── */
+  .console-layout {
+    display: grid;
+    grid-template-columns: 110fr 39fr;
+    grid-template-rows: auto auto;
+    gap: 2px;
+    font-size: 10px;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    max-width: 500px;
+  }
+  .panel {
+    padding: 8px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+  }
+  .panel-title {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .panel-scene   { grid-row: 1; grid-column: 1; }
+  .panel-stat    { grid-row: 1; grid-column: 2; }
+  .panel-log     { grid-row: 2; grid-column: 1; }
+  .panel-kill    { grid-row: 2; grid-column: 2; }
+
+  .dim { color: var(--gray); font-size: 10px; margin-top: 4px; }
+
+  /* ── 상태 머신 ── */
+  .fsm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .state {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .state.start  { border-color: var(--teal);   color: var(--teal);   background: #0d2b18; }
+  .state.explore{ border-color: var(--blue);   color: var(--blue);   background: #0d1f35; }
+  .state.battle { border-color: var(--coral);  color: var(--coral);  background: #3b0a0a; }
+  .state.shop   { border-color: var(--amber);  color: var(--amber);  background: #2a1f0a; }
+  .state.end    { border-color: var(--gray);   color: var(--gray);   background: var(--bg3); }
+  .arr { font-size: 14px; color: var(--border); }
+
+  /* ── 몬스터 스탯 테이블 ── */
+  .stat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stat-table th {
+    padding: 5px 8px;
+    text-align: right;
+    color: var(--gray);
+    font-size: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-table th:first-child { text-align: left; }
+  .stat-table td {
+    padding: 4px 8px;
+    text-align: right;
+    color: var(--text2);
+    border-bottom: 1px solid #1c2330;
+    font-size: 11px;
+  }
+  .stat-table td:first-child { text-align: left; color: var(--text); font-weight: 600; }
+  .stat-table tr:hover td { background: #1c2330; }
+
+  hr.section { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<h1>TEAM8 · Text Console RPG</h1>
+<p class="subtitle">완성본 전체 아키텍처 다이어그램 · C++20 · Windows Console</p>
+
+<div class="diagram">
+
+  <!-- ══════════════════════════════════════
+       LAYER 0: 진입점
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">진입점</div>
+    <div class="row">
+      <div class="card gray" style="max-width:340px; flex:none;">
+        <div class="card-title">main.cpp <span class="badge badge-global">entry</span></div>
+        <ul class="member-list">
+          <li><span class="fn">ui</span>.Initialize() <span style="color:var(--gray)">// 콘솔 크기·커서·UTF-8 설정</span></li>
+          <li><span class="fn">GameManager</span>::GetInstance().<span class="fn">Run</span>()</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       LAYER 1: 관리자 계층
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">최상위 관리자 계층 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp; | 관리자 계층</div>
+    <div class="row">
+
+      <!-- GameManager -->
+      <div class="card purple">
+        <div class="card-title">GameManager <span class="badge badge-singleton">singleton</span></div>
+        <div class="card-file">Game/GameManager.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="var">curentGameState</span>: <span class="type">GameStateMachine</span></li>
+          <li><span class="var">battleManager</span>: <span class="type">BattleManager*</span></li>
+          <li><span class="var">player</span>: <span class="type">Character*</span></li>
+          <hr class="section">
+          <li><span class="fn">GetInstance</span>() → <span class="type">GameManager&</span></li>
+          <li><span class="fn">Run</span>() &nbsp;<span style="color:var(--gray)">// 타이틀 → 캐릭터생성 → 메인루프</span></li>
+        </ul>
+        <div style="margin-top:10px;">
+          <div class="dim">상태 머신</div>
+          <div class="fsm">
+            <span class="state start">Start</span>
+            <span class="arr">→</span>
+            <span class="state explore">Explore</span>
+            <span class="arr">↔</span>
+            <span class="state battle">Battle</span>
+            <span class="arr">→</span>
+            <span class="state shop">Shop</span>
+            <span class="arr">→</span>
+            <span class="state end">GameEnd</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BattleManager -->
+      <div class="card coral">
+        <div class="card-title">BattleManager</div>
+        <div class="card-file">Game/BattleManager.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="fn">BeforeBattle</span>(player) → <span class="type">Phase</span></li>
+          <li><span class="fn">Battle</span>(player) → <span class="type">BattleResult</span></li>
+          <li><span class="fn">BattleLoop</span>(player, monster) → <span class="type">BattleResult</span></li>
+          <li><span class="fn">PlayerWin</span>(player, monster)</li>
+          <li><span class="fn">MonsterWin</span>(player)</li>
+          <li><span class="fn">GameVictory</span>(monster) <span style="color:var(--gray)">// 보스 클리어</span></li>
+          <li><span class="fn">UseRandomItem</span>(player)</li>
+          <li><span class="fn">WaitForEnter</span>() &nbsp;<span class="fn">Line</span>()</li>
+          <hr class="section">
+          <li style="color:var(--text2);font-size:10px;">
+            턴 확률: 70% 공격 / 30% 아이템 시도<br>
+            아이템 시도: 30% 성공 / 70% 방해<br>
+            전투 대상: HP·ATK·DEF 기반 / Level=10 → Boss
+          </li>
+        </ul>
+      </div>
+
+      <!-- UIManager -->
+        <div class="card teal">
+        <div class="card-title">UIManager <span class="badge badge-global">extern ui</span></div>
+        <div class="card-file">UI/UIManager.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="fn">Initialize</span>() &nbsp;<span class="fn">GetTitleResult</span>()</li>
+          <li><span class="fn">ShowCharacterGeneration</span>() → <span class="type">string</span></li>
+          <li><span class="fn">ShowMainFrame</span>() &nbsp;<span class="fn">ShowShop</span>()</li>
+          <li><span class="fn">UpdateStat</span> &nbsp;<span class="fn">UpdateInventory</span> &nbsp;<span class="fn">UpdateScene</span></li>
+          <li><span class="fn">UpdateKillList</span>(name) &nbsp;<span class="var">killList</span>: <span class="type">map&lt;string,int&gt;</span></li>
+          <li><span class="fn">PrintLog</span>(msg) &nbsp;<span class="var">LogMessages</span>: <span class="type">vector&lt;string&gt;</span></li>
+          <li><span class="fn">DrawBox</span> &nbsp;<span class="fn">Gotoxy</span> &nbsp;<span class="fn">GetDisplayWidth</span></li>
+          <li><span class="fn">ShowMenuAt</span> &nbsp;<span class="fn">ShowMenuAlign</span></li>
+          <hr class="section">
+          <li style="color:var(--text2);font-size:10px;">ASCII 아트: warriorIdle · warriorBattle · goblin · slime · orc · troll · boss</li>
+          <li><span style="color:var(--gray)">Windows API: SetConsoleCursorPosition · SetConsoleOutputCP</span></li>
+        </ul>
+        <div style="margin-top:10px;">
+          <div class="dim">콘솔 레이아웃 (150×40)</div>
+          <div class="console-layout" style="margin-top:6px;">
+            <div class="panel panel-scene">
+              <div class="panel-title">Scene</div>
+              <div class="dim">x:0~110 y:0~25<br>ASCII 아트 + 탐험/전투 씬</div>
+            </div>
+            <div class="panel panel-stat-inv">
+              <div class="panel-title">Stat</div>
+              <div class="dim">x:111~149 y:0~12<br>HP·ATK·Gold·EXP</div>
+              <div class="panel-title" style="margin-top:12px;">Inventory</div>
+              <div class="dim">x:111~149 y:13~25</div>
+            </div>
+            <div class="panel panel-log">
+              <div class="panel-title">Log</div>
+              <div class="dim">x:0~110 y:26~39<br>PrintLog 메시지 스크롤</div>
+            </div>
+            <div class="panel panel-kill">
+              <div class="panel-title">Kill List</div>
+              <div class="dim">x:111~149 y:26~39</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SoundManager -->
+      <div class="card pink" style="max-width: 240px;">
+        <div class="card-title">SoundManager <span class="badge badge-singleton">singleton</span></div>
+        <div class="card-file">Sound/SoundManager.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="fn">GetInstance</span>() → <span class="type">SoundManager*</span></li>
+          <li><span class="fn">PlayBGM</span>(path) → <span class="type">bool</span></li>
+          <li><span class="fn">PlaySFX</span>(path, alias)</li>
+          <li><span class="fn">StopBGM</span>()</li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--gray)">Windows MCI API (winmm.lib)<br>mp4 → wav 변환 후 repeat 지원<br>Assets/Sound/music.wav (BGM)<br>Assets/Sound/keyInput.wav (SFX)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       LAYER 2: 캐릭터 / 아이템
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">캐릭터 · 아이템 계층</div>
+    <div class="row">
+
+      <!-- Character -->
+      <div class="card blue">
+        <div class="card-title">Character <span class="badge badge-singleton">singleton</span></div>
+        <div class="card-file">Character/Character.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="var">Name</span>, <span class="var">Level</span>, <span class="var">Health</span>, <span class="var">MaxHealth</span></li>
+          <li><span class="var">Attack</span>, <span class="var">Experience</span>, <span class="var">Gold</span></li>
+          <li><span class="var">IsDead</span>: <span class="type">bool</span> = false</li>
+          <li><span class="var">CharacterInventory</span>: <span class="type">Inventory</span></li>
+          <hr class="section">
+          <li><span class="fn">GetInstance</span>(name) → <span class="type">Character*</span></li>
+          <li><span class="fn">SetHealth</span>(hp) <span style="color:var(--gray)">// 0≤hp≤MaxHealth, IsDead 처리</span></li>
+          <li><span class="fn">TakeDamage</span>(dmg) → <span class="fn">SetHealth</span>(HP-dmg)</li>
+          <li><span class="fn">LevelUp</span>() <span style="color:var(--gray)">// EXP≥100, max Lv10</span></li>
+          <li><span class="fn">UseItem</span>(idx) → Inventory.<span class="fn">UseItem</span>(idx, this)</li>
+          <li><span class="fn">DisplayStatus</span>() <span style="color:var(--gray)">// 박스 출력 (미사용)</span></li>
+          <hr class="section">
+          <li style="font-size:10px;">초기값: HP=200, ATK=30, Lv=1<br>레벨업: MaxHP += Lv×20, ATK += Lv×5</li>
+        </ul>
+      </div>
+
+      <!-- Inventory -->
+      <div class="card blue">
+        <div class="card-title">Inventory</div>
+        <div class="card-file">Item/Inventory.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="var">items</span>: <span class="type">vector&lt;unique_ptr&lt;IItem&gt;&gt;</span></li>
+          <hr class="section">
+          <li><span class="fn">AddItem</span>(unique_ptr) <span style="color:var(--gray)">// 동명 아이템 → count++</span></li>
+          <li><span class="fn">UseItem</span>(idx, char*) <span style="color:var(--gray)">// Use() → count-- → erase</span></li>
+          <li><span class="fn">RemoveItem</span>(idx) <span style="color:var(--gray)">// count-- → erase</span></li>
+          <li><span class="fn">GetItems</span>() → <span class="type">vector&lt;IItem*&gt;</span></li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--text2)">count 필드로 스택 관리<br>동일 아이템 중복 시 unique_ptr 하나로 합산</li>
+        </ul>
+      </div>
+
+      <!-- IItem -->
+      <div class="card amber">
+        <div class="card-title">IItem <span class="badge badge-interface">interface</span></div>
+        <div class="card-file">Item/IItem.h</div>
+        <ul class="member-list">
+          <li><span class="var">name</span>: <span class="type">string</span> (protected)</li>
+          <li><span class="var">gold</span>: <span class="type">int</span> (protected)</li>
+          <li><span class="var">count</span>: <span class="type">int</span> = 1 (public)</li>
+          <hr class="section">
+          <li><span class="fn">GetName</span>() → <span class="type">string</span> (pure)</li>
+          <li><span class="fn">Use</span>(Character*) (pure)</li>
+          <li><span class="fn">GetGold</span>() → <span class="type">int</span></li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--gray)">전역 상수: HEALTH_POTION · ATTACK_BOOST<br>(헤더 직접 정의 → ODR 주의)</li>
+        </ul>
+      </div>
+
+      <!-- HealthPotion -->
+      <div class="card amber">
+        <div class="card-title">HealthPotion</div>
+        <div class="card-file">Item/HealthPotion.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="var">healthRestore</span> = 50</li>
+          <li><span class="var">gold</span> = 200</li>
+          <hr class="section">
+          <li><span class="fn">Use</span>() → <span class="fn">SetHealth</span>(HP+50)</li>
+          <li style="font-size:10px;color:var(--gray)">SetHealth 내부에서 MaxHealth 초과 방지</li>
+        </ul>
+      </div>
+
+      <!-- AttackBoost -->
+      <div class="card amber">
+        <div class="card-title">AttackBoost</div>
+        <div class="card-file">Item/AttackBoost.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="var">attackTempIncrease</span> = 10</li>
+          <li><span class="var">gold</span> = 100</li>
+          <hr class="section">
+          <li><span class="fn">Use</span>() → <span class="note">Attack += 10</span></li>
+          <li style="font-size:10px;color:var(--text2)">사용 후 BattleManager에서<br>Attack -= 10 으로 수동 원복 처리<br>(UseRandomItem 마지막 if 블록)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       LAYER 3: 몬스터 시스템
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">몬스터 시스템</div>
+    <div class="row">
+
+      <!-- Monster base -->
+      <div class="card coral">
+        <div class="card-title">Monster (base)</div>
+        <div class="card-file">Monster/Monster.h</div>
+        <ul class="member-list">
+          <li><span class="var">Info</span>: <span class="type">MonsterInfo</span> (protected)</li>
+          <hr class="section">
+          <li><span class="fn">GetStatus</span>() → <span class="type">MonsterStats&</span></li>
+          <li><span class="fn">TakeDamage</span>(dmg) <span style="color:var(--gray)">// max(1, dmg-DEF)</span></li>
+          <li><span class="fn">TakeDamageWithIsDead</span>(dmg) → <span class="type">bool</span></li>
+          <li><span class="fn">GetReward</span>() → <span class="type">MonsterReward</span></li>
+          <li><span class="fn">MonsterDropItems</span>() → <span class="type">unique_ptr&lt;IItem&gt;</span></li>
+        </ul>
+      </div>
+
+      <!-- 서브타입들 -->
+      <div class="group-box" style="flex:2;">
+        <div class="group-title">Monster 서브타입 (classes/) — 익명 namespace + GenRand 레벨 보정</div>
+        <div class="row" style="gap:8px;">
+          <div class="card coral" style="min-width:140px;">
+            <div class="card-title" style="font-size:12px;">Goblin</div>
+            <ul class="member-list">
+              <li>HP: <span class="fn">GenRand</span>(20,30)×Lv</li>
+              <li>ATK: <span class="fn">GenRand</span>(5,10)×Lv</li>
+              <li>DEF: 2+Lv · EXP: 10</li>
+              <li>드롭: 고블린 몽둥이(32G)</li>
+            </ul>
+          </div>
+          <div class="card coral" style="min-width:140px;">
+            <div class="card-title" style="font-size:12px;">Orc</div>
+            <ul class="member-list">
+              <li>HP: <span class="fn">GenRand</span>(20,30)×Lv</li>
+              <li>ATK: <span class="fn">GenRand</span>(5,10)×Lv</li>
+              <li>DEF: 10+Lv · EXP: 20</li>
+              <li>드롭: 오크 몽둥이(60G)</li>
+            </ul>
+          </div>
+          <div class="card coral" style="min-width:140px;">
+            <div class="card-title" style="font-size:12px;">Troll</div>
+            <ul class="member-list">
+              <li>HP: <span class="fn">GenRand</span>(20,30)×Lv</li>
+              <li>ATK: <span class="fn">GenRand</span>(5,10)×Lv</li>
+              <li>DEF: 5+Lv · EXP: 50</li>
+              <li>드롭: 트롤 몽둥이(50G)</li>
+            </ul>
+          </div>
+          <div class="card coral" style="min-width:140px;">
+            <div class="card-title" style="font-size:12px;">Slime</div>
+            <ul class="member-list">
+              <li>HP: <span class="fn">GenRand</span>(20,30)×Lv</li>
+              <li>ATK: <span class="fn">GenRand</span>(5,10)×Lv</li>
+              <li>DEF: 0+Lv · EXP: 5</li>
+              <li>드롭: 슬라임진액(10G)</li>
+            </ul>
+          </div>
+          <div class="card coral" style="min-width:140px; border-top-color: #f778ba;">
+            <div class="card-title" style="font-size:12px; color:var(--pink);">Boss ★</div>
+            <ul class="member-list">
+              <li>HP: <span class="fn">GenRand</span>(30,45)×Lv</li>
+              <li>ATK: <span class="fn">GenRand</span>(7,15)×Lv</li>
+              <li>DEF: 10+Lv · EXP: 100</li>
+              <li>드롭: 메타몽의 온기(2000G)</li>
+              <li style="color:var(--pink);">Level=10 때만 소환</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- MonsterStructs / MonsterTable -->
+      <div class="card green" style="max-width:300px;">
+        <div class="card-title">MonsterStructs <span class="badge badge-enum">data</span></div>
+        <div class="card-file">Monster/data/MonsterStructs.h · MonsterTable.h</div>
+        <ul class="member-list">
+          <li><span class="type">DevItem</span>: name, gold</li>
+          <li><span class="type">MonsterStats</span>: Name HP ATK DEF AVD</li>
+          <li><span class="type">MonsterReward</span>: Exp, DevItem</li>
+          <li><span class="type">MonsterInfo</span>: Stats + Reward</li>
+          <hr class="section">
+          <li><span class="type">MonsterType</span>: Goblin Orc Troll Slime <span style="color:var(--gray)">|RandomLength|</span> Boss</li>
+          <hr class="section">
+          <li><span class="fn">GetMonsterTable</span>() <span class="badge badge-singleton" style="font-size:9px;">inline static</span></li>
+          <li style="font-size:10px;color:var(--gray)">메이어스 싱글턴 패턴<br>RandomLength로 Boss 랜덤 제외</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       LAYER 4: 팩토리 / 공통 유틸
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">팩토리 · 유틸 · 드롭아이템</div>
+    <div class="row">
+
+      <!-- Create -->
+      <div class="card green">
+        <div class="card-title">Create <span class="badge badge-factory">factory</span></div>
+        <div class="card-file">Monster/utils/Create.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="fn">CreateRandomMonster</span>(level) → <span class="type">unique_ptr&lt;Monster&gt;</span></li>
+          <li><span class="fn">CreateMonster</span>(type, level) → <span class="type">unique_ptr&lt;Monster&gt;</span></li>
+          <li><span class="fn">CreateBoss</span>(level=10) → <span class="type">unique_ptr&lt;Monster&gt;</span></li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--gray)">GenRand(0, RandomLength-1) → MonsterType 캐스팅<br>switch-case로 각 서브클래스 생성<br>미지원 타입 → throw invalid_argument</li>
+        </ul>
+      </div>
+
+      <!-- common -->
+      <div class="card green" style="max-width:240px;">
+        <div class="card-title">common</div>
+        <div class="card-file">Monster/utils/common.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="fn">GenRand</span>(min, max) → <span class="type">int</span></li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--gray)">static random_device + mt19937<br>함수 첫 호출 시 1회 초기화<br>전역 재시드 없이 엔진 재사용</li>
+        </ul>
+      </div>
+
+      <!-- DropItem -->
+      <div class="card amber" style="max-width:280px;">
+        <div class="card-title">MonsterItem</div>
+        <div class="card-file">Monster/item/DropItem.h · .cpp</div>
+        <ul class="member-list">
+          <li>: <span class="type">IItem</span></li>
+          <li><span class="fn">MonsterItem</span>(DevItem&) <span style="color:var(--gray)">// name, gold 세팅</span></li>
+          <li><span class="fn">GetName</span>() → <span class="type">string</span></li>
+          <li><span class="fn">Use</span>() → <span class="note">빈 구현 (의도적)</span></li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--text2)">몬스터 드롭 전용 아이템<br>BattleManager에서 이름 체크로 사용 차단<br>DevItem → IItem 브릿지 역할</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       LAYER 5: 상점 시스템
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">상점 시스템</div>
+    <div class="row">
+
+      <div class="card green">
+        <div class="card-title">Shop/struct.h <span class="badge badge-wip">ODR 주의</span></div>
+        <ul class="member-list">
+          <li><span class="type">ShopItems</span>: HEALTH_POTION · ATTACK_BOOST</li>
+          <li><span class="type">ShopItemInfo</span>: name, gold</li>
+          <li><span class="var">ShopItemTable</span>: <span class="type">static const unordered_map</span></li>
+          <li style="font-size:10px;color:var(--gray)">HealthPotion: 200G / AttackBoost: 100G<br>static const → 각 TU마다 복사본 생성 (ODR)</li>
+        </ul>
+      </div>
+
+      <div class="card green">
+        <div class="card-title">Shop/function.h · .cpp</div>
+        <ul class="member-list">
+          <li><span class="fn">BuyItem</span>(ShopItems, Character*) → <span class="type">bool</span></li>
+          <li><span class="fn">SellItem</span>(index, Character*) → <span class="type">bool</span> <span class="badge" style="background:#0d2b18;color:var(--green);">완성</span></li>
+          <hr class="section">
+          <li style="font-size:10px;color:var(--text2)">구매: 골드 부족 체크 → 차감 → AddItem<br>판매: HealthPotion/AttackBoost → 60% 가격<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;몬스터 아이템 → 전액(MonsterTable 참조)<br>판매 후 RemoveItem 호출 완료</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ENUM 정리
+  ══════════════════════════════════════ -->
+  <div class="layer">
+    <div class="layer-label">열거형 (enum class)</div>
+    <div class="row">
+      <div class="card gray" style="max-width:260px;">
+        <div class="card-title">GameStateMachine <span class="badge badge-enum">enum</span></div>
+        <ul class="member-list">
+          <li>Start · Explore · Battle · Shop · GameEnd</li>
+        </ul>
+      </div>
+      <div class="card gray" style="max-width:220px;">
+        <div class="card-title">Phase <span class="badge badge-enum">enum</span></div>
+        <ul class="member-list">
+          <li>Continue · Enter · Escape</li>
+        </ul>
+      </div>
+      <div class="card gray" style="max-width:240px;">
+        <div class="card-title">BattleResult <span class="badge badge-enum">enum</span></div>
+        <ul class="member-list">
+          <li>Win · Fail · BossClear</li>
+        </ul>
+      </div>
+      <div class="card gray" style="max-width:260px;">
+        <div class="card-title">MonsterType <span class="badge badge-enum">enum</span></div>
+        <ul class="member-list">
+          <li>Goblin · Orc · Troll · Slime</li>
+          <li><span style="color:var(--gray)">RandomLength</span> · Boss · Length</li>
+        </ul>
+      </div>
+      <div class="card gray" style="max-width:220px;">
+        <div class="card-title">ShopItems <span class="badge badge-enum">enum</span></div>
+        <ul class="member-list">
+          <li>HEALTH_POTION · ATTACK_BOOST</li>
+        </ul>
+      </div>
+      <div class="card gray" style="max-width:200px;">
+        <div class="card-title">TextAlign <span class="badge badge-enum">enum</span></div>
+        <ul class="member-list">
+          <li>Left · Center · Right</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /diagram -->
+
+</body>
+</html>
