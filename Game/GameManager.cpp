@@ -5,6 +5,7 @@
 #include "../Item/AttackBoost.h"
 #include "../Item/HealthPotion.h"
 #include "../UI/UIManager.h"
+#include "../Sound/SoundManager.h"
 
 //GameManager 싱글톤 생성 시작
 GameManager* GameManager::instance = nullptr;
@@ -92,6 +93,8 @@ GameManager::GameManager()
 
 void GameManager::Run()
 {
+    SoundManager::GetInstance()->PlayBGM("Assets/Sound/Goblins_Den_(Regular).wav");
+    
     int titleResult = ui.GetTitleResult();
 
     if (titleResult == 0)
@@ -103,6 +106,19 @@ void GameManager::Run()
 
         // 시작 아이템을 캐릭터 내부 인벤토리에 지급
         player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
+        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
         player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
         curentGameState = GameStateMachine::Explore;
     }
@@ -114,6 +130,8 @@ void GameManager::Run()
     player = Character::GetInstance();
     battleManager = new BattleManager();
 
+    SoundManager::GetInstance()->PlayBGM("Assets/Sound/Goblins_Dance_(Battle).wav");
+    
     while (curentGameState != GameStateMachine::GameEnd)
     {
         switch (curentGameState)
@@ -133,7 +151,7 @@ void GameManager::Run()
             if (BattleResult == BattleResult::Win  )
             {
                 curentGameState = GameStateMachine::Explore;
-                ui.PrintLog("\033[36m[상점]\033[0m 미궁 속 미지의 상점을 발견했습니다. [Enter] 입장 (ESC 무서웡.. 패쓰!)");
+                ui.PrintLog("\033[36m[상점]\033[0m 미궁 속 미지의 상점을 발견했습니다. [Enter] 입장 / [ESC] 패스");
                 int key = _getch();
                 if (key == KEY_ESC)
                 {

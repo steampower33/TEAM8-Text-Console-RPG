@@ -195,9 +195,12 @@ void UIManager::DrawBox(int startX, int startY, int endX, int endY)
 
 int UIManager::GetTitleResult()
 {
+    // ShowEndingCredit();
+    // int key = _getch();
+    
     DrawBox(0, 0, ConsoleWidth - 1, ConsoleHeight - 1);
     DrawTitleMenu();
-
+    
     return ShowMenuAlign(1,
                          ConsoleWidth - 1,
                          25,
@@ -354,80 +357,102 @@ void UIManager::UpdateStat(Character* character)
     }
 }
 
-void UIManager::UpdateScene(bool isCombat, std::string monsterName)
+void UIManager::ClearScenePanel()
 {
+    int innerWidth = EndSceneX - StartSceneX - 1;
+    std::string blankLine(innerWidth, ' '); // 너비만큼의 공백
+    
+    for (int i = StartSceneY + 1; i < EndSceneY; i++)
+    {
+        PrintTextAt(StartSceneX + 1, i, blankLine);
+    }
+}
+
+void UIManager::UpdateScene(bool isCombat, std::string monsterName, int playerOffset, int monsterOffset, bool isMonsterDead, bool isPlayerAttacked, bool isMonsterAttacked)
+{
+    int playerBaseX = StartSceneX + 5; 
+    
     if (!isCombat)
     {
-        // 비전투(Idle) 상태: 대검 출력
         for (int i = 0; i < warriorIdle.size(); i++)
         {
-            PrintTextAlign(StartSceneX + 1,
-                           EndSceneX - 1,
-                           StartSceneY + 1 + i,
-                           warriorIdle[i],
-                           TextAlign::Left);
+            PrintTextAlign(playerBaseX + playerOffset, EndSceneX - 1, StartSceneY + 1 + i, warriorIdle[i], TextAlign::Left);
         }
     }
     else
     {
         for (int i = 0; i < warriorBattle.size(); i++)
         {
-            PrintTextAlign(StartSceneX + 1,
-                           EndSceneX - 1,
-                           StartSceneY + 1 + i,
-                           warriorBattle[i],
-                           TextAlign::Left);
+            std::string text = warriorBattle[i];
+            if (isPlayerAttacked)
+                text = Color::ORANGE + text + Color::RESET;
+            PrintTextAlign(playerBaseX + playerOffset, EndSceneX - 1, StartSceneY + 1 + i, text, TextAlign::Left);
         }
 
-        // 전투(Combat) 상태: 몬스터 이름에 따라 아트 스왑
-        int monsterX = StartSceneX + 55; // 우측 배치 기준 X좌표
+        int monsterX = StartSceneX + 55 + monsterOffset; 
         int startY = StartSceneY + 1;
-
-        // C++ string의 find를 쓰는 이유: 팀원분 코드를 보면 레벨이 0일 때 "Slime 0" 처럼 
-        // 뒤에 숫자가 붙는 예외 처리가 있어서, 이름 포함 여부로 검사하는 것이 안전합니다.
-
         int SceneHeight = EndSceneY - StartSceneY - 1;
 
-        if (monsterName.find("Goblin") != std::string::npos)
+        // [핵심] 그릴 몬스터 배열의 '주소'만 저장할 포인터 변수 준비
+        const std::vector<std::string>* targetMonsterArt = nullptr;
+
+        // 이름에 따라 어떤 배열을 가리킬지 주소만 매핑
+        if (monsterName.find("Goblin") != std::string::npos) targetMonsterArt = &goblin;
+        else if (monsterName.find("Orc") != std::string::npos) targetMonsterArt = &orc;
+        else if (monsterName.find("Troll") != std::string::npos) targetMonsterArt = &troll;
+        else if (monsterName.find("Slime") != std::string::npos) targetMonsterArt = &slime;
+        else if (monsterName.find("Boss") != std::string::npos) targetMonsterArt = &boss;
+
+        // 매핑된 배열이 있다면, 렌더링 로직은 여기서 딱 한 번만 실행!
+        if (targetMonsterArt != nullptr)
         {
-            // 뾰족한 고블린 배열 출력
-            for (int i = 0; i < std::min(int(goblin.size()), SceneHeight); i++)
+            for (int i = 0; i < std::min(int(targetMonsterArt->size()), SceneHeight); i++)
             {
-                PrintTextAt(monsterX, startY + i, goblin[i]);
+                // 포인터 역참조(*)로 배열 데이터 가져오기
+                std::string text = (*targetMonsterArt)[i];
+                
+                // 몬스터가 죽었다면 시뻘겋게 칠하기
+                if (isMonsterDead)
+                    text = Color::RED + text + Color::RESET;
+                if (isMonsterAttacked)
+                    text = Color::ORANGE + text + Color::RESET;
+                
+                PrintTextAt(monsterX, startY + i, text);
             }
         }
-        else if (monsterName.find("Orc") != std::string::npos)
-        {
-            for (int i = 0; i < std::min(int(orc.size()), SceneHeight); i++)
-            {
-                PrintTextAt(monsterX, startY + i, orc[i]);
-            }
-        }
-        else if (monsterName.find("Troll") != std::string::npos)
-        {
-            for (int i = 0; i < std::min(int(troll.size()), SceneHeight); i++)
-            {
-                PrintTextAt(monsterX, startY + i, troll[i]);
-            }
-        }
-        else if (monsterName.find("Slime") != std::string::npos)
-        {
-            for (int i = 0; i < std::min(int(slime.size()), SceneHeight); i++)
-            {
-                PrintTextAt(monsterX, startY + i, slime[i]);
-            }
-        }
-        else if (monsterName.find("Boss") != std::string::npos)
-        {
-            for (int i = 0; i < std::min(int(boss.size()), SceneHeight); i++)
-            {
-                PrintTextAt(monsterX, startY + i, boss[i]);
-            }
-        }
-        
     }
 }
 
+void UIManager::AnimateStrike(bool isPlayerAttacking, std::string monsterName, bool isMonsterDead, bool isPlayerAttacked, bool isMonsterAttacked)
+{
+    // 진동 패턴: 우로 3칸 -> 좌로 3칸 -> 우로 2칸 -> 좌로 2칸 -> 원위치
+    // 콘솔 특성상 2~3칸만 움직여도 굉장히 역동적으로 보입니다.
+    int shakePattern[] = { 3, -3, 2, -2, 0 }; 
+
+    // 타격 효과음 재생 연동 (있다면)
+    // SoundManager::GetInstance()->PlaySFX("Assets/Sound/hit.wav", "hit");
+
+    for (int offset : shakePattern)
+    {
+        // 이전 프레임의 잔상 완벽 제거
+        ClearScenePanel(); 
+        
+        // 오프셋을 적용해 새로운 프레임 렌더링
+        if (isPlayerAttacking)
+        {
+            // 플레이어가 때림 -> 몬스터가 피격당해 흔들림
+            UpdateScene(true, monsterName, 0, offset, isMonsterDead, isPlayerAttacked, isMonsterAttacked);
+        }
+        else
+        {
+            // 몬스터가 때림 -> 플레이어가 피격당해 흔들림
+            UpdateScene(true, monsterName, offset, 0, isMonsterDead, isPlayerAttacked, isMonsterAttacked);
+        }
+        
+        // 인간의 눈이 진동을 인식할 수 있도록 프레임 딜레이 부여 (히트스톱 효과 겸용)
+        Sleep(40); 
+    }
+}
 void UIManager::UpdateKillList(std::string monsterName)
 {
     if (monsterName.size() != 0)
@@ -458,7 +483,7 @@ void UIManager::UpdateKillList(std::string monsterName)
 // PrintLog(sysLog);
 // PrintLog(attackLog);
 // PrintLog(itemLog);
-void UIManager::PrintLog(const std::string& message)
+void UIManager::PrintLog(const std::string& message, int delay)
 {
     if (message.size() != 0)
         LogMessages.push_back(message);
@@ -483,6 +508,7 @@ void UIManager::PrintLog(const std::string& message)
         std::string line = std::string("> ") + LogMessages[i];
         PrintTextAt(StartLogX + 2, EndLogY - 1 - (logSize - i), line);
     }
+    Sleep(delay);
 }
 
 void UIManager::UpdateInventory(Inventory* inven)
@@ -575,7 +601,8 @@ void UIManager::ShowShop(Character* character)
                     bool buy = BuyItem(selectedKey, character);
                     if (buy)
                     {
-                        PrintLog("\033[32m[아이템]\033[0m " + itemName + "을 구매했습니다.");
+                        SoundManager::GetInstance()->PlaySFX("Assets/Sound/keys_jingling.wav", "ItemBuy");
+                        PrintLog("\033[32m[아이템]\033[0m " + itemName + "을 구매했습니다.", 0);
                     }
                     else
                     {
@@ -609,14 +636,15 @@ void UIManager::ShowShop(Character* character)
             }
             else if (choose != menuList.size() - 1)
             {
-                int purchaseOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"판매", "취소"}, 2, false);
-                if (purchaseOrNot == 0)
+                int sellOrNot = ShowMenuAt({startX + 2 + actMenuWidth + 5, endY - 2}, {"판매", "취소"}, 2, false);
+                if (sellOrNot == 0)
                 {
                     std::string itemName = items[choose]->GetName();
                     bool sell = SellItem(choose, character);
                     if (sell)
                     {
-                        PrintLog("\033[32m[아이템]\033[0m " + itemName + " 을 판매했습니다.");
+                        SoundManager::GetInstance()->PlaySFX("Assets/Sound/coins_gather_quick.wav", "ItemSell");
+                        PrintLog("\033[32m[아이템]\033[0m " + itemName + " 을 판매했습니다.", 0);
                     }
                     UpdateInventory(&inventory);
                     UpdateStat(character);
@@ -632,6 +660,134 @@ void UIManager::ShowShop(Character* character)
         }
         }
     }
+}
+
+void UIManager::ShowPlayerDead()
+{
+    ClearScenePanel();
+    
+    std::vector<std::string> art = {
+        R"EOF( ╱$$     ╱$$ ╱$$$$$$  ╱$$   ╱$$       ╱$$$$$$$  ╱$$$$$$ ╱$$$$$$$$ ╱$$$$$$$ )EOF",
+        R"EOF(│  $$   ╱$$╱╱$$__  $$│ $$  │ $$      │ $$__  $$│_  $$_╱│ $$_____╱│ $$__  $$)EOF",
+        R"EOF( ╲  $$ ╱$$╱│ $$  ╲ $$│ $$  │ $$      │ $$  ╲ $$  │ $$  │ $$      │ $$  ╲ $$)EOF",
+        R"EOF(  ╲  $$$$╱ │ $$  │ $$│ $$  │ $$      │ $$  │ $$  │ $$  │ $$$$$   │ $$  │ $$)EOF",
+        R"EOF(   ╲  $$╱  │ $$  │ $$│ $$  │ $$      │ $$  │ $$  │ $$  │ $$__╱   │ $$  │ $$)EOF",
+        R"EOF(    │ $$   │ $$  │ $$│ $$  │ $$      │ $$  │ $$  │ $$  │ $$      │ $$  │ $$)EOF",
+        R"EOF(    │ $$   │  $$$$$$╱│  $$$$$$╱      │ $$$$$$$╱ ╱$$$$$$│ $$$$$$$$│ $$$$$$$╱)EOF",
+        R"EOF(    │__╱    ╲______╱  ╲______╱       │_______╱ │______╱│________╱│_______╱ )EOF",
+    };
+
+    int boxWidth = EndSceneX - StartSceneX - 1;
+    int boxHeight = EndSceneY - StartSceneY - 1;
+    int startX = (ConsoleWidth - boxWidth) / 2;
+    int startY = (ConsoleHeight - boxHeight) / 2;
+    for (int i = 0; i < art.size(); i++)
+    {
+        std::string text = "\033[31m" + art[i] + "\033[0m";
+        PrintTextAt(startX, startY + i, text);
+    }
+}
+
+void UIManager::ShowEndingCredit()
+{
+    system("cls");
+    
+    int boxWidth = 60;
+    int boxHeight = ConsoleHeight - 1;
+    int startX = (ConsoleWidth - boxWidth) / 2;
+    int startY = (ConsoleHeight - boxHeight) / 2;
+    int endX = startX + boxWidth;
+    int endY = startY + boxHeight;
+    DrawBox(startX, startY, endX, endY);
+    std::vector<std::string> endLog = {
+        "=== Development Team ===", // 혹은 === Programmers ===
+        "",
+        "GameLoop       : 조민웅",
+        "Item/Inventory : 이인구",
+        "Monster/Shop   : 김선우",
+        "Character      : 김진우",
+        "UI/Sound       : 이승민",
+        "", 
+        "",
+        "=== Developer Comments ===",
+        "",
+        "[조민웅]",
+        "  재미있는 시간이었습니당 클로드야 고마워!",
+        "",
+        "[이인구]",
+        "  고생 많으셨습니다, 고수님들 덕분에 꿀 빨다 갑니다.",
+        "  감사합니다.",
+        "",
+        "[김선우]",
+        "  웅ㅇ애 CPP 어려웡 ",
+        "",
+        "[김진우]",
+        "  재밌있는 시간이었습니다. 덕분에 많이 배워 갑니다.",
+        "",
+        "[이승민]",
+        "  재밌었슴다! 다들 고생많으셨습니다!",
+        "",
+        "",
+        "=== Special Thanks to ===",
+        "",
+        "  [ Development Tools ]",
+        "    - Rider (Main Editor)",
+        "    - GitHub (Version Control)",
+        "",
+        "  [ AI Assistants ]",
+        "    - Gemini",
+        "    - Claude",
+        "    - ChatGPT",
+        "",
+        "  [ Collaboration & Docs ]",
+        "    - Notion (Documentation)",
+        "    - Gamma (Presentation)",
+        "",
+        "",
+        "  [ Audio Assets ]",
+            "    - Minifantasy Dungeon by Leohpaz",
+            "    - 400 Sounds Pack by Chequered Ink",
+            "", 
+            "", 
+            "", 
+            "", 
+            "", 
+        "플레이해주셔서 감사합니다.....!!"
+    };
+    
+    int idx = 1; // 1부터 시작해야 첫 줄이 바로 계산됨
+    while (idx <= endLog.size())
+    {
+        // 박스 내부 여백 깔끔하게 지우기
+        int innerWidth = endX - startX - 1;
+        std::string blankLine(innerWidth, ' ');
+        for (int i = startY + 1; i < endY; i++)
+        {
+            PrintTextAt(startX + 1, i, blankLine);
+        }
+
+        // 크레딧 한 줄씩 출력 (스크롤 로직)
+        for (int i = 0; i < idx; i++)
+        {
+            std::string line = std::string("  ") + endLog[i];
+            
+            int currentY = endY - 1 - (idx - i);
+            
+            if (currentY > startY) 
+            {
+                PrintTextAt(startX + 2, currentY, line);
+            }
+        }
+        
+        // 스크롤 속도 제어 (1000 = 1초)
+        Sleep(500); // 0.8초마다 한 줄씩 올라감 (원하는 감성에 맞춰 조절하세요)
+        
+        idx++;
+    }
+    
+    Sleep(2000); 
+    
+    // 아무 키나 누르면 타이틀로 돌아가는 등의 후속 로직을 여기에 작성하면 됩니다.
 }
 
 // ====================================================== 

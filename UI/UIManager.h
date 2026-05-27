@@ -16,6 +16,15 @@
 #define KEY_ENTER 13
 #define KEY_ESC   27
 
+namespace Color 
+{
+const std::string RESET   = "\033[0m";
+    
+const std::string RED     = "\033[38;5;124m";
+const std::string ORANGE     = "\033[38;5;208m";
+
+}
+
 class Character;
 class Inventory;
 class IItem;
@@ -53,12 +62,20 @@ public:
     void ShowMainFrame();
     void UpdateStat(Character* character);
 
-    void UpdateScene(bool isCombat = false, std::string monsterName = "");
-
+    void ClearScenePanel();
+    void UpdateScene(
+        bool isCombat, std::string monsterName, int playerOffset = 0, 
+        int monsterOffset = 0, bool isMonsterDead = false, bool isPlayerAttacked = false, bool isMonsterAttacked = false);
+    void AnimateStrike(
+        bool isPlayerAttacking, std::string monsterName, 
+        bool isMonsterDead = false, bool isPlayerAttacked = false, bool isMonsterAttacked = false);
+    
     std::vector<std::string> LogMessages;
-    void PrintLog(const std::string& message = "");
+    void PrintLog(const std::string& message = "", int delay = 300);
     void UpdateInventory(Inventory* inven);
     void ShowShop(Character* character);
+    void ShowPlayerDead();
+    void ShowEndingCredit();
 
     std::map<std::string, int> killList;
     void UpdateKillList(std::string monsterName = "");
@@ -81,7 +98,7 @@ public:
                         int endX,
                         int y,
                         const std::string& text,
-                        TextAlign align);
+                        TextAlign align = TextAlign::Left);
     void DrawBox(int startX, int startY, int endX, int endY);
     void Gotoxy(int x, int y);
     void DrawTitleMenu();
@@ -226,7 +243,7 @@ private:
         R"_EOL(                            @*%@                  )_EOL",
         R"_EOL(                          @#----@                 )_EOL",
         R"_EOL(                        @#-------#%               )_EOL",
-        R"_EOL(                         #-(*--*))-.@               )_EOL",
+        R"_EOL(                         #-(*--*))-.@             )_EOL",
         R"_EOL(                       @#-==-^-+--.*#@            )_EOL",
         R"_EOL(                   @+##--------------:##%@        )_EOL",
         R"_EOL(        @###@     @:---------------------=@       )_EOL",
