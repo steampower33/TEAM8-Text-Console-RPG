@@ -790,6 +790,119 @@ void UIManager::ShowEndingCredit()
     // 아무 키나 누르면 타이틀로 돌아가는 등의 후속 로직을 여기에 작성하면 됩니다.
 }
 
+// 이제 성공 여부(bool)가 아니라, 데미지 배율(float)을 반환합니다.
+float UIManager::ShowTimingGauge()
+{
+    int x = StartSceneX + 15; 
+    int y = StartSceneY + 20;
+    
+    int barLength = 30;
+    
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // 퍼펙트 존(2.0배)의 위치를 랜덤으로 설정합니다. 
+    std::uniform_int_distribution<int> centerDist(4, barLength - 5);
+    int centerIndex = centerDist(gen);
+
+    // 커서 이동 속도 랜덤 설정
+    std::uniform_int_distribution<int> speedDist(5, 35);
+    int currentSpeed = speedDist(gen);
+    
+    int cursor = 0;           
+    int direction = 1;        
+    float multiplier = 0.0f; // 최종 데미지 배율
+
+    while (_kbhit()) _getch();
+
+    while (true)
+    {
+        // ==========================================
+        // 렌더링: 현재 상태를 화면에 먼저 확실하게 그립니다.
+        // ==========================================
+        std::string bar = "[";
+        for (int i = 0; i < barLength; i++)
+        {
+            int d = std::abs(i - centerIndex);
+            std::string cellText = (i == cursor) ? "╋" : " ";
+
+            if (d == 0) 
+                bar += "\033[1;93;41m" + cellText + "\033[0m"; // 2.0배
+            else if (d == 1) 
+                bar += "\033[1;97;43m" + cellText + "\033[0m"; // 1.5배
+            else if (d == 2) 
+                bar += "\033[1;97;42m" + cellText + "\033[0m"; // 1.0배
+            else if (d == 3) 
+                bar += "\033[1;97;44m" + cellText + "\033[0m"; // 0.5배
+            else 
+                bar += (i == cursor) ? "\033[1;93m╋\033[0m" : "-"; // 0.0배
+        }
+        bar += "]";
+        PrintTextAt(x, y, bar);
+
+        // ==========================================
+        // 마이크로 폴링(Polling): 렌더링된 화면 그대로 입력을 대기합니다.
+        // ==========================================
+        bool isPressed = false;
+        
+        // currentSpeed를 통째로 Sleep하지 않고, 5ms 단위로 쪼개서 키보드를 감시합니다.
+        for (int wait = 0; wait < currentSpeed; wait += 5)
+        {
+            if (_kbhit())
+            {
+                int key = _getch();
+                if (key == KEY_ENTER || key == 32)
+                {
+                    isPressed = true;
+                    break; // 감지 즉시 for문 탈출
+                }
+            }
+            Sleep(5); // 5ms 대기
+        }
+
+        // ==========================================
+        // 판정 및 상태 업데이트
+        // ==========================================
+        if (isPressed)
+        {
+            // 방금 화면에 띄워둔 cursor 값을 기준으로 정확하게 판정!
+            int distance = std::abs(cursor - centerIndex);
+            multiplier = 2.0f - (distance * 0.5f);
+            
+            if (multiplier <= 0.0f) 
+                multiplier = 0.0f;
+            
+            break; // 미니게임 루프(while) 탈출
+        }
+
+        // 아무도 키를 누르지 않았다면 비로소 커서를 다음 칸으로 이동시킵니다.
+        cursor += direction;
+        if (cursor <= 0 || cursor >= barLength - 1)
+        {
+            direction *= -1; 
+        }
+    }
+
+    // 결과 처리 및 로그 출력
+    // float는 정확한 == 2.0f 비교보다 >= 2.0f 이 안전합니다.
+    if (multiplier >= 2.0f) {
+        PrintLog("\033[1;31m[PERFECT] 완벽한 일격! (데미지 200%)\033[0m");
+    } else if (multiplier > 0.0f) {
+        std::string multStr = std::to_string(multiplier).substr(0, 3); 
+        PrintLog("\033[32m[HIT] 공격 적중! (데미지 " + multStr + "배)\033[0m");
+    } else {
+        SoundManager::GetInstance()->PlaySFX("Assets/Sound/8_bit_negative_quick.wav", "PlayerAttackMiss");
+        PrintLog("\033[90m[MISS] 헛스윙을 했습니다...\033[0m");
+    }
+
+    Sleep(500); 
+    
+    std::string blankBar(barLength + 2, ' ');
+    PrintTextAt(x, y, blankBar);
+
+    return multiplier;
+}
+
 // ====================================================== 
 // = 아래로는 Panel 그리기 위주 함수
 // ======================================================
