@@ -100,11 +100,11 @@ BattleResult BattleManager::Battle(Character& player)
     ui.PrintLog("\033[31m[새로운 전투!]\033[0m");
     if (MonsterStats.Name == "Boss")
     {
-        ui.PrintLog("\033[31m[전투 발생!]\033[0m 보스 몬스터 " + MonsterStats.Name + "이(가) 나타났다!");
+        ui.PrintLog("\033[31m[전투 발생!]\033[0m 보스 몬스터 " + MonsterStats.Name + "(HP: " + std::to_string(MonsterStats.HP) + ", ATK: " + std::to_string(MonsterStats.ATK) + ")이(가) 나타났다!");
     }
     else
     {
-        ui.PrintLog("\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "이(가) 나타났다!");
+        ui.PrintLog("\033[31m[전투 발생!]\033[0m 야생의 " + MonsterStats.Name + "(HP: " + std::to_string(MonsterStats.HP) + ", ATK: " + std::to_string(MonsterStats.ATK) + ")이(가) 나타났다!");
     }
     
     // isCombat = true 전달
@@ -148,10 +148,12 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
         if (damageMultiplier > 0.0f)
         {
             // 공격 성공 로직 (몬스터 체력 깎기, 흔들림 애니메이션 재생 등)
-            IsMonsterDead = monster.TakeDamageWithIsDead(int(float(player.Attack) * damageMultiplier));
+            int damage = int(float(player.Attack) * damageMultiplier);
+            int beforeMonsterHP = monster.GetStatus().HP;
+            IsMonsterDead = monster.TakeDamageWithIsDead(damage);
             SoundManager::GetInstance()->PlaySFX("Assets/Sound/07_human_atk_sword_1.wav", "PlayerAttack");
             ui.AnimateStrike(true, MonsterName, IsMonsterDead,false, true);
-            ui.PrintLog("\033[31m[플레이어 공격]\033[0m " + player.Name + "의 공격! " + MonsterName + "에게 피해를 입혔습니다. " + MonsterName + "의 잔여 HP = "+ std::to_string(monster.GetStatus().HP));
+            ui.PrintLog("\033[31m[플레이어 공격]\033[0m " + player.Name + "의 공격! " + MonsterName + "에게 피해를 입혔습니다. " + MonsterName + " HP : " + std::to_string(beforeMonsterHP) + " -> " + std::to_string(monster.GetStatus().HP));
         }
             
         if (IsMonsterDead == true)
@@ -177,12 +179,6 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
         ui.PrintLog("\033[31m[몬스터 반격]\033[0m " + MonsterName + "의 맹공! " + std::to_string(monster.GetStatus().ATK) + "의 피해!");
         ui.UpdateStat(&player);
             
-        if (player.IsDead == true)
-        {
-            MonsterWin(player);
-            return BattleResult::Fail;
-        }
-        
         //공격력 포션 일회성 스텟 증가 설정
         if (UseAttackBoostThisTime)
         {
@@ -191,6 +187,13 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
             ui.PrintLog("\033[32m[Attack Boost]\033[0m Attack이 다시 되돌아왔습니다!", 500);
             UseAttackBoostThisTime = false;
         }
+        
+        if (player.IsDead == true)
+        {
+            MonsterWin(player);
+            return BattleResult::Fail;
+        }
+        
     }
     //return fightResult;
 }

@@ -801,12 +801,12 @@ float UIManager::ShowTimingGauge()
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    // 퍼펙트 존(2.0배)의 위치를 랜덤으로 설정합니다. 
+    // 퍼펙트 존(1.0배)의 위치를 랜덤으로 설정합니다.
     std::uniform_int_distribution<int> centerDist(4, barLength - 5);
     int centerIndex = centerDist(gen);
 
     // 커서 이동 속도 랜덤 설정
-    std::uniform_int_distribution<int> speedDist(5, 35);
+    std::uniform_int_distribution<int> speedDist(5, 20);
     int currentSpeed = speedDist(gen);
     
     int cursor = 0;           
@@ -827,13 +827,13 @@ float UIManager::ShowTimingGauge()
             std::string cellText = (i == cursor) ? "╋" : " ";
 
             if (d == 0) 
-                bar += "\033[1;93;41m" + cellText + "\033[0m"; // 2.0배
+                bar += "\033[1;93;41m" + cellText + "\033[0m"; // 1.2배
             else if (d == 1) 
-                bar += "\033[1;97;43m" + cellText + "\033[0m"; // 1.5배
+                bar += "\033[1;97;43m" + cellText + "\033[0m"; // 0.9배
             else if (d == 2) 
-                bar += "\033[1;97;42m" + cellText + "\033[0m"; // 1.0배
+                bar += "\033[1;97;42m" + cellText + "\033[0m"; // 0.6배
             else if (d == 3) 
-                bar += "\033[1;97;44m" + cellText + "\033[0m"; // 0.5배
+                bar += "\033[1;97;44m" + cellText + "\033[0m"; // 0.3배
             else 
                 bar += (i == cursor) ? "\033[1;93m╋\033[0m" : "-"; // 0.0배
         }
@@ -867,7 +867,7 @@ float UIManager::ShowTimingGauge()
         {
             // 방금 화면에 띄워둔 cursor 값을 기준으로 정확하게 판정!
             int distance = std::abs(cursor - centerIndex);
-            multiplier = 2.0f - (distance * 0.5f);
+            multiplier = 1.2f - (distance * 0.3f);
             
             if (multiplier <= 0.0f) 
                 multiplier = 0.0f;
@@ -884,9 +884,8 @@ float UIManager::ShowTimingGauge()
     }
 
     // 결과 처리 및 로그 출력
-    // float는 정확한 == 2.0f 비교보다 >= 2.0f 이 안전합니다.
-    if (multiplier >= 2.0f) {
-        PrintLog("\033[1;31m[PERFECT] 완벽한 일격! (데미지 200%)\033[0m");
+    if (multiplier >= 1.2f) {
+        PrintLog("\033[1;31m[PERFECT] 완벽한 일격! (데미지 120%)\033[0m");
     } else if (multiplier > 0.0f) {
         std::string multStr = std::to_string(multiplier).substr(0, 3); 
         PrintLog("\033[32m[HIT] 공격 적중! (데미지 " + multStr + "배)\033[0m");

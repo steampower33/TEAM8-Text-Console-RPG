@@ -106,19 +106,6 @@ void GameManager::Run()
 
         // 시작 아이템을 캐릭터 내부 인벤토리에 지급
         player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<HealthPotion>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
-        player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
         player->CharacterInventory.AddItem(std::make_unique<AttackBoost>());
         curentGameState = GameStateMachine::Explore;
     }

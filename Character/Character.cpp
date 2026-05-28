@@ -1,7 +1,8 @@
 #include <iostream>
 #include <iomanip> // DisplayStatus 쪽에서 setw 안쓰면 지워도 됨
 #include "Character.h"
-
+#include "../UI/UIManager.h"
+#include "../Sound/SoundManager.h"
 
 Character* Character::Instance = nullptr;
 
@@ -48,7 +49,7 @@ void Character::LevelUp() // 레벨 업
 {
     if (Level >= 10)
     {
-        std::cout << "최대 레벨에 도달했습니다!" << std::endl;
+        ui.PrintLog(Color::RED + "[최대 레벨] 최대 레벨에 도달했습니다!" + Color::RESET);
         return;
     }
 
@@ -60,7 +61,9 @@ void Character::LevelUp() // 레벨 업
         Attack += Level * 5;
         Health = MaxHealth;
 
-        std::cout << "레벨 업! 현재 레벨: " << Level << std::endl;
+        ui.PrintLog(Color::YELLOW + "[레벨업] 현재 레벨: " + std::to_string(Level) + Color::RESET);
+        ui.PrintLog(Color::YELLOW + "[레벨업] 능력치가 상승되었습니다!" + Color::RESET);
+        SoundManager::GetInstance()->PlaySFX("Assets/Sound/8_bit_chime_positive.wav", "LevelUP");
     }
 }
 

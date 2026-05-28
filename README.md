@@ -9,12 +9,7 @@
 - GameManager를 중심으로 각 시스템들(Item, Inventory, Character, Monster, UI, Shop, Sound)이 유기적으로 돌아갈수있도록 구현
 
 ### **주요 게임 사례 및 시연 영상**
-- 게임의 주요 장면이나 기능을 보여주는 시연 영상 (진행중)
-  - 메인 게임 루프 
-  - 탐색 → 전투 → 승리시 상점 
-  - 플레이어 죽음 
-  - 후반부 보스전 
-  - 엔딩
+[![포트폴리오 시연 영상](https://img.youtube.com/vi/GSiU53bYj_Q/maxresdefault.jpg)](https://www.youtube.com/watch?v=GSiU53bYj_Q)
 
 ### **게임 개발 과정**
 - 노션의 다이어그램 예시대로 파트를 나눔
@@ -24,18 +19,18 @@
 ### **트러블 슈팅**
 - 매번마다 파일 추가하면 .vcxproj 충돌 → CMakelists.txt 바꿈
 - Branch Rules
-  - 한명이 독단적으로 pull request & merge로 날려버리는 위험성을 방지하기위해서 2명이상의 승인이 필요하도록 설정 
-- git convention 
-  - branch 이름을 대소문자구분해서 이름을 짓다가 branch 이름 충돌? 이 발생함 
+  - 한명이 독단적으로 pull request & merge로 날려버리는 위험성을 방지하기위해서 2명이상의 승인이 필요하도록 설정
+- git convention
+  - branch 이름을 대소문자구분해서 이름을 짓다가 branch 이름 충돌? 이 발생함
   - 그래서 대소문자 구분을 하지않고 이름을 짓기로 결정
 
 ### 환경 설정
 - Rider
-    - Working In Directory를 F:/nbc/TEAM8-Text-Console-RPG 로 설정
-    - Run in external console 체크
-      ![setting](Assets/Images/setting.png)
-    - CMake에서 Toolchain VisualStudio로 설정
-      ![setting](Assets/Images/cmake.png)
+  - Working In Directory를 F:/nbc/TEAM8-Text-Console-RPG 로 설정
+  - Run in external console 체크
+    ![setting](Assets/Images/setting.png)
+  - CMake에서 Toolchain VisualStudio로 설정
+    ![setting](Assets/Images/cmake.png)
 
 ### 🎵 Audio Assets & Credits
 This project uses free audio assets from the incredible creators on itch.io.
