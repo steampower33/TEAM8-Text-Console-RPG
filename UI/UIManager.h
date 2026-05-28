@@ -21,10 +21,26 @@
 
 namespace Color 
 {
-const std::string RESET   = "\033[0m";
+// 기본 제어
+const std::string RESET        = "\033[0m";       // 색상 초기화
     
-const std::string RED     = "\033[38;5;124m";
-const std::string ORANGE     = "\033[38;5;208m";
+// 기본 색상 (Basic)
+const std::string RED          = "\033[38;5;124m"; // 어두운 붉은색 (피, 적 경고)
+const std::string LIGHT_RED    = "\033[38;5;196m"; // 밝은 붉은색 (데미지 텍스트)
+const std::string ORANGE       = "\033[38;5;208m"; // 주황색 (일반 경고, 불 속성)
+const std::string YELLOW       = "\033[38;5;226m"; // 노란색 (골드, 강조 표시)
+    
+// 자연/마법 계열 (Nature & Magic)
+const std::string GREEN        = "\033[38;5;46m";  // 밝은 녹색 (회복, 자연 속성)
+const std::string DARK_GREEN   = "\033[38;5;22m";  // 어두운 녹색 (숲, 독 속성)
+const std::string BLUE         = "\033[38;5;21m";  // 짙은 파란색 (마나, 물 속성)
+const std::string CYAN         = "\033[38;5;51m";  // 청록색 (얼음, 정보 텍스트)
+const std::string PURPLE       = "\033[38;5;93m";  // 보라색 (독특한 아이템, 저주)
+    
+// 무채색 (Grayscale - 232~255 대역)
+const std::string WHITE        = "\033[38;5;255m"; // 완전한 흰색
+const std::string GRAY         = "\033[38;5;240m"; // 회색 (비활성화, 배경 설명)
+const std::string DARK_GRAY    = "\033[38;5;235m"; // 어두운 회색 (그림자)
 
 }
 
