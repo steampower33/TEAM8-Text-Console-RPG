@@ -9,7 +9,7 @@
 - GameManager를 중심으로 각 시스템들(Item, Inventory, Character, Monster, UI, Shop, Sound)이 유기적으로 돌아갈수있도록 구현
 
 ### **주요 게임 사례 및 시연 영상**
-[![포트폴리오 시연 영상](https://img.youtube.com/vi/GSiU53bYj_Q/maxresdefault.jpg)](https://www.youtube.com/watch?v=GSiU53bYj_Q)
+[![포트폴리오 시연 영상](https://img.youtube.com/vi/Smd5yC0MmSY/maxresdefault.jpg)](https://www.youtube.com/watch?v=Smd5yC0MmSY)
 
 ### **게임 개발 과정**
 - 노션의 다이어그램 예시대로 파트를 나눔

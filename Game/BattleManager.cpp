@@ -155,7 +155,16 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
             ui.AnimateStrike(true, MonsterName, IsMonsterDead,false, true);
             ui.PrintLog("\033[31m[플레이어 공격]\033[0m " + player.Name + "의 공격! " + MonsterName + "에게 피해를 입혔습니다. " + MonsterName + " HP : " + std::to_string(beforeMonsterHP) + " -> " + std::to_string(monster.GetStatus().HP));
         }
-            
+        
+        // 공격력 포션 되돌리기
+        if (UseAttackBoostThisTime)
+        {
+            player.Attack -= 10;
+            SoundManager::GetInstance()->PlaySFX("Assets/Sound/power_down_2.wav", "UsePotion");
+            ui.PrintLog("\033[32m[Attack Boost]\033[0m Attack이 다시 되돌아왔습니다!", 500);
+            UseAttackBoostThisTime = false;
+        }
+        
         if (IsMonsterDead == true)
         {
             ui.UpdateKillList(MonsterName);
@@ -173,21 +182,13 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
                 
         }
         
+        // 몬스터 공격
         SoundManager::GetInstance()->PlaySFX("Assets/Sound/17_orc_atk_sword_1.wav", "MonsterAttack");
         ui.AnimateStrike(false, MonsterName, false, true, false);
         player.TakeDamage(monster.GetStatus().ATK); //몬스터 공격
         ui.PrintLog("\033[31m[몬스터 반격]\033[0m " + MonsterName + "의 맹공! " + std::to_string(monster.GetStatus().ATK) + "의 피해!");
         ui.UpdateStat(&player);
             
-        //공격력 포션 일회성 스텟 증가 설정
-        if (UseAttackBoostThisTime)
-        {
-            player.Attack -= 10;
-            SoundManager::GetInstance()->PlaySFX("Assets/Sound/power_down_2.wav", "UsePotion");
-            ui.PrintLog("\033[32m[Attack Boost]\033[0m Attack이 다시 되돌아왔습니다!", 500);
-            UseAttackBoostThisTime = false;
-        }
-        
         if (player.IsDead == true)
         {
             MonsterWin(player);
@@ -302,9 +303,9 @@ void BattleManager::UseRandomItem(Character& player)
     }
     
     // 쓸 수 있는 아이템이 있으면 확률적으로 사용
-    // 30%확률로 아이템 사용
+    // 60% 확률로 아이템 사용
     string name;
-    if (ResultOfUseItemPercent <= 30 && usableItems.size() > 0)
+    if (ResultOfUseItemPercent <= 60 && usableItems.size() > 0)
     {
         // 사용 가능한 것들 중에서 균일하게 선택
         uniform_int_distribution<int> usableDist(0, usableItems.size() - 1);
@@ -327,13 +328,13 @@ void BattleManager::UseRandomItem(Character& player)
         }
         else if (name == ATTACK_BOOST)
         {
-            UseAttackBoostThisTime = true;
             SoundManager::GetInstance()->PlaySFX("Assets/Sound/power_up.wav", "AttackBoost");
             ui.PrintLog("\033[32m[Attack Boost]\033[0m Attack: " + std::to_string(beforeAttack) + " -> " + std::to_string(player.Attack), 500);
+            UseAttackBoostThisTime = true;
         }
     }
-    //70%확률로 방해받아 사용실패
-    else if (ResultOfUseItemPercent > 30 && usableItems.size() > 0)
+    // 40%확률로 방해받아 사용실패
+    else if (ResultOfUseItemPercent > 40 && usableItems.size() > 0)
     {
         ui.PrintLog("\033[32m[아이템 사용 시도]\033[0m 아이템을 사용하려 했으나 몬스터의 방해로 인해 사용하지 못하였습니다!!");
     }
