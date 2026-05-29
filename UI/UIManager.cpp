@@ -806,7 +806,7 @@ float UIManager::ShowTimingGauge()
     int centerIndex = centerDist(gen);
 
     // 커서 이동 속도 랜덤 설정
-    std::uniform_int_distribution<int> speedDist(5, 20);
+    std::uniform_int_distribution<int> speedDist(5, 15);
     int currentSpeed = speedDist(gen);
     
     int cursor = 0;           

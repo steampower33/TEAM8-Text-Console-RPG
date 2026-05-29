@@ -136,7 +136,7 @@ BattleResult BattleManager::BattleLoop(Character& player, Monster& monster)
         // static int debugCount = 0;
         // ui.PrintLog("[전투 대기] 호출 횟수: " + std::to_string(++debugCount));
                 
-        if (Result < 60) // result가 1~30일때는 아이템 사용 시도
+        if (Result < 30) // result가 1~30일때는 아이템 사용 시도
         {
             UseRandomItem(player);
         }
